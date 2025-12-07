@@ -7,7 +7,7 @@ import Labtest from"./pages/Labtest.jsx";
 // import Farmerdashboard from"./pages/Farmerdashboard.jsx";
 import Collector from"./pages/Collector.jsx";
 import Admin from "./pages/Admin.jsx"
-// import User from "./pages/User.jsx";
+import User from "./pages/User.jsx";
 // import Manufacturer from "./pages/Manufacturer.jsx";
 
 function App() {
@@ -21,7 +21,7 @@ function App() {
         {/* <Route path="/Manufacturer" element ={<Manufacturer/>}/> */}
         <Route path="/Collector" element={<Collector/>}/>
         <Route path="/Admin" element={<Admin/>}/>
-        {/* <Route path="/User" element={<User/>}/> */}
+        <Route path="/User" element={<User/>}/>
       </Routes>
     </BrowserRouter>
   );
