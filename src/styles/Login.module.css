@@ -1,0 +1,175 @@
+.container{
+  background-image: url("https://img.freepik.com/premium-photo/bottle-herbs-flowers-white-background_1022029-137813.jpg");
+  width:1550px;
+    background-repeat: no-repeat;
+      background-size: 100% 100%;   
+      height:100%;
+
+
+}
+.loginWrapper {
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  padding-top: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Role Tabs */
+.roleTabs {
+  display: flex;
+  gap: 20px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.4);
+  padding: 12px 25px;
+  border-radius: 40px;
+  backdrop-filter: blur(8px);
+  top:-34px;
+}
+
+.roleTab {
+  padding: 8px 20px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  color: #4b3a2f;
+  position:relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.active {
+  color: #2d1e15;
+}
+
+/* Animated underline */
+.underline {
+  position: absolute;
+  bottom: 3px;
+  height: 4px;
+  width: 100%;
+  background: #8c5c3a;
+  border-radius: 10px;
+  margin-right:00px;
+}
+
+/* Card */
+.authCard {
+  margin-top: 5px;
+  background: rgba(255, 255, 255, 0.437);
+  padding: 35px 40px;
+  width: 350px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  backdrop-filter: blur(6px);
+}
+
+/* Title */
+.title {
+  text-align: center;
+  font-size: 22px;
+  margin-bottom: 25px;
+  color: #3a2d23;
+}
+
+/* Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Inputs */
+input {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #aac574;
+  background: #c6e0bd80;
+  font-size: 14px;
+}
+
+/* Buttons */
+.btn {
+  margin-top: 10px;
+  background: #418c3a;
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: #4e702c;
+}
+
+/* Switch text */
+.switchText {
+  margin-top: 10px;
+  font-size: 14px;
+  text-align: center;
+  color: #4a3a2f;
+}
+
+.switchText span {
+  font-weight: bold;
+  cursor: pointer;
+  color: #0927019a;
+}
+
+
+.hiddenInput {
+  display: none;
+}
+
+.uploadBox {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.uploadLabel {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: #f4f4f4;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 15px;
+  transition: 0.25s ease;
+  border: 1.5px dashed #bcbcbc;
+}
+
+.uploadLabel:hover {
+  background: #ececec;
+  border-color: #888;
+  transform: scale(1.02);
+}
+
+
+select {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #aac574;
+  background: #c6e0bd80;
+  font-size: 14px;
+  appearance: none; /* removes default arrow in some browsers */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+/* Optional: add a custom dropdown arrow */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238c5c3a'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px 6px;
+}
