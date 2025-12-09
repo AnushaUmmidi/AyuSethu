@@ -896,24 +896,27 @@ export default function AdminDashboard() {
         </div>
         
         <div className="header-actions">
+          <div>
+          <h3>AyuSethu</h3>
+          </div>
           <div className="search-bar">
-            <input
+            {/* <input
               type="text"
               placeholder="Search batches, farmers, entities..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
             />
-            <span className="search-icon">🔍</span>
+            <span className="search-icon">🔍</span> */}
           </div>
           
-          <div className="system-health">
+          {/* <div className="system-health">
             <div className="health-indicator healthy" title="Blockchain: Healthy"></div>
             <div className="health-indicator healthy" title="Database: Healthy"></div>
             <div className="health-indicator healthy" title="API: Healthy"></div>
-          </div>
+          </div> */}
           
-          <div className="user-profile">
+          {/* <div className="user-profile">
             <div className="profile-avatar">
               <span className="avatar-initials">AO</span>
             </div>
@@ -921,7 +924,7 @@ export default function AdminDashboard() {
               <span className="profile-name">Admin Officer</span>
               <span className="profile-role">Ministry of AYUSH</span>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
       

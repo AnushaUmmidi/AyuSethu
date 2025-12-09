@@ -791,7 +791,7 @@ const Manufacturer = () => {
             <div className="logo">
               <i className="fas fa-industry"></i>
               <div>
-                <h1>VirtuHerbChain</h1>
+                <h1>AyuSethu</h1>
                 <p>Manufacturer Portal</p>
               </div>
             </div>

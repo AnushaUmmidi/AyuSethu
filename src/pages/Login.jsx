@@ -15,9 +15,6 @@ export default function LoginPage() {
             case "User":
                 navigate("/User");
                 break;
-            case "Farmer":
-                navigate("/Farmerdashboard");
-                break;
             case "Collector":
                 navigate("/Collector");
                 break;

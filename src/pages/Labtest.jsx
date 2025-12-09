@@ -58,11 +58,11 @@ function Header({
       <div className="navbar">
         <nav>
           <div className="logo-container">
-            <div className="logo-icon">
+            {/* <div className="logo-icon">
               <Leaf className="w-5 h-5" />
-            </div>
+            </div> */}
             <div>
-              <div className="text-base font-bold">VirtuHerbChain</div>
+              <div className="text-base font-bold">AyuSethu</div>
               <div className="text-xs opacity-80">Tester Portal</div>
             </div>
           </div>

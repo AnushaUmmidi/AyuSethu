@@ -1,17 +1,23 @@
+/* Add this at the top of your CSS file */
+.container {
+  position: relative;
+  width: 100vw;
+  overflow-x: hidden;
+}
+
+/* NAVBAR - Make it fixed so it stays on top */
 .navbar {
-  position: absolute;
+  position: absolute; /* Changed from absolute to fixed */
   top: 40px;
   left: 50%;
   transform: translateX(-50%);
   width: 85%;
   max-width: 1200px;
   height: 65px;
-
   background: rgba(40, 40, 40, 0.28);
   backdrop-filter: blur(14px);
   border-radius: 50px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -32,6 +38,12 @@
   font-size: 1.9rem;
   font-weight: 700;
   letter-spacing: 1px;
+}
+
+.logoImage{
+  left:10;
+ width:70px;
+ height:70px;
 }
 
 /* Menu links */
@@ -58,48 +70,59 @@
   display: none;
 }
 
+/* HEADER CONTAINER - Make it relative for proper positioning */
 .headerImage {
   position: relative;
   width: 100vw;
-  height: 140vh;
+  height: 100vh;
   overflow: hidden;
-  margin-top: -130px;
+}
+
+/* Remove background-attachment properties and add normal scroll behavior */
+.headerImage {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
 }
 
 .headerImage img {
   filter: brightness(0.5);
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
 .loginBtn {
   position: absolute;
-  top: 72%;       /* adjust as needed */
+  top: 25%;       /* adjust as needed */
   left: 50%;      /* match heroText alignment */
   transform: translate(-50%, -50%);
   background-color:white;
-    width:100px;
+  width:100px;
   height:40px;
-    border-radius:30px;
-
+  border-radius:30px;
+  z-index: 100; /* Make sure it's above the slides */
 }
 
 .loginBtn button {
-    background: rgba(255, 224, 214, 0.806);
+  background: rgba(255, 224, 214, 0.806);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-
   padding: 12px 35px;
   border-radius: 50px;
   border: 1px solid rgba(255, 255, 255, 0.105);
-
-  color: #2f1f1a;         /* earthy brown */
-  font-weight: 600;        /* bolder for emphasis */
-  font-size: 18px;         /* bigger text */
-  letter-spacing: 1px;     /* slightly spaced */
-  text-transform: uppercase; /* all caps for punch */
-  text-shadow: 0 2px 6px rgba(0,0,0,0.3); /* subtle shadow for readability */
-
+  color: #2f1f1a;
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.3);
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.loginBtn button:hover {
+  background: rgba(255, 224, 214, 0.95);
 }
 
 /* All images stacked */
@@ -134,41 +157,32 @@
     opacity: 0;
     transform: scale(1);
   }
-
-  /* Fade in starts earlier */
   2% {
     opacity: 1;
     transform: scale(1.02);
   }
-
-  /* Stay visible longer */
   35% {
     opacity: 1;
     transform: scale(1.08);
   }
-
-  /* Fade out but still overlap with next image */
   38% {
     opacity: 0;
     transform: scale(1.1);
   }
-
-  /* DO NOT keep hidden till 100% — reduce white gap */
   40% {
     opacity: 0;
   }
-
-  /* Keep stable hidden for the rest */
   100% {
     opacity: 0;
     transform: scale(1);
   }
 }
 
+/* HERO TEXT - Position it inside headerImage */
 .heroText {
   position: absolute;
-  top: 50%;
-  left: 20%;
+  top: 16%;
+  left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
   color: rgb(255, 255, 255);
@@ -177,7 +191,9 @@
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  filter: brightness(9);
+  z-index: 50; /* Above slides */
+  pointer-events: none; 
+  filter: brightness(7);
 }
 
 .heroText h1 {
@@ -185,15 +201,12 @@
   font-weight: 600;
   margin: 0;
   letter-spacing: 1px;
-  margin-left:900px;
 }
 
 .heroText h2 {
   font-size: 32px;
   font-weight: 600;
   margin: 0;
-    margin-left:900px;
-
 }
 
 .heroText p {
@@ -201,15 +214,16 @@
   font-weight: 400;
   margin: 0;
   opacity: 0.9;
-  margin-left:22px;
-    margin-left:900px;
-
 }
 
+/* WORK SECTION - Add margin to account for featuresSection overlap */
 .workSection {
-  padding: 60px 20px;
+  padding: 120px 20px 60px; /* Increased top padding */
   background: #ffffff;
   text-align: center;
+  margin-top: 50px; /* Space for features section overlap */
+  position: relative;
+  z-index: 5;
 }
 
 .workHeading {
@@ -217,7 +231,7 @@
   font-weight: 700;
   color: #274e27;
   margin-bottom: 0px;
-  margin-top: 38px;
+  top: 0%;
   font-family: 'Cormorant Garamond', serif;
 }
 
@@ -235,39 +249,42 @@
   gap: 40px;
   overflow-x: auto;
   scrollbar-width: none;
-  /* Firefox */
   padding-bottom: 20px;
 }
 
 .workContainer::-webkit-scrollbar {
   display: none;
-  /* Chrome, Safari, Edge */
 }
 
+/* FEATURES SECTION - Position at bottom of header */
 .featuresSection {
   position: absolute;
-  bottom: -200px;
-  /* Move up or down as you need */
+  top:29%;
   left: 50%;
   transform: translateX(-50%);
+  width: 70%;
+  max-width: 1200px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  width: 70%;
-  height: 120px;
-  border-radius: 80px;
-  overflow: hidden;
-  z-index: 3000;
+  background: #ffffff;
+  border-radius: 50px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  z-index: 100; /* Above header image but below navbar */
 }
 
 .featureBox {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 0px 30px;
+  padding: 10px 20px;
   background: #f5f8f3;
+  transition: transform 0.3s ease;
+  height:100px;
 }
 
+
 .darkBox {
+  
   background: #1e2421;
 }
 
@@ -336,7 +353,7 @@
   color: #fff;
   font-size: 30px;
   z-index: 2;
-   transition: all 0.3s ease;
+  transition: all 0.3s ease;
   animation: circleEntrance 0.8s ease-out forwards;
   opacity: 0;
   transform: scale(0.5);
@@ -386,8 +403,8 @@
 .dash {
   position: absolute;
   top: 50px;
-  left: 150px;
-  width: 170px;
+  left: 160px;
+  width: 180px;
   border-top: 2px dashed #8fc35c;
   opacity: 0;
   animation: dashEntrance 0.6s ease-in-out forwards;
@@ -430,7 +447,7 @@
 /* Step title */
 .stepTitle {
   font-weight: 700px;
-  font-size: 15px;
+  font-size: 20px;
   text-align: center;
   margin-top: 20px;
   color: #274e27;
@@ -438,7 +455,7 @@
 
 /* Step description */
 .stepText {
-  font-size: 13px;
+  font-size: 15px;
   text-align: center;
   color: #4f6b4f;
   margin-top: 4px;
@@ -468,12 +485,13 @@
 }
 
 /* ===========================
-   ABOUT / MOTIVE SECTION
+   ABOUT / MOTIVE SECTION - UNCHANGED
    =========================== */
 .aboutSection {
   width: 100%;
   padding: 80px 40px;
-  background-color: #eef8e4;
+  height:80vh;
+  background-color: #000000;
   position: relative;
 }
 
@@ -501,15 +519,16 @@
 
 .aboutTitle {
   text-align: center;
-  font-size: 50px;
-  font-weight: 700;
-  color: #274e27;
+  font-size: 45px;
+  font-weight: 600;
+  color: #397139;
   font-family: 'Cormorant Garamond', serif;
   margin-bottom: 50px;
-  margin-top: 0;
+  margin-top: -40px;
 }
 
 .aboutContentWrapper {
+  margin-top:20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -520,14 +539,14 @@
 
 .aboutImageWrapper {
   flex: 1;
-  background-color: #1b1b1b;
   padding: 20px;
   display: flex;
   justify-content: center;
-  border-radius: 10px;
+  margin-top:-80px;
+ margin-left:-200px;  
 }
 
-.aboutImage {
+.aboutImage img{
   width: 100%;
   max-width: 420px;
   height: auto;
@@ -543,23 +562,317 @@
   font-family: "Lora", serif;
   font-size: 19px;
   line-height: 1.8;
-  color: #2f3e2f;
-  margin: 0;
+  color: #ffffff;
+  margin-top: -190px;
+  margin-left:-180px;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 1200px) {
+  .featuresSection {
+    width: 85%;
+  }
+  
+  .heroText h1 {
+    font-size: 48px;
+  }
+  
+  .heroText h2 {
+    font-size: 28px;
+  }
+  
+  .heroText p {
+    font-size: 18px;
+  }
 }
 
 @media (max-width: 1024px) {
   .featuresSection {
     width: 90%;
-    grid-template-columns: 1fr;
-    border-radius: 20px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    border-radius: 30px;
   }
-
+  
+  .heroText h1 {
+    font-size: 42px;
+  }
+  
+  .heroText h2 {
+    font-size: 26px;
+  }
+  
+  .heroText p {
+    font-size: 17px;
+  }
+  
   .aboutContentWrapper {
     flex-direction: column;
   }
-
+  
   .workContainer {
     justify-content: flex-start;
     padding: 0 20px;
   }
+}
+
+@media (max-width: 768px) {
+  .featuresSection {
+    grid-template-columns: 1fr;
+    bottom: -100px;
+    width: 85%;
+    border-radius: 25px;
+  }
+  
+  .heroText h1 {
+    font-size: 36px;
+    margin-left: 0;
+  }
+  
+  .heroText h2 {
+    font-size: 22px;
+    margin-left: 0;
+  }
+  
+  .heroText p {
+    font-size: 16px;
+    margin-left: 0;
+  }
+  
+  .navbar {
+    width: 90%;
+    padding: 0 25px;
+  }
+  
+  .dash {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .featuresSection {
+    bottom: -120px;
+    width: 90%;
+    padding: 15px;
+  }
+  
+  .heroText h1 {
+    font-size: 30px;
+  }
+  
+  .heroText h2 {
+    font-size: 20px;
+  }
+  
+  .heroText p {
+    font-size: 15px;
+  }
+  
+  .featureBox {
+    padding: 8px 12px;
+  }
+  
+  .featureTitle {
+    font-size: 16px;
+  }
+  
+  .featureSubtitle {
+    font-size: 14px;
+  }
+}
+
+/* ------------------------
+   PARTNERS SECTION
+-------------------------*/
+.partnersSection {
+  margin-top: 80px;
+  text-align: center;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.partnersHeading {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1b1b1b;
+  margin-bottom: 40px;
+}
+
+/* Slider Container - masks the edges */
+.partnersSliderContainer {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 20px 0;
+}
+
+/* Gradient fade on edges */
+.partnersSliderContainer::before,
+.partnersSliderContainer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.partnersSliderContainer::before {
+  left: 0;
+  background: linear-gradient(to right, 
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0) 100%);
+}
+
+.partnersSliderContainer::after {
+  right: 0;
+  background: linear-gradient(to left, 
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0) 100%);
+}
+
+/* Slider Wrapper */
+.partnersSlider {
+  display: flex;
+  gap: 40px;
+  width: max-content;
+  animation: slideLeft 30s linear infinite;
+}
+
+/* Pause animation on hover */
+.partnersSlider:hover {
+  animation-play-state: paused;
+}
+
+.partnerDisplay {
+  width: 150px;
+  height: 150px;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f5f8f3;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.partnerDisplay:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+  background: #e8f0e3;
+}
+
+.partnerLogo {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  filter: grayscale(30%);
+  transition: all 0.3s ease;
+}
+
+.partnerDisplay:hover .partnerLogo {
+  filter: grayscale(0%);
+  transform: scale(1.05);
+}
+
+/* Infinite sliding animation - SLOW */
+@keyframes slideLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Create seamless loop by duplicating content */
+.partnersSliderContainer {
+  display: flex;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .partnerDisplay {
+    width: 130px;
+    height: 130px;
+  }
+  
+  .partnersSlider {
+    gap: 30px;
+  }
+  
+  .partnersSliderContainer::before,
+  .partnersSliderContainer::after {
+    width: 70px;
+  }
+}
+
+@media (max-width: 768px) {
+  .partnersHeading {
+    font-size: 28px;
+    margin-bottom: 30px;
+  }
+  
+  .partnerDisplay {
+    width: 110px;
+    height: 110px;
+  }
+  
+  .partnersSlider {
+    gap: 25px;
+  }
+  
+  .partnersSliderContainer::before,
+  .partnersSliderContainer::after {
+    width: 50px;
+  }
+  
+  @keyframes slideLeft {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .partnerDisplay {
+    width: 90px;
+    height: 90px;
+    border-radius: 15px;
+  }
+  
+  .partnersSlider {
+    gap: 20px;
+  }
+  
+  .partnersSliderContainer::before,
+  .partnersSliderContainer::after {
+    width: 30px;
+  }
+  
+  .partnersHeading {
+    font-size: 24px;
+  }
+}
+
+/* For extra smooth continuous loop */
+.partnersSlider {
+  animation: slideLeft 40s linear infinite;
+}
+
+/* To make it even slower */
+.partnersSlider.slow {
+  animation: slideLeft 60s linear infinite;
+}
+
+/* To make it slightly faster */
+.partnersSlider.fast {
+  animation: slideLeft 20s linear infinite;
 }

@@ -1,27 +1,32 @@
 import React, { useState, useEffect, useRef } from "react";
-import "../styles/Collector.css";
+import styles from "../styles/Collector.module.css";
 import { Bell, X, CheckCircle, AlertCircle, MapPin, Camera } from 'lucide-react';
 
 const STAGE_DATA = [
   {
     id: 1,
     title: "Stage 1",
+    description: "Plantation Documentation"
   },
   {
     id: 2,
     title: "Stage 2",
+    description: "Growth Monitoring"
   },
   {
     id: 3,
     title: "Stage 3",
+    description: "Mid-Term Assessment"
   },
   {
     id: 4,
     title: "Stage 4",
+    description: "Pre-Harvest Check"
   },
   {
     id: 5,
     title: "Stage 5",
+    description: "Final Verification"
   }
 ];
 
@@ -85,10 +90,36 @@ function App() {
     fid: "",
     visitDate: "",
     geotag: "",
+    exactAddress: "",
     notes: "",
     species: "",
     estimatedQty: "",
-    farmPhoto: null
+    farmPhoto: null,
+    irrigationType: "",
+    soilType: ""
+  });
+
+  const [stage2Form, setStage2Form] = useState({
+    growthPhotos: [],
+    observations: "",
+    farmerUpdates: "",
+    growthStage: "Early Growth"
+  });
+
+  const [stage3Form, setStage3Form] = useState({
+    assessmentPhotos: [],
+    healthStatus: "Good",
+    pestIssues: "",
+    irrigationIssues: "",
+    recommendations: ""
+  });
+
+  const [stage4Form, setStage4Form] = useState({
+    preHarvestPhotos: [],
+    harvestReadiness: "85%",
+    expectedHarvestDate: "",
+    qualityCheck: "Pass",
+    issues: ""
   });
 
   const [stage5Form, setStage5Form] = useState({
@@ -108,6 +139,8 @@ function App() {
   const [notifications, setNotifications] = useState(NOTIFICATIONS);
   const [showProfile, setShowProfile] = useState(false);
   const [activeTab, setActiveTab] = useState("stage1");
+  const [showCreateBatchDialog, setShowCreateBatchDialog] = useState(false);
+  const [batchIdFromAdmin, setBatchIdFromAdmin] = useState("");
 
   const notificationRef = useRef(null);
   const profileRef = useRef(null);
@@ -132,6 +165,7 @@ function App() {
     const today = new Date().toISOString().split("T")[0];
     setForm(f => ({ ...f, date: today }));
     setStage1Form(s => ({ ...s, visitDate: today }));
+    setStage4Form(s => ({ ...s, expectedHarvestDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0] }));
     setStage5Form(s => ({ ...s, finalHarvestDate: today }));
   }, []);
 
@@ -143,38 +177,168 @@ function App() {
     setStage1Form(prev => ({ ...prev, [key]: value }));
   };
 
+  const updateStage2Form = (key, value) => {
+    setStage2Form(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateStage3Form = (key, value) => {
+    setStage3Form(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateStage4Form = (key, value) => {
+    setStage4Form(prev => ({ ...prev, [key]: value }));
+  };
+
   const updateStage5Form = (key, value) => {
     setStage5Form(prev => ({ ...prev, [key]: value }));
   };
 
   const handleGPS = () => {
+    if (!navigator.geolocation) {
+      setToast("❌ GPS not supported on this device");
+      return;
+    }
+
     setToast("📍 Capturing GPS location...");
-    setTimeout(() => {
-      const newGPS = `${(Math.random() * 90).toFixed(6)}, ${(Math.random() * 180).toFixed(6)}`;
-      updateForm("gps", newGPS);
-      setToast("✅ GPS location captured!");
-    }, 800);
-    setTimeout(() => setToast(""), 3000);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const newGPS = `${latitude.toFixed(8)}, ${longitude.toFixed(8)}`;
+
+        updateForm("gps", newGPS);
+        setToast("✅ GPS location captured!");
+        
+        setTimeout(() => setToast(""), 3000);
+      },
+      (error) => {
+        setToast("❌ Unable to fetch GPS. Give location permission.");
+        console.error(error);
+        setTimeout(() => setToast(""), 3000);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
   };
 
   const handleStage1GPS = () => {
-    setToast("📍 Capturing Farm GPS location...");
-    setTimeout(() => {
-      const newGPS = `${(Math.random() * 90).toFixed(6)}, ${(Math.random() * 180).toFixed(6)}`;
-      updateStage1Form("geotag", newGPS);
-      setToast("✅ Farm GPS location captured!");
-    }, 800);
-    setTimeout(() => setToast(""), 3000);
+    if (!navigator.geolocation) {
+      setToast("❌ GPS not supported on this device");
+      return;
+    }
+
+    setToast("📍 Capturing precise farm location...");
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        // Step 1: Save lat-long
+        const coords = `${latitude.toFixed(8)}, ${longitude.toFixed(8)}`;
+        updateStage1Form("geotag", coords);
+
+        // Step 2: Reverse Geocode (Fetch full address)
+        try {
+          const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`;
+
+          const res = await fetch(url, {
+            headers: {
+              "User-Agent": "HerbChain-Farmer-Portal/1.0",
+              "Accept": "application/json"
+            }
+          });
+
+          const data = await res.json();
+          console.log("REVERSE GEOCODE RESPONSE:", data);
+
+          if (data && data.display_name) {
+            updateStage1Form("exactAddress", data.display_name);
+            setToast("✅ Exact address captured!");
+          } else {
+            setToast("⚠️ No address found for this location");
+          }
+
+        } catch (err) {
+          console.error("Reverse geocode error:", err);
+          setToast("⚠️ GPS OK but address lookup failed.");
+        }
+
+        setTimeout(() => setToast(""), 3000);
+      },
+
+      (error) => {
+        console.error(error);
+        setToast("❌ Unable to fetch GPS. Allow location access.");
+        setTimeout(() => setToast(""), 3000);
+      },
+
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      }
+    );
   };
 
   const handleStage5GPS = () => {
-    setToast("📍 Capturing Final GPS location...");
-    setTimeout(() => {
-      const newGPS = `${(Math.random() * 90).toFixed(6)}, ${(Math.random() * 180).toFixed(6)}`;
-      updateStage5Form("finalGeotag", newGPS);
-      setToast("✅ Final GPS location captured!");
-    }, 800);
-    setTimeout(() => setToast(""), 3000);
+    if (!navigator.geolocation) {
+      setToast("❌ GPS not supported on this device");
+      return;
+    }
+
+    setToast("📍 Capturing precise farm location...");
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        // Step 1: Save lat-long
+        const coords = `${latitude.toFixed(8)}, ${longitude.toFixed(8)}`;
+        updateStage5Form("finalGeotag", coords);
+
+        // Step 2: Reverse Geocode (Fetch full address)
+        try {
+          const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`;
+
+          const res = await fetch(url, {
+            headers: {
+              "User-Agent": "HerbChain-Farmer-Portal/1.0",
+              "Accept": "application/json"
+            }
+          });
+
+          const data = await res.json();
+          console.log("REVERSE GEOCODE RESPONSE:", data);
+
+          if (data && data.display_name) {
+            setToast("✅ Final GPS location captured!");
+          } else {
+            setToast("⚠️ GPS location captured, but no address found");
+          }
+
+        } catch (err) {
+          console.error("Reverse geocode error:", err);
+          setToast("✅ GPS location captured!");
+        }
+
+        setTimeout(() => setToast(""), 3000);
+      },
+
+      (error) => {
+        console.error(error);
+        setToast("❌ Unable to fetch GPS. Allow location access.");
+        setTimeout(() => setToast(""), 3000);
+      },
+
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      }
+    );
   };
 
   const handlePhotoUpload = (stage, file) => {
@@ -184,8 +348,55 @@ function App() {
     } else if (stage === 5) {
       updateStage5Form("finalPhoto", file);
       setToast("✅ Final harvest photo uploaded!");
+    } else if (stage === 2) {
+      const newPhotos = [...stage2Form.growthPhotos, file];
+      updateStage2Form("growthPhotos", newPhotos);
+      setToast("✅ Growth photo uploaded!");
+    } else if (stage === 3) {
+      const newPhotos = [...stage3Form.assessmentPhotos, file];
+      updateStage3Form("assessmentPhotos", newPhotos);
+      setToast("✅ Assessment photo uploaded!");
+    } else if (stage === 4) {
+      const newPhotos = [...stage4Form.preHarvestPhotos, file];
+      updateStage4Form("preHarvestPhotos", newPhotos);
+      setToast("✅ Pre-harvest photo uploaded!");
     }
     setTimeout(() => setToast(""), 3000);
+  };
+
+  const handleMultiplePhotoUpload = (e, stage) => {
+    const files = Array.from(e.target.files);
+    if (stage === 2) {
+      const newPhotos = [...stage2Form.growthPhotos, ...files];
+      updateStage2Form("growthPhotos", newPhotos);
+      setToast(`✅ ${files.length} growth photos uploaded!`);
+    } else if (stage === 3) {
+      const newPhotos = [...stage3Form.assessmentPhotos, ...files];
+      updateStage3Form("assessmentPhotos", newPhotos);
+      setToast(`✅ ${files.length} assessment photos uploaded!`);
+    } else if (stage === 4) {
+      const newPhotos = [...stage4Form.preHarvestPhotos, ...files];
+      updateStage4Form("preHarvestPhotos", newPhotos);
+      setToast(`✅ ${files.length} pre-harvest photos uploaded!`);
+    }
+    setTimeout(() => setToast(""), 3000);
+  };
+
+  const removePhoto = (stage, index) => {
+    if (stage === 2) {
+      const newPhotos = stage2Form.growthPhotos.filter((_, i) => i !== index);
+      updateStage2Form("growthPhotos", newPhotos);
+      setToast("✅ Photo removed!");
+    } else if (stage === 3) {
+      const newPhotos = stage3Form.assessmentPhotos.filter((_, i) => i !== index);
+      updateStage3Form("assessmentPhotos", newPhotos);
+      setToast("✅ Photo removed!");
+    } else if (stage === 4) {
+      const newPhotos = stage4Form.preHarvestPhotos.filter((_, i) => i !== index);
+      updateStage4Form("preHarvestPhotos", newPhotos);
+      setToast("✅ Photo removed!");
+    }
+    setTimeout(() => setToast(""), 2000);
   };
 
   const handleStageClick = (stageId) => {
@@ -211,23 +422,31 @@ function App() {
     }
   };
 
-  const handleCreateBatch = () => {
-    setToast("🌿 Creating new herb batch...");
-    setTimeout(() => {
-      // Generate new batch ID
-      const newBatchId = `BATCH-${new Date().getFullYear()}-${Math.floor(Math.random() * 9000 + 1000)}`;
-      updateStage5Form("batchId", newBatchId);
+  const handleCreateBatchClick = () => {
+    // Generate a batch ID from admin (simulated)
+    const adminBatchId = `BATCH-${new Date().getFullYear()}-${Math.floor(Math.random() * 9000 + 1000)}-ADM`;
+    setBatchIdFromAdmin(adminBatchId);
+    
+    // Show the dialog
+    setShowCreateBatchDialog(true);
+  };
 
-      setToast(`✅ New batch created: ${newBatchId}`);
-      // Move to stage 2
-      const newStatus = [...stageStatus];
-      newStatus[0] = "done";
-      newStatus[1] = "current";
-      setStageStatus(newStatus);
-      setCurrentStage(2);
-      setActiveTab("stage2");
-    }, 1000);
+  const confirmCreateBatch = () => {
+    // Close dialog
+    setShowCreateBatchDialog(false);
+    
+    // Update stage 5 with the batch ID from admin
+    updateStage5Form("batchId", batchIdFromAdmin);
 
+    // Move to stage 2
+    const newStatus = [...stageStatus];
+    newStatus[0] = "done";
+    newStatus[1] = "current";
+    setStageStatus(newStatus);
+    setCurrentStage(2);
+    setActiveTab("stage2");
+    
+    setToast(`✅ New batch created: ${batchIdFromAdmin}`);
     setTimeout(() => setToast(""), 4000);
   };
 
@@ -283,27 +502,27 @@ function App() {
     return (
       <div
         key={stage.id}
-        className={`vhc-timeline-item ${status === "current" ? "vhc-timeline-item-current" : ""}`}
+        className={`${styles["vhc-timeline-item"]} ${status === "current" ? styles["vhc-timeline-item-current"] : ""}`}
         onClick={() => handleStageClick(stage.id)}
       >
-        <div className={`vhc-timeline-dot ${status}`}>
+        <div className={`${styles["vhc-timeline-dot"]} ${styles[status]}`}>
           {status === "done" ? "✓" : stage.id}
         </div>
-        <div className="vhc-timeline-content">
-          <div className="vhc-timeline-stage">
-            <span className="vhc-timeline-stage-icon"></span>
+        <div className={styles["vhc-timeline-content"]}>
+          <div className={styles["vhc-timeline-stage"]}>
+            <span className={styles["vhc-timeline-stage-icon"]}></span>
             {stage.title}
           </div>
-          <div className="vhc-timeline-desc">
+          <div className={styles["vhc-timeline-desc"]}>
             {stage.description}
           </div>
-          <div className={`vhc-timeline-status ${status}`}>
+          <div className={`${styles["vhc-timeline-status"]} ${styles[status]}`}>
             {getStatusText(status)}
           </div>
         </div>
         {status === "current" && (
           <button
-            className="vhc-mark-done-btn"
+            className={styles["vhc-mark-done-btn"]}
             onClick={(e) => {
               e.stopPropagation();
               markStageDone(stage.id);
@@ -320,17 +539,17 @@ function App() {
     switch (currentStage) {
       case 1:
         return (
-          <div className="vhc-stage-content">
-            <h3 className="vhc-stage-title">Stage 1: Plantation Documentation</h3>
-            <p className="vhc-stage-subtitle">Collect initial farm data and documentation</p>
+          <div className={styles["vhc-stage-content"]}>
+            <h3 className={styles["vhc-stage-title"]}>Stage 1: Plantation Documentation</h3>
+            <p className={styles["vhc-stage-subtitle"]}>Collect initial farm data and documentation</p>
 
-            <div className="vhc-form-grid">
-              <div className="vhc-field">
-                <label className="vhc-label">
-                  Farmer Name <span className="vhc-required">*</span>
+            <div className={styles["vhc-form-grid"]}>
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>
+                  Farmer Name <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <input
-                  className="vhc-input"
+                  className={styles["vhc-input"]}
                   type="text"
                   value={stage1Form.farmerName}
                   onChange={(e) => updateStage1Form("farmerName", e.target.value)}
@@ -338,12 +557,12 @@ function App() {
                 />
               </div>
 
-              <div className="vhc-field">
-                <label className="vhc-label">
-                  Farmer ID (FID) <span className="vhc-required">*</span>
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>
+                  Farmer ID (FID) <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <input
-                  className="vhc-input"
+                  className={styles["vhc-input"]}
                   type="text"
                   value={stage1Form.fid}
                   onChange={(e) => updateStage1Form("fid", e.target.value)}
@@ -351,24 +570,24 @@ function App() {
                 />
               </div>
 
-              <div className="vhc-field">
-                <label className="vhc-label">
-                  Visit Date <span className="vhc-required">*</span>
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>
+                  Visit Date <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <input
-                  className="vhc-input"
+                  className={styles["vhc-input"]}
                   type="date"
                   value={stage1Form.visitDate}
                   onChange={(e) => updateStage1Form("visitDate", e.target.value)}
                 />
               </div>
 
-              <div className="vhc-field">
-                <label className="vhc-label">
-                  Herb Species <span className="vhc-required">*</span>
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>
+                  Herb Species <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <select
-                  className="vhc-select"
+                  className={styles["vhc-select"]}
                   value={stage1Form.species}
                   onChange={(e) => updateStage1Form("species", e.target.value)}
                 >
@@ -381,12 +600,12 @@ function App() {
                 </select>
               </div>
 
-              <div className="vhc-field">
-                <label className="vhc-label">
-                  Estimated Quantity (kg) <span className="vhc-required">*</span>
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>
+                  Estimated Quantity (kg) <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <input
-                  className="vhc-input"
+                  className={styles["vhc-input"]}
                   type="number"
                   value={stage1Form.estimatedQty}
                   min="0"
@@ -396,20 +615,50 @@ function App() {
                 />
               </div>
 
-              <div className="vhc-field vhc-field-full">
-                <label className="vhc-label">
-                  GPS Location <span className="vhc-required">*</span>
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>Irrigation Type</label>
+                <select
+                  className={styles["vhc-select"]}
+                  value={stage1Form.irrigationType}
+                  onChange={(e) => updateStage1Form("irrigationType", e.target.value)}
+                >
+                  <option value="">Select irrigation type</option>
+                  <option value="Drip">Drip Irrigation</option>
+                  <option value="Sprinkler">Sprinkler</option>
+                  <option value="Flood">Flood</option>
+                  <option value="Rainfed">Rainfed</option>
+                </select>
+              </div>
+
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>Soil Type</label>
+                <select
+                  className={styles["vhc-select"]}
+                  value={stage1Form.soilType}
+                  onChange={(e) => updateStage1Form("soilType", e.target.value)}
+                >
+                  <option value="">Select soil type</option>
+                  <option value="Loamy">Loamy</option>
+                  <option value="Clay">Clay</option>
+                  <option value="Sandy">Sandy</option>
+                  <option value="Silty">Silty</option>
+                </select>
+              </div>
+
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>
+                  GPS Location <span className={styles["vhc-required"]}>*</span>
                 </label>
-                <div className="vhc-gps-row">
+                <div className={styles["vhc-gps-row"]}>
                   <input
-                    className="vhc-input vhc-gps-input"
+                    className={`${styles["vhc-input"]} ${styles["vhc-gps-input"]}`}
                     value={stage1Form.geotag}
                     readOnly
                     placeholder="Click Capture GPS to get location"
                   />
                   <button
                     type="button"
-                    className="vhc-btn vhc-btn-secondary"
+                    className={`${styles["vhc-btn"]} ${styles["vhc-btn-secondary"]}`}
                     onClick={handleStage1GPS}
                   >
                     <MapPin size={16} /> Capture GPS
@@ -417,21 +666,32 @@ function App() {
                 </div>
               </div>
 
-              <div className="vhc-field vhc-field-full">
-                <label className="vhc-label">Farm Photo</label>
-                <div className="vhc-photo-upload">
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Exact Address</label>
+                <textarea
+                  className={styles["vhc-textarea"]}
+                  value={stage1Form.exactAddress}
+                  readOnly
+                  placeholder="Will be auto-filled after GPS capture"
+                  rows="2"
+                />
+              </div>
+
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Farm Photo</label>
+                <div className={styles["vhc-photo-upload"]}>
                   {stage1Form.farmPhoto ? (
-                    <div className="vhc-photo-preview">
+                    <div className={styles["vhc-photo-preview"]}>
                       <img src={URL.createObjectURL(stage1Form.farmPhoto)} alt="Farm preview" />
                       <button
-                        className="vhc-remove-photo"
+                        className={styles["vhc-remove-photo"]}
                         onClick={() => updateStage1Form("farmPhoto", null)}
                       >
                         <X size={16} />
                       </button>
                     </div>
                   ) : (
-                    <label className="vhc-upload-area">
+                    <label className={styles["vhc-upload-area"]}>
                       <Camera size={24} />
                       <span>Click to upload farm photo</span>
                       <input
@@ -445,10 +705,10 @@ function App() {
                 </div>
               </div>
 
-              <div className="vhc-field vhc-field-full">
-                <label className="vhc-label">Notes & Observations</label>
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Notes & Observations</label>
                 <textarea
-                  className="vhc-textarea"
+                  className={styles["vhc-textarea"]}
                   value={stage1Form.notes}
                   onChange={(e) => updateStage1Form("notes", e.target.value)}
                   placeholder="Record your observations about soil health, plant condition, pests, etc."
@@ -457,10 +717,10 @@ function App() {
               </div>
             </div>
 
-            <div className="vhc-create-batch-section">
+            <div className={styles["vhc-create-batch-section"]}>
               <button
-                className="vhc-create-batch-btn"
-                onClick={handleCreateBatch}
+                className={styles["vhc-create-batch-btn"]}
+                onClick={handleCreateBatchClick}
                 disabled={!stage1Form.farmerName || !stage1Form.fid || !stage1Form.species}
               >
                 <CheckCircle size={20} /> Create New Herb Batch
@@ -469,41 +729,349 @@ function App() {
           </div>
         );
 
+      case 2:
+        return (
+          <div className={styles["vhc-stage-content"]}>
+            <h3 className={styles["vhc-stage-title"]}>Stage 2: Growth Monitoring</h3>
+            <p className={styles["vhc-stage-subtitle"]}>Monitor plant growth and farmer updates</p>
+
+            <div className={styles["vhc-form-grid"]}>
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Growth Photos from Farmer</label>
+                <div className={styles["vhc-photo-upload"]}>
+                  <label className={styles["vhc-upload-area"]}>
+                    <Camera size={24} />
+                    <span>Click to upload farmer's growth photos</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => handleMultiplePhotoUpload(e, 2)}
+                      hidden
+                    />
+                  </label>
+                  
+                  {stage2Form.growthPhotos.length > 0 && (
+                    <div className={styles["vhc-photo-grid"]}>
+                      {stage2Form.growthPhotos.map((photo, index) => (
+                        <div key={index} className={styles["vhc-photo-preview-small"]}>
+                          <img src={URL.createObjectURL(photo)} alt={`Growth ${index + 1}`} />
+                          <button
+                            className={styles["vhc-remove-photo"]}
+                            onClick={() => removePhoto(2, index)}
+                          >
+                            <X size={12} />
+                          </button>
+                          <span className={styles["vhc-photo-count"]}>{index + 1}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className={styles["vhc-upload-note"]}>
+                  Upload photos received from farmer showing plant growth progress
+                </p>
+              </div>
+
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Growth Stage</label>
+                <select
+                  className={styles["vhc-select"]}
+                  value={stage2Form.growthStage}
+                  onChange={(e) => updateStage2Form("growthStage", e.target.value)}
+                >
+                  <option value="Early Growth">Early Growth</option>
+                  <option value="Vegetative">Vegetative Stage</option>
+                  <option value="Flowering">Flowering Stage</option>
+                  <option value="Fruiting">Fruiting Stage</option>
+                  <option value="Maturation">Maturation</option>
+                </select>
+              </div>
+
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Farmer Updates & Concerns</label>
+                <textarea
+                  className={styles["vhc-textarea"]}
+                  value={stage2Form.farmerUpdates}
+                  onChange={(e) => updateStage2Form("farmerUpdates", e.target.value)}
+                  placeholder="Record any updates or concerns shared by the farmer..."
+                  rows="4"
+                />
+              </div>
+
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Your Observations</label>
+                <textarea
+                  className={styles["vhc-textarea"]}
+                  value={stage2Form.observations}
+                  onChange={(e) => updateStage2Form("observations", e.target.value)}
+                  placeholder="Add your observations about plant health, growth rate, etc."
+                  rows="4"
+                />
+              </div>
+            </div>
+
+            <div className={styles["vhc-create-batch-section"]}>
+              <button
+                className={styles["vhc-create-batch-btn"]}
+                onClick={() => markStageDone(2)}
+                disabled={stage2Form.growthPhotos.length === 0}
+              >
+                <CheckCircle size={20} /> Complete Growth Monitoring
+              </button>
+              <p className={styles["vhc-verification-note"]}>
+                Note: At least one growth photo from farmer is required
+              </p>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className={styles["vhc-stage-content"]}>
+            <h3 className={styles["vhc-stage-title"]}>Stage 3: Mid-Term Assessment</h3>
+            <p className={styles["vhc-stage-subtitle"]}>Assess crop health and identify issues</p>
+
+            <div className={styles["vhc-form-grid"]}>
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Assessment Photos from Farmer</label>
+                <div className={styles["vhc-photo-upload"]}>
+                  <label className={styles["vhc-upload-area"]}>
+                    <Camera size={24} />
+                    <span>Click to upload assessment photos</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => handleMultiplePhotoUpload(e, 3)}
+                      hidden
+                    />
+                  </label>
+                  
+                  {stage3Form.assessmentPhotos.length > 0 && (
+                    <div className={styles["vhc-photo-grid"]}>
+                      {stage3Form.assessmentPhotos.map((photo, index) => (
+                        <div key={index} className={styles["vhc-photo-preview-small"]}>
+                          <img src={URL.createObjectURL(photo)} alt={`Assessment ${index + 1}`} />
+                          <button
+                            className={styles["vhc-remove-photo"]}
+                            onClick={() => removePhoto(3, index)}
+                          >
+                            <X size={12} />
+                          </button>
+                          <span className={styles["vhc-photo-count"]}>{index + 1}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className={styles["vhc-upload-note"]}>
+                  Upload photos showing pest issues, disease symptoms, or other concerns
+                </p>
+              </div>
+
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>Overall Health Status</label>
+                <select
+                  className={styles["vhc-select"]}
+                  value={stage3Form.healthStatus}
+                  onChange={(e) => updateStage3Form("healthStatus", e.target.value)}
+                >
+                  <option value="Excellent">Excellent</option>
+                  <option value="Good">Good</option>
+                  <option value="Fair">Fair</option>
+                  <option value="Poor">Poor</option>
+                  <option value="Critical">Critical</option>
+                </select>
+              </div>
+
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Pest/Disease Issues</label>
+                <textarea
+                  className={styles["vhc-textarea"]}
+                  value={stage3Form.pestIssues}
+                  onChange={(e) => updateStage3Form("pestIssues", e.target.value)}
+                  placeholder="Describe any pest or disease issues observed..."
+                  rows="3"
+                />
+              </div>
+
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Irrigation/Water Issues</label>
+                <textarea
+                  className={styles["vhc-textarea"]}
+                  value={stage3Form.irrigationIssues}
+                  onChange={(e) => updateStage3Form("irrigationIssues", e.target.value)}
+                  placeholder="Note any irrigation or water-related issues..."
+                  rows="3"
+                />
+              </div>
+
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Recommendations</label>
+                <textarea
+                  className={styles["vhc-textarea"]}
+                  value={stage3Form.recommendations}
+                  onChange={(e) => updateStage3Form("recommendations", e.target.value)}
+                  placeholder="Provide recommendations to the farmer..."
+                  rows="4"
+                />
+              </div>
+            </div>
+
+            <div className={styles["vhc-create-batch-section"]}>
+              <button
+                className={styles["vhc-create-batch-btn"]}
+                onClick={() => markStageDone(3)}
+              >
+                <CheckCircle size={20} /> Complete Assessment
+              </button>
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className={styles["vhc-stage-content"]}>
+            <h3 className={styles["vhc-stage-title"]}>Stage 4: Pre-Harvest Check</h3>
+            <p className={styles["vhc-stage-subtitle"]}>Final check before harvest</p>
+
+            <div className={styles["vhc-form-grid"]}>
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Pre-Harvest Photos from Farmer</label>
+                <div className={styles["vhc-photo-upload"]}>
+                  <label className={styles["vhc-upload-area"]}>
+                    <Camera size={24} />
+                    <span>Click to upload pre-harvest photos</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => handleMultiplePhotoUpload(e, 4)}
+                      hidden
+                    />
+                  </label>
+                  
+                  {stage4Form.preHarvestPhotos.length > 0 && (
+                    <div className={styles["vhc-photo-grid"]}>
+                      {stage4Form.preHarvestPhotos.map((photo, index) => (
+                        <div key={index} className={styles["vhc-photo-preview-small"]}>
+                          <img src={URL.createObjectURL(photo)} alt={`Pre-harvest ${index + 1}`} />
+                          <button
+                            className={styles["vhc-remove-photo"]}
+                            onClick={() => removePhoto(4, index)}
+                          >
+                            <X size={12} />
+                          </button>
+                          <span className={styles["vhc-photo-count"]}>{index + 1}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <p className={styles["vhc-upload-note"]}>
+                  Upload final photos showing crop readiness for harvest
+                </p>
+              </div>
+
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>Harvest Readiness</label>
+                <div className={styles["vhc-readiness-slider"]}>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={parseInt(stage4Form.harvestReadiness)}
+                    onChange={(e) => updateStage4Form("harvestReadiness", e.target.value)}
+                    className={styles["vhc-slider"]}
+                  />
+                  <div className={styles["vhc-slider-value"]}>
+                    {stage4Form.harvestReadiness}%
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>Expected Harvest Date</label>
+                <input
+                  className={styles["vhc-input"]}
+                  type="date"
+                  value={stage4Form.expectedHarvestDate}
+                  onChange={(e) => updateStage4Form("expectedHarvestDate", e.target.value)}
+                />
+              </div>
+
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>Quality Check</label>
+                <select
+                  className={styles["vhc-select"]}
+                  value={stage4Form.qualityCheck}
+                  onChange={(e) => updateStage4Form("qualityCheck", e.target.value)}
+                >
+                  <option value="Pass">Pass - Ready for harvest</option>
+                  <option value="Hold">Hold - Needs more time</option>
+                  <option value="Reject">Reject - Quality issues</option>
+                </select>
+              </div>
+
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Issues or Concerns</label>
+                <textarea
+                  className={styles["vhc-textarea"]}
+                  value={stage4Form.issues}
+                  onChange={(e) => updateStage4Form("issues", e.target.value)}
+                  placeholder="Note any final issues or concerns before harvest..."
+                  rows="3"
+                />
+              </div>
+            </div>
+
+            <div className={styles["vhc-create-batch-section"]}>
+              <button
+                className={styles["vhc-create-batch-btn"]}
+                onClick={() => markStageDone(4)}
+              >
+                <CheckCircle size={20} /> Complete Pre-Harvest Check
+              </button>
+            </div>
+          </div>
+        );
+
       case 5:
         return (
-          <div className="vhc-stage-content">
-            <h3 className="vhc-stage-title">Stage 5: Final Verification</h3>
-            <p className="vhc-stage-subtitle">Complete final documentation before dispatch</p>
+          <div className={styles["vhc-stage-content"]}>
+            <h3 className={styles["vhc-stage-title"]}>Stage 5: Final Verification</h3>
+            <p className={styles["vhc-stage-subtitle"]}>Complete final documentation before dispatch</p>
 
-            <div className="vhc-form-grid">
-              <div className="vhc-field">
-                <label className="vhc-label">Batch ID</label>
+            <div className={styles["vhc-form-grid"]}>
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>Batch ID</label>
                 <input
-                  className="vhc-input"
+                  className={styles["vhc-input"]}
                   type="text"
                   value={stage5Form.batchId}
                   readOnly
                 />
               </div>
 
-              <div className="vhc-field">
-                <label className="vhc-label">
-                  Final Harvest Date <span className="vhc-required">*</span>
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>
+                  Final Harvest Date <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <input
-                  className="vhc-input"
+                  className={styles["vhc-input"]}
                   type="date"
                   value={stage5Form.finalHarvestDate}
                   onChange={(e) => updateStage5Form("finalHarvestDate", e.target.value)}
                 />
               </div>
 
-              <div className="vhc-field">
-                <label className="vhc-label">
-                  Final Quantity (kg) <span className="vhc-required">*</span>
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>
+                  Final Quantity (kg) <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <input
-                  className="vhc-input"
+                  className={styles["vhc-input"]}
                   type="number"
                   value={stage5Form.finalQuantity}
                   min="0"
@@ -513,35 +1081,35 @@ function App() {
                 />
               </div>
 
-              <div className="vhc-field">
-                <label className="vhc-label">Sample Collected</label>
-                <div className="vhc-checkbox-group">
-                  <label className="vhc-checkbox-label">
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>Sample Collected</label>
+                <div className={styles["vhc-checkbox-group"]}>
+                  <label className={styles["vhc-checkbox-label"]}>
                     <input
                       type="checkbox"
                       checked={stage5Form.sampleCollected}
                       onChange={(e) => updateStage5Form("sampleCollected", e.target.checked)}
-                      className="vhc-checkbox"
+                      className={styles["vhc-checkbox"]}
                     />
                     <span>Lab sample collected</span>
                   </label>
                 </div>
               </div>
 
-              <div className="vhc-field vhc-field-full">
-                <label className="vhc-label">
-                  Final GPS Location <span className="vhc-required">*</span>
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>
+                  Final GPS Location <span className={styles["vhc-required"]}>*</span>
                 </label>
-                <div className="vhc-gps-row">
+                <div className={styles["vhc-gps-row"]}>
                   <input
-                    className="vhc-input vhc-gps-input"
+                    className={`${styles["vhc-input"]} ${styles["vhc-gps-input"]}`}
                     value={stage5Form.finalGeotag}
                     readOnly
                     placeholder="Click Capture GPS to get location"
                   />
                   <button
                     type="button"
-                    className="vhc-btn vhc-btn-secondary"
+                    className={`${styles["vhc-btn"]} ${styles["vhc-btn-secondary"]}`}
                     onClick={handleStage5GPS}
                   >
                     <MapPin size={16} /> Capture GPS
@@ -549,21 +1117,21 @@ function App() {
                 </div>
               </div>
 
-              <div className="vhc-field vhc-field-full">
-                <label className="vhc-label">Final Harvest Photo</label>
-                <div className="vhc-photo-upload">
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>Final Harvest Photo</label>
+                <div className={styles["vhc-photo-upload"]}>
                   {stage5Form.finalPhoto ? (
-                    <div className="vhc-photo-preview">
+                    <div className={styles["vhc-photo-preview"]}>
                       <img src={URL.createObjectURL(stage5Form.finalPhoto)} alt="Final harvest preview" />
                       <button
-                        className="vhc-remove-photo"
+                        className={styles["vhc-remove-photo"]}
                         onClick={() => updateStage5Form("finalPhoto", null)}
                       >
                         <X size={16} />
                       </button>
                     </div>
                   ) : (
-                    <label className="vhc-upload-area">
+                    <label className={styles["vhc-upload-area"]}>
                       <Camera size={24} />
                       <span>Click to upload final harvest photo</span>
                       <input
@@ -575,21 +1143,20 @@ function App() {
                     </label>
                   )}
                 </div>
-                <div className="verify">
-                  <button onClick={() => alert('Aswaganda Verified.')}>Verify</button>
+                <div className={styles["verify"]}>
+                  <button onClick={() => alert('Herb Verified Successfully!')}>Verify</button>
                 </div>
-
               </div>
 
-              <div className="vhc-field">
-                <label className="vhc-label">Dispatch Authorization</label>
-                <div className="vhc-checkbox-group">
-                  <label className="vhc-checkbox-label">
+              <div className={styles["vhc-field"]}>
+                <label className={styles["vhc-label"]}>Dispatch Authorization</label>
+                <div className={styles["vhc-checkbox-group"]}>
+                  <label className={styles["vhc-checkbox-label"]}>
                     <input
                       type="checkbox"
                       checked={stage5Form.dispatchAuth}
                       onChange={(e) => updateStage5Form("dispatchAuth", e.target.checked)}
-                      className="vhc-checkbox"
+                      className={styles["vhc-checkbox"]}
                     />
                     <span>Authorize dispatch</span>
                   </label>
@@ -597,15 +1164,15 @@ function App() {
               </div>
             </div>
 
-            <div className="vhc-final-verification">
+            <div className={styles["vhc-final-verification"]}>
               <button
-                className="vhc-create-batch-btn"
+                className={styles["vhc-create-batch-btn"]}
                 onClick={() => markStageDone(5)}
                 disabled={!stage5Form.finalHarvestDate || !stage5Form.finalQuantity}
               >
                 <CheckCircle size={20} /> Complete Final Verification
               </button>
-              <p className="vhc-verification-note">
+              <p className={styles["vhc-verification-note"]}>
                 Note: Once verified, batch will be locked and sent for processing
               </p>
             </div>
@@ -614,10 +1181,10 @@ function App() {
 
       default:
         return (
-          <div className="vhc-stage-content">
-            <h3 className="vhc-stage-title">Stage {currentStage}: {STAGE_DATA[currentStage - 1]?.title}</h3>
-            <p className="vhc-stage-subtitle">{STAGE_DATA[currentStage - 1]?.description}</p>
-            <div className="vhc-stage-placeholder">
+          <div className={styles["vhc-stage-content"]}>
+            <h3 className={styles["vhc-stage-title"]}>Stage {currentStage}: {STAGE_DATA[currentStage - 1]?.title}</h3>
+            <p className={styles["vhc-stage-subtitle"]}>{STAGE_DATA[currentStage - 1]?.description}</p>
+            <div className={styles["vhc-stage-placeholder"]}>
               <p>Stage {currentStage} content will appear here. Click "Mark Complete" when done.</p>
             </div>
           </div>
@@ -629,89 +1196,167 @@ function App() {
     <>
       {/* Toast Notification */}
       {toast && (
-        <div className="vhc-toast">
-          <span className="vhc-toast-icon">
+        <div className={styles["vhc-toast"]}>
+          <span className={styles["vhc-toast-icon"]}>
             {toast.includes("📍") ? "📍" :
               toast.includes("✅") ? "✅" :
                 toast.includes("📋") ? "📋" :
                   toast.includes("🎉") ? "🎉" :
                     toast.includes("🌿") ? "🌿" : "📡"}
           </span>
-          <div className="vhc-toast-content">
+          <div className={styles["vhc-toast-content"]}>
             {toast.replace(/[📍✅📋🎉🌿📡]/g, '').trim()}
           </div>
         </div>
       )}
 
+      {/* Create Batch Dialog */}
+      {showCreateBatchDialog && (
+        <div className={styles["vhc-dialog-overlay"]}>
+          <div className={styles["vhc-dialog-container"]}>
+            <div className={styles["vhc-dialog-header"]}>
+              <h3 className={styles["vhc-dialog-title"]}>Batch Creation Confirmation</h3>
+              <button 
+                className={styles["vhc-dialog-close"]}
+                onClick={() => setShowCreateBatchDialog(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className={styles["vhc-dialog-content"]}>
+              <div className={styles["vhc-dialog-icon"]}>
+                📋
+              </div>
+              <h4 className={styles["vhc-dialog-message"]}>
+                Batch Assigned Successfully!
+              </h4>
+              <p className={styles["vhc-dialog-description"]}>
+                Your batch has been registered with the following ID:
+              </p>
+              
+              <div className={styles["vhc-batch-id-display"]}>
+                <div className={styles["vhc-batch-id-label"]}>Batch ID</div>
+                <div className={styles["vhc-batch-id-value"]}>{batchIdFromAdmin}</div>
+                <div className={styles["vhc-batch-id-note"]}>(Received from Admin System)</div>
+              </div>
+              
+              <div className={styles["vhc-batch-details"]}>
+                <div className={styles["vhc-batch-detail-item"]}>
+                  <span className={styles["vhc-detail-label"]}>Farmer Name:</span>
+                  <span className={styles["vhc-detail-value"]}>{stage1Form.farmerName || "Not specified"}</span>
+                </div>
+                <div className={styles["vhc-batch-detail-item"]}>
+                  <span className={styles["vhc-detail-label"]}>Herb Species:</span>
+                  <span className={styles["vhc-detail-value"]}>{stage1Form.species || "Not selected"}</span>
+                </div>
+                <div className={styles["vhc-batch-detail-item"]}>
+                  <span className={styles["vhc-detail-label"]}>Estimated Quantity:</span>
+                  <span className={styles["vhc-detail-value"]}>{stage1Form.estimatedQty ? `${stage1Form.estimatedQty} kg` : "Not estimated"}</span>
+                </div>
+                <div className={styles["vhc-batch-detail-item"]}>
+                  <span className={styles["vhc-detail-label"]}>Location:</span>
+                  <span className={styles["vhc-detail-value"]}>
+                    {stage1Form.exactAddress ? stage1Form.exactAddress.split(',')[0] + '...' : "Not captured"}
+                  </span>
+                </div>
+              </div>
+              
+              <div className={styles["vhc-dialog-note"]}>
+                <AlertCircle size={16} />
+                <span>This batch will now move to Stage 2. Track progress using the Batch ID.</span>
+              </div>
+            </div>
+            
+            <div className={styles["vhc-dialog-footer"]}>
+              <button
+                className={`${styles["vhc-dialog-btn"]} ${styles["vhc-dialog-btn-cancel"]}`}
+                onClick={() => setShowCreateBatchDialog(false)}
+              >
+                Edit Details
+              </button>
+              <button
+                className={`${styles["vhc-dialog-btn"]} ${styles["vhc-dialog-btn-confirm"]}`}
+                onClick={confirmCreateBatch}
+                disabled={!stage1Form.farmerName || !stage1Form.fid || !stage1Form.species}
+              >
+                <CheckCircle size={18} />
+                Proceed to Stage 2
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* NAVBAR */}
-      <nav className="vhc-navbar">
-        <div className="vhc-navbar-left">
-          <div className="vhc-nav-logo">🌿 VirtuHerbChain</div>
+      <nav className={styles["vhc-navbar"]}>
+        <div className={styles["vhc-navbar-left"]}>
+          <div className={styles["vhc-nav-logo"]}>AyuSethu</div>
         </div>
 
-        <div className="vhc-navbar-right">
-          <div className="vhc-notification-container" ref={notificationRef}>
+        <div className={styles["vhc-navbar-right"]}>
+          <div className={styles["vhc-notification-container"]} ref={notificationRef}>
             <button
-              className="vhc-notification-btn"
+              className={styles["vhc-notification-btn"]}
               onClick={toggleNotificationDropdown}
             >
               <Bell size={20} />
               {unreadCount > 0 && (
-                <span className="vhc-notification-badge">{unreadCount}</span>
+                <span className={styles["vhc-notification-badge"]}>{unreadCount}</span>
               )}
             </button>
 
             {showNotifications && (
-              <div className="vhc-notification-dropdown">
-                <div className="vhc-notification-header">
+              <div className={styles["vhc-notification-dropdown"]}>
+                <div className={styles["vhc-notification-header"]}>
                   <h4>Notifications</h4>
                   <button
-                    className="vhc-notification-close"
+                    className={styles["vhc-notification-close"]}
                     onClick={toggleNotificationDropdown}
                   >
                     <X size={16} />
                   </button>
                 </div>
 
-                <div className="vhc-notification-tabs">
+                <div className={styles["vhc-notification-tabs"]}>
                   <button
-                    className={`vhc-notification-tab ${activeTab === 'admin' ? 'active' : ''}`}
+                    className={`${styles["vhc-notification-tab"]} ${activeTab === 'admin' ? styles['active'] : ''}`}
                     onClick={() => setActiveTab('admin')}
                   >
                     Admin
                   </button>
                   <button
-                    className={`vhc-notification-tab ${activeTab === 'tester' ? 'active' : ''}`}
+                    className={`${styles["vhc-notification-tab"]} ${activeTab === 'tester' ? styles['active'] : ''}`}
                     onClick={() => setActiveTab('tester')}
                   >
                     Tester
                   </button>
                 </div>
 
-                <div className="vhc-notification-list">
+                <div className={styles["vhc-notification-list"]}>
                   {notifications
                     .filter(n => activeTab === 'all' || n.type === activeTab)
                     .map(notification => (
                       <div
                         key={notification.id}
-                        className={`vhc-notification-item ${!notification.read ? 'unread' : ''}`}
+                        className={`${styles["vhc-notification-item"]} ${!notification.read ? styles['unread'] : ''}`}
                       >
-                        <div className="vhc-notification-icon">
+                        <div className={styles["vhc-notification-icon"]}>
                           {getNotificationIcon(notification.type)}
                         </div>
-                        <div className="vhc-notification-content">
-                          <div className="vhc-notification-title">
+                        <div className={styles["vhc-notification-content"]}>
+                          <div className={styles["vhc-notification-title"]}>
                             {notification.title}
                           </div>
-                          <div className="vhc-notification-message">
+                          <div className={styles["vhc-notification-message"]}>
                             {notification.message}
                           </div>
-                          <div className="vhc-notification-time">
+                          <div className={styles["vhc-notification-time"]}>
                             {notification.time}
                           </div>
                         </div>
                         <button
-                          className="vhc-mark-read-btn"
+                          className={styles["vhc-mark-read-btn"]}
                           onClick={() => handleMarkNotificationRead(notification.id)}
                         >
                           Mark Read
@@ -719,68 +1364,67 @@ function App() {
                       </div>
                     ))}
                 </div>
-                
               </div>
             )}
           </div>
 
-          <div className="vhc-user-profile-container" ref={profileRef}>
+          <div className={styles["vhc-user-profile-container"]} ref={profileRef}>
             <button
-              className="vhc-user-profile-btn"
+              className={styles["vhc-user-profile-btn"]}
               onClick={toggleProfileDropdown}
             >
-                <div className="animated-avatar-profile">
+                <div className={styles["animated-avatar-profile"]}>
                   <img src={"https://img.freepik.com/premium-photo/young-optimistic-woman-doctor-is-holding-clipboard-her-hands-while-standing-sunny-clinic-portrait-friendly-female-physician-with-stethoscope-perfect-medical-service-hospital-me_665183-12973.jpg"} alt="Profile" />
                 </div>
             </button>
 
             {showProfile && (
-              <div className="vhc-profile-dropdown">
-                <div className="vhc-profile-header">
-                  <div className="vhc-profile-avatar-lg">CO</div>
-                  <div className="vhc-profile-details">
+              <div className={styles["vhc-profile-dropdown"]}>
+                <div className={styles["vhc-profile-header"]}>
+                  <div className={styles["vhc-profile-avatar-lg"]}>CO</div>
+                  <div className={styles["vhc-profile-details"]}>
                     <h4>Collector #7421</h4>
                     <p>Senior Field Officer</p>
-                    <div className="vhc-profile-badges">
-                      <span className="vhc-profile-badge">ID: COL-7421</span>
-                      <span className="vhc-profile-badge active">Active</span>
+                    <div className={styles["vhc-profile-badges"]}>
+                      <span className={styles["vhc-profile-badge"]}>ID: COL-7421</span>
+                      <span className={`${styles["vhc-profile-badge"]} ${styles["active"]}`}>Active</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="vhc-profile-stats">
-                  <div className="vhc-stat-item">
-                    <div className="vhc-stat-icon">📦</div>
+                <div className={styles["vhc-profile-stats"]}>
+                  <div className={styles["vhc-stat-item"]}>
+                    <div className={styles["vhc-stat-icon"]}>📦</div>
                     <div>
-                      <div className="vhc-stat-label">Batches Today</div>
-                      <div className="vhc-stat-value">8</div>
+                      <div className={styles["vhc-stat-label"]}>Batches Today</div>
+                      <div className={styles["vhc-stat-value"]}>8</div>
                     </div>
                   </div>
-                  <div className="vhc-stat-item">
-                    <div className="vhc-stat-icon">🎯</div>
+                  <div className={styles["vhc-stat-item"]}>
+                    <div className={styles["vhc-stat-icon"]}>🎯</div>
                     <div>
-                      <div className="vhc-stat-label">Success Rate</div>
-                      <div className="vhc-stat-value">94%</div>
+                      <div className={styles["vhc-stat-label"]}>Success Rate</div>
+                      <div className={styles["vhc-stat-value"]}>94%</div>
                     </div>
                   </div>
-                  <div className="vhc-stat-item">
-                    <div className="vhc-stat-icon">👨‍🌾</div>
+                  <div className={styles["vhc-stat-item"]}>
+                    <div className={styles["vhc-stat-icon"]}>👨‍🌾</div>
                     <div>
-                      <div className="vhc-stat-label">Active Farmers</div>
-                      <div className="vhc-stat-value">28</div>
+                      <div className={styles["vhc-stat-label"]}>Active Farmers</div>
+                      <div className={styles["vhc-stat-value"]}>28</div>
                     </div>
                   </div>
-                  <div className="vhc-stat-item">
-                    <div className="vhc-stat-icon">🏆</div>
+                  <div className={styles["vhc-stat-item"]}>
+                    <div className={styles["vhc-stat-icon"]}>🏆</div>
                     <div>
-                      <div className="vhc-stat-label">Certified Farms</div>
-                      <div className="vhc-stat-value">15</div>
+                      <div className={styles["vhc-stat-label"]}>Certified Farms</div>
+                      <div className={styles["vhc-stat-value"]}>15</div>
                     </div>
                   </div>
                 </div>
 
                 <button
-                  className="vhc-logout-btn"
+                  className={styles["vhc-logout-btn"]}
                   onClick={handleLogout}
                 >
                   <span>🚪</span> Log Out
@@ -791,226 +1435,351 @@ function App() {
         </div>
       </nav>
 
-      {/* HERO SECTION */}
-      <header className="vhc-header">
-        <div className="vhc-hero-image">
-          <img
-            src="https://img.freepik.com/premium-photo/indian-farmer-with-agronomist-cotton-field-showing-some-information-tab_54391-2389.jpg"
-            alt="Herb farm landscape"
-          />
-        </div>
-      </header>
-
       {/* MAIN CONTENT */}
-      <main className="vhc-main">
-        <div className="vhc-grid">
+      <main className={styles["vhc-main"]}>
+        <div className={styles["vhc-grid"]}>
           {/* LEFT PANEL: STAGE CONTENT */}
-          <section className="vhc-card vhc-stage-card">
+          <section className={`${styles["vhc-card"]} ${styles["vhc-stage-card"]}`}>
             {renderStageContent()}
           </section>
 
           {/* RIGHT PANEL: TIMELINE & PREVIEW */}
-          <aside className="vhc-card">
-            <div className="vhc-timeline-header">
-              <h2 className="vhc-timeline-title">Batch Integrity Timeline</h2>
-              <p className="vhc-timeline-subtitle">
+          <aside className={styles["vhc-card"]}>
+            <div className={styles["vhc-timeline-header"]}>
+              <h2 className={styles["vhc-timeline-title"]}>Batch Integrity Timeline</h2>
+              <p className={styles["vhc-timeline-subtitle"]}>
                 Track progress through all stages. Click any stage to manage.
               </p>
             </div>
 
-            <div className="vhc-timeline-container">
-              <div className="vhc-timeline-line" />
+            <div className={styles["vhc-timeline-container"]}>
+              <div className={styles["vhc-timeline-line"]} />
               <div>
                 {STAGE_DATA.map((stage) => renderTimelineItem(stage))}
               </div>
             </div>
 
             {/* LIVE PREVIEW */}
-            <div className="vhc-live-preview">
-              <h3 className="vhc-live-preview-title">Live Batch Preview</h3>
+            <div className={styles["vhc-live-preview"]}>
+              <h3 className={styles["vhc-live-preview-title"]}>Live Batch Preview</h3>
 
-              <div className="vhc-preview-container">
+              <div className={styles["vhc-preview-container"]}>
                 {currentStage === 1 ? (
-                  <div className="vhc-preview-grid">
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Farmer Name</div>
-                      <div className="vhc-preview-value">
-                        {stage1Form.farmerName || <span className="vhc-preview-empty">Not entered</span>}
+                  <div className={styles["vhc-preview-grid"]}>
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Farmer Name</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {stage1Form.farmerName || <span className={styles["vhc-preview-empty"]}>Not entered</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Farmer ID</div>
-                      <div className="vhc-preview-value">
-                        {stage1Form.fid || <span className="vhc-preview-empty">Not entered</span>}
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Farmer ID</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {stage1Form.fid || <span className={styles["vhc-preview-empty"]}>Not entered</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Visit Date</div>
-                      <div className="vhc-preview-value">
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Visit Date</div>
+                      <div className={styles["vhc-preview-value"]}>
                         {stage1Form.visitDate ? new Date(stage1Form.visitDate).toLocaleDateString('en-GB') :
-                          <span className="vhc-preview-empty">Not set</span>}
+                          <span className={styles["vhc-preview-empty"]}>Not set</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Species</div>
-                      <div className="vhc-preview-value">
-                        {stage1Form.species || <span className="vhc-preview-empty">Not selected</span>}
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Species</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {stage1Form.species || <span className={styles["vhc-preview-empty"]}>Not selected</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Estimated Qty</div>
-                      <div className="vhc-preview-value">
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Estimated Qty</div>
+                      <div className={styles["vhc-preview-value"]}>
                         {stage1Form.estimatedQty ? `${stage1Form.estimatedQty} kg` :
-                          <span className="vhc-preview-empty">Not estimated</span>}
+                          <span className={styles["vhc-preview-empty"]}>Not estimated</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">GPS Location</div>
-                      <div className="vhc-preview-value vhc-preview-gps">
-                        {stage1Form.geotag || <span className="vhc-preview-empty">Not captured</span>}
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Soil Type</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {stage1Form.soilType || <span className={styles["vhc-preview-empty"]}>Not specified</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-notes">
-                      <div className="vhc-notes-label">Observations</div>
-                      <div className="vhc-notes-content">
-                        {stage1Form.notes || <span className="vhc-preview-empty">No observations added</span>}
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Irrigation</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {stage1Form.irrigationType || <span className={styles["vhc-preview-empty"]}>Not specified</span>}
+                      </div>
+                    </div>
+
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>GPS Location</div>
+                      <div className={`${styles["vhc-preview-value"]} ${styles["vhc-preview-gps"]}`}>
+                        {stage1Form.geotag || <span className={styles["vhc-preview-empty"]}>Not captured</span>}
+                      </div>
+                    </div>
+
+                    <div className={`${styles["vhc-preview-item"]} ${styles["vhc-field-full"]}`}>
+                      <div className={styles["vhc-preview-label"]}>Exact Address</div>
+                      <div className={`${styles["vhc-preview-value"]} ${styles["vhc-preview-address"]}`}>
+                        {stage1Form.exactAddress ? 
+                          <span className={styles["vhc-address-truncated"]}>{stage1Form.exactAddress.substring(0, 50)}...</span> : 
+                          <span className={styles["vhc-preview-empty"]}>Not captured</span>
+                        }
+                      </div>
+                    </div>
+
+                    <div className={styles["vhc-preview-notes"]}>
+                      <div className={styles["vhc-notes-label"]}>Observations</div>
+                      <div className={styles["vhc-notes-content"]}>
+                        {stage1Form.notes || <span className={styles["vhc-preview-empty"]}>No observations added</span>}
+                      </div>
+                    </div>
+                  </div>
+                ) : currentStage === 2 ? (
+                  <div className={styles["vhc-preview-grid"]}>
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Growth Stage</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {stage2Form.growthStage || <span className={styles["vhc-preview-empty"]}>Not specified</span>}
+                      </div>
+                    </div>
+
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Photos Uploaded</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage2Form.growthPhotos.length > 0 ? styles['success'] : styles['pending']}`}>
+                          {stage2Form.growthPhotos.length} photos
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Farmer Updates</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {stage2Form.farmerUpdates ? 
+                          <span className={styles["vhc-address-truncated"]}>{stage2Form.farmerUpdates.substring(0, 50)}...</span> : 
+                          <span className={styles["vhc-preview-empty"]}>No updates</span>
+                        }
+                      </div>
+                    </div>
+
+                    <div className={`${styles["vhc-preview-item"]} ${styles["vhc-field-full"]}`}>
+                      <div className={styles["vhc-preview-label"]}>Observations</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {stage2Form.observations || <span className={styles["vhc-preview-empty"]}>No observations</span>}
+                      </div>
+                    </div>
+                  </div>
+                ) : currentStage === 3 ? (
+                  <div className={styles["vhc-preview-grid"]}>
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Health Status</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage3Form.healthStatus === 'Excellent' || stage3Form.healthStatus === 'Good' ? styles['success'] : styles['pending']}`}>
+                          {stage3Form.healthStatus}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Assessment Photos</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage3Form.assessmentPhotos.length > 0 ? styles['success'] : styles['pending']}`}>
+                          {stage3Form.assessmentPhotos.length} photos
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Pest Issues</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {stage3Form.pestIssues ? 
+                          <span className={styles["vhc-address-truncated"]}>{stage3Form.pestIssues.substring(0, 50)}...</span> : 
+                          <span className={styles["vhc-preview-empty"]}>None reported</span>
+                        }
+                      </div>
+                    </div>
+
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Irrigation Issues</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {stage3Form.irrigationIssues ? 
+                          <span className={styles["vhc-address-truncated"]}>{stage3Form.irrigationIssues.substring(0, 50)}...</span> : 
+                          <span className={styles["vhc-preview-empty"]}>None reported</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                ) : currentStage === 4 ? (
+                  <div className={styles["vhc-preview-grid"]}>
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Harvest Readiness</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${parseInt(stage4Form.harvestReadiness) > 80 ? styles['success'] : styles['pending']}`}>
+                          {stage4Form.harvestReadiness}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Expected Harvest</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {stage4Form.expectedHarvestDate ? new Date(stage4Form.expectedHarvestDate).toLocaleDateString('en-GB') :
+                          <span className={styles["vhc-preview-empty"]}>Not set</span>}
+                      </div>
+                    </div>
+
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Quality Check</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage4Form.qualityCheck === 'Pass' ? styles['success'] : styles['pending']}`}>
+                          {stage4Form.qualityCheck}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Pre-Harvest Photos</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage4Form.preHarvestPhotos.length > 0 ? styles['success'] : styles['pending']}`}>
+                          {stage4Form.preHarvestPhotos.length} photos
+                        </span>
                       </div>
                     </div>
                   </div>
                 ) : currentStage === 5 ? (
-                  <div className="vhc-preview-grid">
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Batch ID</div>
-                      <div className="vhc-preview-value vhc-preview-batchid">
+                  <div className={styles["vhc-preview-grid"]}>
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Batch ID</div>
+                      <div className={`${styles["vhc-preview-value"]} ${styles["vhc-preview-batchid"]}`}>
                         {stage5Form.batchId}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Final Harvest Date</div>
-                      <div className="vhc-preview-value">
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Final Harvest Date</div>
+                      <div className={styles["vhc-preview-value"]}>
                         {stage5Form.finalHarvestDate ? new Date(stage5Form.finalHarvestDate).toLocaleDateString('en-GB') :
-                          <span className="vhc-preview-empty">Not set</span>}
+                          <span className={styles["vhc-preview-empty"]}>Not set</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Final Quantity</div>
-                      <div className="vhc-preview-value">
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Final Quantity</div>
+                      <div className={styles["vhc-preview-value"]}>
                         {stage5Form.finalQuantity ? `${stage5Form.finalQuantity} kg` :
-                          <span className="vhc-preview-empty">Not recorded</span>}
+                          <span className={styles["vhc-preview-empty"]}>Not recorded</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Sample Collected</div>
-                      <div className="vhc-preview-value">
-                        <span className={`vhc-preview-status-badge ${stage5Form.sampleCollected ? 'success' : 'pending'}`}>
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Sample Collected</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage5Form.sampleCollected ? styles['success'] : styles['pending']}`}>
                           {stage5Form.sampleCollected ? 'Yes' : 'No'}
                         </span>
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Dispatch Auth</div>
-                      <div className="vhc-preview-value">
-                        <span className={`vhc-preview-status-badge ${stage5Form.dispatchAuth ? 'success' : 'pending'}`}>
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Dispatch Auth</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage5Form.dispatchAuth ? styles['success'] : styles['pending']}`}>
                           {stage5Form.dispatchAuth ? 'Authorized' : 'Pending'}
                         </span>
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Final GPS</div>
-                      <div className="vhc-preview-value vhc-preview-gps">
-                        {stage5Form.finalGeotag || <span className="vhc-preview-empty">Not captured</span>}
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Final GPS</div>
+                      <div className={`${styles["vhc-preview-value"]} ${styles["vhc-preview-gps"]}`}>
+                        {stage5Form.finalGeotag || <span className={styles["vhc-preview-empty"]}>Not captured</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-photo">
-                      <div className="vhc-notes-label">Final Photo</div>
-                      <div className="vhc-photo-status">
+                    <div className={styles["vhc-preview-photo"]}>
+                      <div className={styles["vhc-notes-label"]}>Final Photo</div>
+                      <div className={styles["vhc-photo-status"]}>
                         {stage5Form.finalPhoto ? (
-                          <span className="vhc-photo-uploaded">✅ Photo uploaded</span>
+                          <span className={styles["vhc-photo-uploaded"]}>✅ Photo uploaded</span>
                         ) : (
-                          <span className="vhc-preview-empty">No photo uploaded</span>
+                          <span className={styles["vhc-preview-empty"]}>No photo uploaded</span>
                         )}
                       </div>
-
                     </div>
                   </div>
                 ) : (
-                  <div className="vhc-preview-grid">
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Herb Name</div>
-                      <div className="vhc-preview-value">
-                        {form.herb || <span className="vhc-preview-empty">Not selected</span>}
+                  <div className={styles["vhc-preview-grid"]}>
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Herb Name</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {form.herb || <span className={styles["vhc-preview-empty"]}>Not selected</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Harvest Date</div>
-                      <div className="vhc-preview-value">
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Harvest Date</div>
+                      <div className={styles["vhc-preview-value"]}>
                         {form.date ? new Date(form.date).toLocaleDateString('en-GB') :
-                          <span className="vhc-preview-empty">Not set</span>}
+                          <span className={styles["vhc-preview-empty"]}>Not set</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Quality Grade</div>
-                      <div className="vhc-preview-value">
-                        {form.quality || <span className="vhc-preview-empty">Not graded</span>}
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Quality Grade</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {form.quality || <span className={styles["vhc-preview-empty"]}>Not graded</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Quantity</div>
-                      <div className="vhc-preview-value">
-                        {form.qty ? `${form.qty} kg` : <span className="vhc-preview-empty">Not specified</span>}
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Quantity</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {form.qty ? `${form.qty} kg` : <span className={styles["vhc-preview-empty"]}>Not specified</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">Weather</div>
-                      <div className="vhc-preview-value">
-                        {form.weather || <span className="vhc-preview-empty">Not recorded</span>}
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>Weather</div>
+                      <div className={styles["vhc-preview-value"]}>
+                        {form.weather || <span className={styles["vhc-preview-empty"]}>Not recorded</span>}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-item">
-                      <div className="vhc-preview-label">GPS Location</div>
-                      <div className="vhc-preview-value vhc-preview-gps">
+                    <div className={styles["vhc-preview-item"]}>
+                      <div className={styles["vhc-preview-label"]}>GPS Location</div>
+                      <div className={`${styles["vhc-preview-value"]} ${styles["vhc-preview-gps"]}`}>
                         {form.gps === "Not captured" ?
-                          <span className="vhc-preview-empty">Not captured</span> :
+                          <span className={styles["vhc-preview-empty"]}>Not captured</span> :
                           form.gps}
                       </div>
                     </div>
 
-                    <div className="vhc-preview-notes">
-                      <div className="vhc-notes-label">Collector Notes</div>
-                      <div className="vhc-notes-content">
-                        {form.notes || <span className="vhc-preview-empty">No notes added</span>}
+                    <div className={styles["vhc-preview-notes"]}>
+                      <div className={styles["vhc-notes-label"]}>Collector Notes</div>
+                      <div className={styles["vhc-notes-content"]}>
+                        {form.notes || <span className={styles["vhc-preview-empty"]}>No notes added</span>}
                       </div>
                     </div>
                   </div>
                 )}
 
-                <div className="vhc-preview-status">
-                  <div className="vhc-preview-status-icon">
+                <div className={styles["vhc-preview-status"]}>
+                  <div className={styles["vhc-preview-status-icon"]}>
                     {stageStatus[currentStage - 1] === "done" ? "✅" :
                       stageStatus[currentStage - 1] === "current" ? "🔄" : "⏳"}
                   </div>
-                  <div className="vhc-preview-status-text">
-                    <div className="vhc-preview-status-title">
+                  <div className={styles["vhc-preview-status-text"]}>
+                    <div className={styles["vhc-preview-status-title"]}>
                       Stage {currentStage}: {STAGE_DATA[currentStage - 1]?.title}
                     </div>
-                    <div className="vhc-preview-status-subtitle">
+                    <div className={styles["vhc-preview-status-subtitle"]}>
                       Status: {getStatusText(stageStatus[currentStage - 1])}
                     </div>
                   </div>

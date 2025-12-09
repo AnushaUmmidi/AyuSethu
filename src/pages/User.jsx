@@ -143,9 +143,7 @@ function App() {
       <main className="main">
         <section id="scanner" className="content-section">
           <SectionHeader
-            step="Step 1"
             title="Provide herb barcode"
-            subtitle="Scan using camera, upload a barcode image, or enter the barcode manually. The system then shows full herb and farmer details from backend (dummy data here)."
           />
           <div className="grid-2">
             <BarcodePanel
@@ -168,9 +166,7 @@ function App() {
 
         <section id="feedback" className="content-section">
           <SectionHeader
-            step="Step 2"
             title="Process improvement feedback"
-            subtitle="Share suggestions about sourcing, grading, drying, storage, or logistics for this herb or in general."
           />
           <FeedbackSection
             feedback={feedback}
@@ -200,7 +196,7 @@ function Header() {
         <div className="logo">
           <div className="logo-mark">🌿</div>
           <div>
-            <div className="logo-title">HerbTrace</div>
+            <div className="logo-title">AyuSethu</div>
             <div className="logo-subtitle">
               Ayurvedic Herb & Farmer Traceability
             </div>
@@ -233,13 +229,6 @@ function Hero() {
           every batch.
         </p>
         <div className="hero-actions">
-          <a href="#scanner" className="btn btn-primary">
-            Start with demo code "1"
-          </a>
-          <span className="hero-hint">
-            Try barcode <strong>1</strong> for Tulasi, <strong>2</strong> for
-            Ashwagandha.
-          </span>
         </div>
       </div>
     </section>
@@ -555,7 +544,7 @@ function FeedbackDialog({ onClose }) {
 function Footer() {
   return (
     <footer className="footer">
-      <span>HerbTrace User Portal</span>
+      <span>AyuSethu User Portal</span>
       <span className="footer-dot">•</span>
       <span>Built in React for Ayurvedic herb traceability 🌿</span>
     </footer>
