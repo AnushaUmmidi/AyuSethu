@@ -23,7 +23,7 @@
   max-width: 1200px;
   min-width: 300px;
   height: 65px;
-  background: rgba(40, 40, 40, 0.95);
+  background: rgba(40, 40, 40, 0.464);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-radius: 50px;
@@ -88,7 +88,7 @@
   width: 100%;
   height: 100vh;
   min-height: 600px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* IMAGE SLIDER */
@@ -226,32 +226,38 @@
 
 /* FEATURES SECTION */
 .featuresSection {
- position: absolute;
-  bottom: -60px;
+  position: absolute;
+  bottom: -55px;           /* pulls it halfway outside hero */
   left: 50%;
   transform: translateX(-50%);
   width: 70%;
   max-width: 1200px;
+
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0;
+
   background: #ffffff;
-  border-radius: 25px;
-  padding: 25px 30px;
+  border-radius: 50px;
   box-shadow: 0 15px 40px rgba(0,0,0,0.15);
   z-index: 300;
+  overflow: hidden;
 }
 
 .featureBox {
-   display: flex;
+  display: flex;
   align-items: center;
-  padding: 15px 25px;
+  padding: 25px 30px; /* Use same padding as outer container had */
   background: #f5f8f3;
   transition: transform 0.3s ease;
   height: 110px;
   gap: 20px;
+  border-right: 1px solid rgba(0,0,0,0.05); /* Optional: visual separator */
 }
 
+/* Remove right border from last box in each row */
+.featureBox:nth-child(3n) {
+  border-right: none;
+}
 
 .featureBox:nth-child(1) {
   border-radius: 25px 0 0 25px;
@@ -312,12 +318,14 @@
   margin-top: 50px;
   position: relative;
   z-index: 10;
+  margin-top: 0;
 }
 
 .workHeading {
   font-size: 36px;
   font-weight: 700;
   color: #274e27;
+  margin-top: 0px;
   margin-bottom: 10px;
   font-family: 'Cormorant Garamond', serif;
 }
@@ -384,8 +392,8 @@
 .dash {
   position: absolute;
   top: 50px;
-  left: 100px;
-  width: 140px;
+  left: 150px;
+  width: 200px;
   height: 2px;
   background: repeating-linear-gradient(
     to right,
@@ -435,11 +443,12 @@
 
 .aboutTitle {
   text-align: center;
-  font-size: clamp(32px, 5vw, 45px);
+  font-size: 36px;
   font-weight: 600;
+  margin-top:-50px;
+  margin-bottom:20px;
   color: #397139;
   font-family: 'Cormorant Garamond', serif;
-  margin-bottom: clamp(40px, 6vw, 60px);
   line-height: 1.2;
 }
 
@@ -493,10 +502,13 @@
 }
 
 .partnersHeading {
-  font-size: clamp(28px, 4vw, 32px);
-  font-weight: 700;
-  color: #1b1b1b;
-  margin-bottom: clamp(30px, 5vw, 50px);
+  text-align: center;
+  font-size: 36px;
+  font-weight: 600;
+  margin-top:-50px;
+  margin-bottom:20px;
+  color: #397139;
+  font-family: 'Cormorant Garamond', serif;
   line-height: 1.2;
 }
 
@@ -509,10 +521,6 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 30px;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  width: 100%;
   box-sizing: border-box;
 }
 
@@ -527,8 +535,8 @@
 }
 
 .partnerLogo {
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   object-fit: contain;
   border-radius: 10px;
   margin-bottom: 15px;

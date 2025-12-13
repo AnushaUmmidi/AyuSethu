@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import styles from "../styles/Login.module.css";
 
 export default function LoginPage() {
-    const roles = ["User", "Collector", "Tester", "Manufacturer", "Admin"];
+    const roles = ["Collector", "Tester", "Manufacturer", "Admin"];
     const [activeRole, setActiveRole] = useState("User");
     const [showRegister, setShowRegister] = useState(false);
 
@@ -25,7 +25,7 @@ export default function LoginPage() {
                 navigate("/Admin");
                 break;
             default:
-                navigate("/User");
+                navigate("/Collector");
         }
     };
 

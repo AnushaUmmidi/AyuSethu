@@ -208,7 +208,7 @@ function App() {
 
         updateForm("gps", newGPS);
         setToast("✅ GPS location captured!");
-        
+
         setTimeout(() => setToast(""), 3000);
       },
       (error) => {
@@ -402,7 +402,7 @@ function App() {
   const handleStageClick = (stageId) => {
     setCurrentStage(stageId);
     setActiveTab(`stage${stageId}`);
-    setToast(`📋 Switched to Stage ${stageId}`);
+    setToast(`Stage ${stageId}`);
     setTimeout(() => setToast(""), 3000);
   };
 
@@ -426,7 +426,7 @@ function App() {
     // Generate a batch ID from admin (simulated)
     const adminBatchId = `BATCH-${new Date().getFullYear()}-${Math.floor(Math.random() * 9000 + 1000)}-ADM`;
     setBatchIdFromAdmin(adminBatchId);
-    
+
     // Show the dialog
     setShowCreateBatchDialog(true);
   };
@@ -434,7 +434,7 @@ function App() {
   const confirmCreateBatch = () => {
     // Close dialog
     setShowCreateBatchDialog(false);
-    
+
     // Update stage 5 with the batch ID from admin
     updateStage5Form("batchId", batchIdFromAdmin);
 
@@ -445,7 +445,7 @@ function App() {
     setStageStatus(newStatus);
     setCurrentStage(2);
     setActiveTab("stage2");
-    
+
     setToast(`✅ New batch created: ${batchIdFromAdmin}`);
     setTimeout(() => setToast(""), 4000);
   };
@@ -454,7 +454,7 @@ function App() {
     const newShowState = !showNotifications;
     setShowNotifications(newShowState);
     setShowProfile(false);
-    
+
     // Mark all as read when opening notifications
     if (newShowState) {
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
@@ -520,7 +520,7 @@ function App() {
             {getStatusText(status)}
           </div>
         </div>
-        {status === "current" && (
+        {/* {status === "current" && (
           <button
             className={styles["vhc-mark-done-btn"]}
             onClick={(e) => {
@@ -530,7 +530,7 @@ function App() {
           >
             Mark Complete
           </button>
-        )}
+        )} */}
       </div>
     );
   };
@@ -750,7 +750,7 @@ function App() {
                       hidden
                     />
                   </label>
-                  
+
                   {stage2Form.growthPhotos.length > 0 && (
                     <div className={styles["vhc-photo-grid"]}>
                       {stage2Form.growthPhotos.map((photo, index) => (
@@ -847,7 +847,7 @@ function App() {
                       hidden
                     />
                   </label>
-                  
+
                   {stage3Form.assessmentPhotos.length > 0 && (
                     <div className={styles["vhc-photo-grid"]}>
                       {stage3Form.assessmentPhotos.map((photo, index) => (
@@ -951,7 +951,7 @@ function App() {
                       hidden
                     />
                   </label>
-                  
+
                   {stage4Form.preHarvestPhotos.length > 0 && (
                     <div className={styles["vhc-photo-grid"]}>
                       {stage4Form.preHarvestPhotos.map((photo, index) => (
@@ -1195,20 +1195,6 @@ function App() {
   return (
     <>
       {/* Toast Notification */}
-      {toast && (
-        <div className={styles["vhc-toast"]}>
-          <span className={styles["vhc-toast-icon"]}>
-            {toast.includes("📍") ? "📍" :
-              toast.includes("✅") ? "✅" :
-                toast.includes("📋") ? "📋" :
-                  toast.includes("🎉") ? "🎉" :
-                    toast.includes("🌿") ? "🌿" : "📡"}
-          </span>
-          <div className={styles["vhc-toast-content"]}>
-            {toast.replace(/[📍✅📋🎉🌿📡]/g, '').trim()}
-          </div>
-        </div>
-      )}
 
       {/* Create Batch Dialog */}
       {showCreateBatchDialog && (
@@ -1216,14 +1202,14 @@ function App() {
           <div className={styles["vhc-dialog-container"]}>
             <div className={styles["vhc-dialog-header"]}>
               <h3 className={styles["vhc-dialog-title"]}>Batch Creation Confirmation</h3>
-              <button 
+              <button
                 className={styles["vhc-dialog-close"]}
                 onClick={() => setShowCreateBatchDialog(false)}
               >
                 <X size={20} />
               </button>
             </div>
-            
+
             <div className={styles["vhc-dialog-content"]}>
               <div className={styles["vhc-dialog-icon"]}>
                 📋
@@ -1234,13 +1220,13 @@ function App() {
               <p className={styles["vhc-dialog-description"]}>
                 Your batch has been registered with the following ID:
               </p>
-              
+
               <div className={styles["vhc-batch-id-display"]}>
                 <div className={styles["vhc-batch-id-label"]}>Batch ID</div>
                 <div className={styles["vhc-batch-id-value"]}>{batchIdFromAdmin}</div>
                 <div className={styles["vhc-batch-id-note"]}>(Received from Admin System)</div>
               </div>
-              
+
               <div className={styles["vhc-batch-details"]}>
                 <div className={styles["vhc-batch-detail-item"]}>
                   <span className={styles["vhc-detail-label"]}>Farmer Name:</span>
@@ -1261,13 +1247,13 @@ function App() {
                   </span>
                 </div>
               </div>
-              
+
               <div className={styles["vhc-dialog-note"]}>
                 <AlertCircle size={16} />
                 <span>This batch will now move to Stage 2. Track progress using the Batch ID.</span>
               </div>
             </div>
-            
+
             <div className={styles["vhc-dialog-footer"]}>
               <button
                 className={`${styles["vhc-dialog-btn"]} ${styles["vhc-dialog-btn-cancel"]}`}
@@ -1291,6 +1277,12 @@ function App() {
       {/* NAVBAR */}
       <nav className={styles["vhc-navbar"]}>
         <div className={styles["vhc-navbar-left"]}>
+          <img
+            src="https://res.cloudinary.com/domogztsv/image/upload/v1765220874/WhatsApp_Image_2025-12-09_at_12.36.40_AM_bp8jxt.jpg"
+            alt="AyuSethu Logo"
+            className={styles["vhc-nav-LogoImage"]}
+          />
+
           <div className={styles["vhc-nav-logo"]}>AyuSethu</div>
         </div>
 
@@ -1373,17 +1365,16 @@ function App() {
               className={styles["vhc-user-profile-btn"]}
               onClick={toggleProfileDropdown}
             >
-                <div className={styles["animated-avatar-profile"]}>
-                  <img src={"https://img.freepik.com/premium-photo/young-optimistic-woman-doctor-is-holding-clipboard-her-hands-while-standing-sunny-clinic-portrait-friendly-female-physician-with-stethoscope-perfect-medical-service-hospital-me_665183-12973.jpg"} alt="Profile" />
-                </div>
+              <div className={styles["animated-avatar-profile"]}>
+                <img src={"https://img.freepik.com/premium-photo/young-optimistic-woman-doctor-is-holding-clipboard-her-hands-while-standing-sunny-clinic-portrait-friendly-female-physician-with-stethoscope-perfect-medical-service-hospital-me_665183-12973.jpg"} alt="Profile" />
+              </div>
             </button>
 
             {showProfile && (
               <div className={styles["vhc-profile-dropdown"]}>
                 <div className={styles["vhc-profile-header"]}>
-                  <div className={styles["vhc-profile-avatar-lg"]}>CO</div>
                   <div className={styles["vhc-profile-details"]}>
-                    <h4>Collector #7421</h4>
+                    <h4>Collector7421</h4>
                     <p>Senior Field Officer</p>
                     <div className={styles["vhc-profile-badges"]}>
                       <span className={styles["vhc-profile-badge"]}>ID: COL-7421</span>
@@ -1394,28 +1385,24 @@ function App() {
 
                 <div className={styles["vhc-profile-stats"]}>
                   <div className={styles["vhc-stat-item"]}>
-                    <div className={styles["vhc-stat-icon"]}>📦</div>
                     <div>
                       <div className={styles["vhc-stat-label"]}>Batches Today</div>
                       <div className={styles["vhc-stat-value"]}>8</div>
                     </div>
                   </div>
                   <div className={styles["vhc-stat-item"]}>
-                    <div className={styles["vhc-stat-icon"]}>🎯</div>
                     <div>
                       <div className={styles["vhc-stat-label"]}>Success Rate</div>
                       <div className={styles["vhc-stat-value"]}>94%</div>
                     </div>
                   </div>
                   <div className={styles["vhc-stat-item"]}>
-                    <div className={styles["vhc-stat-icon"]}>👨‍🌾</div>
                     <div>
                       <div className={styles["vhc-stat-label"]}>Active Farmers</div>
                       <div className={styles["vhc-stat-value"]}>28</div>
                     </div>
                   </div>
                   <div className={styles["vhc-stat-item"]}>
-                    <div className={styles["vhc-stat-icon"]}>🏆</div>
                     <div>
                       <div className={styles["vhc-stat-label"]}>Certified Farms</div>
                       <div className={styles["vhc-stat-value"]}>15</div>
@@ -1427,7 +1414,7 @@ function App() {
                   className={styles["vhc-logout-btn"]}
                   onClick={handleLogout}
                 >
-                  <span>🚪</span> Log Out
+                 Log Out
                 </button>
               </div>
             )}
@@ -1527,8 +1514,8 @@ function App() {
                     <div className={`${styles["vhc-preview-item"]} ${styles["vhc-field-full"]}`}>
                       <div className={styles["vhc-preview-label"]}>Exact Address</div>
                       <div className={`${styles["vhc-preview-value"]} ${styles["vhc-preview-address"]}`}>
-                        {stage1Form.exactAddress ? 
-                          <span className={styles["vhc-address-truncated"]}>{stage1Form.exactAddress.substring(0, 50)}...</span> : 
+                        {stage1Form.exactAddress ?
+                          <span className={styles["vhc-address-truncated"]}>{stage1Form.exactAddress.substring(0, 50)}...</span> :
                           <span className={styles["vhc-preview-empty"]}>Not captured</span>
                         }
                       </div>
@@ -1562,8 +1549,8 @@ function App() {
                     <div className={styles["vhc-preview-item"]}>
                       <div className={styles["vhc-preview-label"]}>Farmer Updates</div>
                       <div className={styles["vhc-preview-value"]}>
-                        {stage2Form.farmerUpdates ? 
-                          <span className={styles["vhc-address-truncated"]}>{stage2Form.farmerUpdates.substring(0, 50)}...</span> : 
+                        {stage2Form.farmerUpdates ?
+                          <span className={styles["vhc-address-truncated"]}>{stage2Form.farmerUpdates.substring(0, 50)}...</span> :
                           <span className={styles["vhc-preview-empty"]}>No updates</span>
                         }
                       </div>
@@ -1599,8 +1586,8 @@ function App() {
                     <div className={styles["vhc-preview-item"]}>
                       <div className={styles["vhc-preview-label"]}>Pest Issues</div>
                       <div className={styles["vhc-preview-value"]}>
-                        {stage3Form.pestIssues ? 
-                          <span className={styles["vhc-address-truncated"]}>{stage3Form.pestIssues.substring(0, 50)}...</span> : 
+                        {stage3Form.pestIssues ?
+                          <span className={styles["vhc-address-truncated"]}>{stage3Form.pestIssues.substring(0, 50)}...</span> :
                           <span className={styles["vhc-preview-empty"]}>None reported</span>
                         }
                       </div>
@@ -1609,8 +1596,8 @@ function App() {
                     <div className={styles["vhc-preview-item"]}>
                       <div className={styles["vhc-preview-label"]}>Irrigation Issues</div>
                       <div className={styles["vhc-preview-value"]}>
-                        {stage3Form.irrigationIssues ? 
-                          <span className={styles["vhc-address-truncated"]}>{stage3Form.irrigationIssues.substring(0, 50)}...</span> : 
+                        {stage3Form.irrigationIssues ?
+                          <span className={styles["vhc-address-truncated"]}>{stage3Form.irrigationIssues.substring(0, 50)}...</span> :
                           <span className={styles["vhc-preview-empty"]}>None reported</span>
                         }
                       </div>
@@ -1793,4 +1780,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 

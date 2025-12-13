@@ -173,3 +173,45 @@ select {
   background-position: right 12px center;
   background-size: 10px 6px;
 }
+
+/* Custom audio wrapper for stage audio */
+.custom-audio-wrapper {
+  background: #f5fdf5;
+  border: 2px solid #8cc98c;
+  padding: 14px;
+  border-radius: 14px;
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Style the audio player ONLY here */
+.custom-audio-player {
+  width: 100%;
+  height: 44px;
+  background-color: #e9ffe9;
+  border-radius: 12px;
+  outline: none;
+}
+
+/* Title + description */
+.audio-details-text h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+.audio-details-text p {
+  margin: 3px 0;
+  font-size: 14px;
+  color: #4f6a4f;
+}
+
+.audio-duration-tag {
+  background: #a5dfa5;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+}
