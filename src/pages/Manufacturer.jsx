@@ -4,8 +4,13 @@ import '../styles/Manufacturer.css';
 const Manufacturer = () => {
   // State for different phases
   const [activePhase, setActivePhase] = useState('receive');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [batches, setBatches] = useState([]);
   const [selectedBatch, setSelectedBatch] = useState(null);
+  const [showBarcodeImage, setShowBarcodeImage] = useState(false);
+
+const [showProfileCard, setShowProfileCard] = useState(false);
+
   const [quoteForm, setQuoteForm] = useState({
     manufacturerID: 'MANUF-7890',
     batchID: '',
@@ -36,7 +41,7 @@ const Manufacturer = () => {
     packagingBatchNumber: '',
     packagingPhotos: []
   });
-  
+
   // NOTIFICATION STATES - ADDED
   const [notifications, setNotifications] = useState([
     {
@@ -161,7 +166,7 @@ const Manufacturer = () => {
 
   // NOTIFICATION FUNCTIONS - ADDED
   const markNotificationAsRead = (id) => {
-    setNotifications(prev => prev.map(notification => 
+    setNotifications(prev => prev.map(notification =>
       notification.id === id ? { ...notification, read: true } : notification
     ));
   };
@@ -179,14 +184,28 @@ const Manufacturer = () => {
   // Close notifications when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showNotifications && !event.target.closest('.notification-container')) {
+      if (showNotifications && !event.target.closest('.vhc-notification-container')) {
         setShowNotifications(false);
       }
     };
-    
+
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [showNotifications]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        showProfileMenu &&
+        !event.target.closest(".vhc-user-profile")
+      ) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [showProfileMenu]);
 
   // Handle batch selection
   const handleBatchSelect = (batch) => {
@@ -198,14 +217,14 @@ const Manufacturer = () => {
   const handleQuoteSubmit = (e) => {
     e.preventDefault();
     alert(`Quote submitted for ${quoteForm.batchID}\nAmount: ₹${quoteForm.quoteAmount}/kg\nValidity: ${quoteForm.validityTime}`);
-    
+
     // Update batch status
-    setBatches(prev => prev.map(batch => 
-      batch.id === quoteForm.batchID 
+    setBatches(prev => prev.map(batch =>
+      batch.id === quoteForm.batchID
         ? { ...batch, status: 'quote_submitted' }
         : batch
     ));
-    
+
     setActivePhase('manufacturing');
   };
 
@@ -238,7 +257,7 @@ const Manufacturer = () => {
 
   // Render phase content
   const renderPhaseContent = () => {
-    switch(activePhase) {
+    switch (activePhase) {
       case 'receive':
         return renderReceivePhase();
       case 'quote':
@@ -267,17 +286,17 @@ const Manufacturer = () => {
 
       <div className="dashboard-grid">
         {batches.map(batch => (
-          <div key={batch.id} className={`batch-card ${selectedBatch?.id === batch.id ? 'selected' : ''}`} 
-               onClick={() => handleBatchSelect(batch)}>
+          <div key={batch.id} className={`batch-card ${selectedBatch?.id === batch.id ? 'selected' : ''}`}
+            onClick={() => handleBatchSelect(batch)}>
             <div className="batch-header">
               <div className="batch-id">{batch.id}</div>
               <span className={`status-badge ${batch.status}`}>
                 {batch.status.replace('_', ' ').toUpperCase()}
               </span>
             </div>
-            
+
             <h4 className="batch-name">{batch.name}</h4>
-            
+
             <div className="batch-details">
               <div className="detail-row">
                 <span className="detail-label">Herb Type:</span>
@@ -323,13 +342,6 @@ const Manufacturer = () => {
                 setActivePhase('quote');
               }}>
                 <i className="fas fa-file-invoice-dollar"></i> Submit Quote
-              </button>
-              <button className="btn-primary" onClick={(e) => {
-                e.stopPropagation();
-                setSelectedBatch(batch);
-                setActivePhase('manufacturing');
-              }}>
-                <i className="fas fa-industry"></i> Start Manufacturing
               </button>
             </div>
           </div>
@@ -497,7 +509,7 @@ const Manufacturer = () => {
           <h4 className="section-title">
             <i className="fas fa-cogs"></i> Processing Steps
           </h4>
-          
+
           <div className="step-grid">
             <div className="step-card">
               <div className="step-icon washing">
@@ -618,7 +630,7 @@ const Manufacturer = () => {
           <h4 className="section-title">
             <i className="fas fa-file-upload"></i> Documentation
           </h4>
-          
+
           <div className="upload-grid">
             <div className="upload-card">
               <div className="upload-icon">
@@ -763,9 +775,12 @@ const Manufacturer = () => {
             </div>
             <div className="barcode-info">
               <p>Scan this barcode to verify product authenticity</p>
-              <button className="btn-secondary">
-                <i className="fas fa-print"></i> Print Barcode
-              </button>
+              <button
+  className="btn-secondary"
+  onClick={() => window.open("https://res.cloudinary.com/domogztsv/image/upload/v1765720436/WhatsApp_Image_2025-12-14_at_6.07.45_PM_ehfirz.jpg", "_blank")}
+>
+  <i className="fas fa-print"></i> Print Barcode
+</button>
             </div>
           </div>
         </div>
@@ -784,163 +799,163 @@ const Manufacturer = () => {
 
   return (
     <div className="manufacturer-portal">
-      {/* Header */}
-      <header className="portal-header">
-        <div className="header-container">
-          <div className="logo-section">
-            <div className="logo">
-              <i className="fas fa-industry"></i>
-              <div>
-                <h1>AyuSethu</h1>
-                <p>Manufacturer Portal</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="header-actions">
-            {/* UPDATED NOTIFICATION SECTION */}
-            <div className="notification-container">
-              <div 
-                className="notification-bell" 
-                onClick={() => setShowNotifications(!showNotifications)}
-              >
-                <i className="fas fa-bell"></i>
-                {notificationCount > 0 && (
-                  <span className="notification-count">{notificationCount}</span>
-                )}
-              </div>
-              
-              {/* Notification Dropdown */}
-              {showNotifications && (
-                <div className="notification-dropdown">
-                  <div className="notification-header">
-                    <h4>Notifications ({notificationCount})</h4>
-                    <button 
-                      className="mark-all-read" 
-                      onClick={markAllAsRead}
-                      disabled={notificationCount === 0}
-                    >
-                      Mark all read
-                    </button>
-                  </div>
-                  
-                  <div className="notification-tabs">
-                    <button className="notification-tab active">All</button>
-                    <button className="notification-tab">Bidding</button>
-                    <button className="notification-tab">Collector</button>
-                    <button className="notification-tab">Material</button>
-                  </div>
-                  
-                  <div className="notification-list">
-                    {notifications.map(notification => (
-                      <div 
-                        key={notification.id} 
-                        className={`notification-item ${notification.read ? '' : 'unread'}`}
-                        onClick={() => {
-                          markNotificationAsRead(notification.id);
-                          if (notification.batchId) {
-                            const batch = batches.find(b => b.id === notification.batchId);
-                            if (batch) {
-                              setSelectedBatch(batch);
-                              setActivePhase('receive');
-                              setShowNotifications(false);
-                            }
-                          }
-                        }}
-                      >
-                        <div className={`notification-icon ${notification.category}`}>
-                          {notification.category === 'bidding' && <i className="fas fa-gavel"></i>}
-                          {notification.category === 'collector' && <i className="fas fa-user-tie"></i>}
-                          {notification.category === 'material' && <i className="fas fa-box-open"></i>}
-                          {notification.category === 'system' && <i className="fas fa-cog"></i>}
-                        </div>
-                        <div className="notification-content">
-                          <div className="notification-title">{notification.title}</div>
-                          <div className="notification-message">{notification.message}</div>
-                          <div className="notification-time">{notification.time}</div>
-                        </div>
-                        {!notification.read && <div className="unread-dot"></div>}
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="notification-footer">
-                    <button className="view-all-btn">View All Notifications</button>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="user-profile">
-              <div className="avatar">M</div>
-              <div className="user-info">
-                <span className="username">Herbal Solutions Inc.</span>
-                <span className="user-id">MANUF-7890</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* Navigation */}
-<nav className="vhc-navbar">
-  {/* LEFT SIDE */}
-  <div className="vhc-navbar-left">
-    <img
-      src="https://res.cloudinary.com/domogztsv/image/upload/v1765220874/WhatsApp_Image_2025-12-09_at_12.36.40_AM_bp8jxt.jpg"
-      alt="AyuSethu Logo"
-      className="vhc-nav-LogoImage"
-    />
-    <div className="vhc-nav-logo">AyuSethu</div>
+      <nav className="vhc-navbar">
+        {/* LEFT SIDE */}
+        <div className="vhc-navbar-left">
+          <img
+            src="https://res.cloudinary.com/domogztsv/image/upload/v1765220874/WhatsApp_Image_2025-12-09_at_12.36.40_AM_bp8jxt.jpg"
+            alt="AyuSethu Logo"
+            className="vhc-nav-LogoImage"
+          />
+          <div className="vhc-nav-logo">AyuSethu</div>
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="vhc-navbar-right">
+          {/* PHASE NAVIGATION */}
+
+
+          {/* NOTIFICATIONS */}
+          <div className="vhc-notification-container">
+            <button
+              className="vhc-notification-btn"
+              onClick={() => setShowNotifications(!showNotifications)}
+            >
+              <i className="fas fa-bell"></i>
+              {notificationCount > 0 && (
+                <span className="vhc-notification-badge">
+                  {notificationCount}
+                </span>
+              )}
+            </button>
+
+            {showNotifications && (
+              <div className="vhc-notification-dropdown">
+                <div className="vhc-notification-header">
+                  <h4>Notifications ({notificationCount})</h4>
+                  <button
+                    className="vhc-mark-all-read"
+                    onClick={markAllAsRead}
+                    disabled={notificationCount === 0}
+                  >
+                    Mark all read
+                  </button>
+                </div>
+
+                <div className="vhc-notification-tabs">
+                  <button className="vhc-notification-tab active">All</button>
+                  <button className="vhc-notification-tab">Bidding</button>
+                  <button className="vhc-notification-tab">Collector</button>
+                  <button className="vhc-notification-tab">Material</button>
+                </div>
+
+                <div className="vhc-notification-list">
+                  {notifications.map(notification => (
+                    <div
+                      key={notification.id}
+                      className={`vhc-notification-item ${notification.read ? "" : "unread"}`}
+                      onClick={() => {
+                        markNotificationAsRead(notification.id);
+                        if (notification.batchId) {
+                          const batch = batches.find(b => b.id === notification.batchId);
+                          if (batch) {
+                            setSelectedBatch(batch);
+                            setActivePhase("receive");
+                            setShowNotifications(false);
+                          }
+                        }
+                      }}
+                    >
+                      <div className={`vhc-notification-icon ${notification.category}`}>
+                        {notification.category === "bidding" && <i className="fas fa-gavel"></i>}
+                        {notification.category === "collector" && <i className="fas fa-user-tie"></i>}
+                        {notification.category === "material" && <i className="fas fa-box-open"></i>}
+                        {notification.category === "system" && <i className="fas fa-cog"></i>}
+                      </div>
+
+                      <div className="vhc-notification-content">
+                        <div className="vhc-notification-title">
+                          {notification.title}
+                        </div>
+                        <div className="vhc-notification-message">
+                          {notification.message}
+                        </div>
+                        <div className="vhc-notification-time">
+                          {notification.time}
+                        </div>
+                      </div>
+
+                      {!notification.read && <div className="vhc-unread-dot"></div>}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="vhc-notification-footer">
+                  <button className="vhc-view-all-btn">
+                    View All Notifications
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* USER PROFILE */}
+<div className="vhc-user-profile">
+  <div
+    className="vhc-avatar"
+    onClick={() => setShowProfileCard(prev => !prev)}
+  >
+    M
   </div>
 
-  {/* RIGHT SIDE – MANUFACTURER PHASE NAVIGATION */}
-  <div className="vhc-navbar-right">
-    <div className="vhc-phase-nav">
-
-      <button
-        className={`vhc-phase-item ${
-          activePhase === "receive" ? "active" : ""
-        }`}
-        onClick={() => setActivePhase("receive")}
-      >
-        <i className="fas fa-inbox"></i>
-        <span>Receive Batches</span>
-      </button>
-
-      <button
-        className={`vhc-phase-item ${
-          activePhase === "quote" ? "active" : ""
-        }`}
-        onClick={() => setActivePhase("quote")}
-      >
-        <i className="fas fa-file-invoice-dollar"></i>
-        <span>Submit Quotes</span>
-      </button>
-
-      <button
-        className={`vhc-phase-item ${
-          activePhase === "manufacturing" ? "active" : ""
-        }`}
-        onClick={() => setActivePhase("manufacturing")}
-      >
-        <i className="fas fa-industry"></i>
-        <span>Manufacturing</span>
-      </button>
-
-      <button
-        className={`vhc-phase-item ${
-          activePhase === "packaging" ? "active" : ""
-        }`}
-        onClick={() => setActivePhase("packaging")}
-      >
-        <i className="fas fa-box"></i>
-        <span>Packaging</span>
-      </button>
-
+  {showProfileCard && (
+    <div className="vhc-user-card-dropdown">
+      <div className="vhc-user-name">Herbal Solutions Inc.</div>
+      <div className="vhc-user-id">Manufacturer ID: MANUF-7890</div>
+      <div className="vhc-user-email">Email: contact@herbal.com</div>
+      <div className="vhc-user-role">Role: Manufacturer</div>
     </div>
-  </div>
-</nav>
+  )}
+</div>
+
+        </div>
+      </nav>
+      <div className="vhc-phase-nav">
+        <button
+          className={`vhc-phase-item ${activePhase === "receive" ? "active" : ""}`}
+          onClick={() => setActivePhase("receive")}
+        >
+          <i className="fas fa-inbox"></i>
+          <span>Receive Batches</span>
+        </button>
+
+        <button
+          className={`vhc-phase-item ${activePhase === "quote" ? "active" : ""}`}
+          onClick={() => setActivePhase("quote")}
+        >
+          <i className="fas fa-file-invoice-dollar"></i>
+          <span>Submit Quotes</span>
+        </button>
+
+        <button
+          className={`vhc-phase-item ${activePhase === "manufacturing" ? "active" : ""}`}
+          onClick={() => setActivePhase("manufacturing")}
+        >
+          <i className="fas fa-industry"></i>
+          <span>Manufacturing</span>
+        </button>
+
+        <button
+          className={`vhc-phase-item ${activePhase === "packaging" ? "active" : ""}`}
+          onClick={() => setActivePhase("packaging")}
+        >
+          <i className="fas fa-box"></i>
+          <span>Packaging</span>
+        </button>
+      </div>
+
 
 
       {/* Main Content */}

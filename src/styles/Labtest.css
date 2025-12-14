@@ -50,6 +50,24 @@ width: 100vw;                           /* full width */
   align-items: center;
 }
 
+.Logo img{
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left:-3%;
+  flex-shrink: 0;
+}
+
+.Logo-text{
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000000;
+  display: flex;
+  text-align: center;
+  margin-left: 600px;
+}
+
 .logo-container {
   display: flex;
   align-items: center;

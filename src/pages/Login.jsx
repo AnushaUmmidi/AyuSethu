@@ -29,6 +29,10 @@ export default function LoginPage() {
         }
     };
 
+    const handleRegister = () => {
+        alert("Registered successfully!");
+        setShowRegister(false); // go back to login after register
+    };
     return (
         <div className={styles.container}>
             <div className={styles.loginWrapper}>
@@ -45,62 +49,104 @@ export default function LoginPage() {
                             >
                                 <h2 className={styles.title}>Register</h2>
 
-                                {/* Role Selector */}
-                                <label htmlFor="roleSelect" className={styles.label}>Select Role:</label>
+                                <label className={styles.label}>Select Role:</label>
                                 <select
-                                    id="roleSelect"
                                     value={activeRole}
                                     onChange={(e) => setActiveRole(e.target.value)}
-                                    className={styles.select}
+                                    className={styles.input}
                                 >
                                     {roles.map((role) => (
                                         <option key={role} value={role}>{role}</option>
                                     ))}
                                 </select>
 
-                                {/* COMMON FIELDS */}
                                 <input type="text" placeholder="Full Name" />
                                 <input type="email" placeholder="Email" />
                                 <input type="password" placeholder="Password" />
 
-                                {/* ROLE-BASED FIELDS */}
-                                {activeRole === "User" && <input type="text" placeholder="Phone Number" />}
                                 {activeRole === "Collector" && (
                                     <>
                                         <input type="text" placeholder="Phone Number" />
-                                        <input type="file" accept="image/*" />
                                         <input type="text" placeholder="Organization" />
+                                        <label
+                                            htmlFor="collectorPhoto"
+                                            className={styles.uploadLabel}
+                                        >
+                                            Upload Your Photo
+                                        </label>
+
+                                        <input
+                                            id="collectorPhoto"
+                                            type="file"
+                                            className={styles.hiddenInput}
+                                            accept="image/*,.pdf"
+                                        />
                                     </>
                                 )}
+
                                 {activeRole === "Tester" && (
                                     <>
                                         <input type="text" placeholder="Lab Name" />
-                                        <input type="text" placeholder="Lab License Number" />
-                                        <input type="text" placeholder="Location" />
+                                        <input type="text" placeholder="License Number" />
+                                        <input
+                                            id="TesterPhoto"
+                                            type="file"
+                                            className={styles.hiddenInput}
+                                            accept="image/*,.pdf"
+                                        />
+                                        <label
+                                            htmlFor="TesterPhoto"
+                                            className={styles.uploadLabel}
+                                        >
+                                            Upload Your Photo
+                                        </label>
 
-                                        <div className={styles.uploadBox}>
-                                            <label htmlFor="testerPhoto1" className={styles.uploadLabel}>
-                                                Upload Photo
-                                            </label>
-                                            <input id="testerPhoto1" type="file" accept="image/*" className={styles.hiddenInput} />
-                                        </div>
-
-                                        <div className={styles.uploadBox}>
-                                            <label htmlFor="testerLicense" className={styles.uploadLabel}>
-                                                Lab License
-                                            </label>
-                                            <input id="testerLicense" type="file" accept="image/*" className={styles.hiddenInput} />
-                                        </div>
                                     </>
                                 )}
+
                                 {activeRole === "Manufacturer" && (
                                     <>
                                         <input type="text" placeholder="Company Name" />
-                                        <input type="text" placeholder="Manufacturing License Number" />
-                                        <input type="text" placeholder="Factory Location" />
-                                        <input type="file" accept="image/*" />
+                                        <input type="text" placeholder="License Number" />
+                                                                                <input
+                                            id="manufacturerPhoto"
+                                            type="file"
+                                            className={styles.hiddenInput}
+                                            accept="image/*,.pdf"
+                                        />
+
+                                        <label
+                                            htmlFor="manufacturerPhoto"
+                                            className={styles.uploadLabel}
+                                        >
+                                            Upload Your Photo
+                                        </label>
+
+                                        <input
+                                            id="manufacturerLicense"
+                                            type="file"
+                                            className={styles.hiddenInput}
+                                            accept="image/*,.pdf"
+                                        />
+
+                                        <label
+                                            htmlFor="manufacturerLicense"
+                                            className={styles.uploadLabel}
+                                        >
+                                            Upload Manufacturing License
+                                        </label>
+
                                     </>
                                 )}
+
+                                <button className={styles.btn} onClick={handleRegister}>
+                                    Register
+                                </button>
+
+                                <p className={styles.switchText}>
+                                    Already have an account?{" "}
+                                    <span onClick={() => setShowRegister(false)}>Login</span>
+                                </p>
                             </motion.div>
                         ) : (
                             // LOGIN SECTION
@@ -136,6 +182,8 @@ export default function LoginPage() {
                                 <p className={styles.switchText}>
                                     New here? <span onClick={() => setShowRegister(true)}>Register Now</span>
                                 </p>
+
+
                             </motion.div>
                         )}
                     </AnimatePresence>

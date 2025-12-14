@@ -57,9 +57,12 @@ function Header({
             {/* <div className="logo-icon">
               <Leaf className="w-5 h-5" />
             </div> */}
-            <div>
-              <div className="text-base font-bold">AyuSethu</div>
-              <div className="text-xs opacity-80">Tester Portal</div>
+              <div className="Logo">
+                <img src="https://res.cloudinary.com/domogztsv/image/upload/v1765220874/WhatsApp_Image_2025-12-09_at_12.36.40_AM_bp8jxt.jpg"
+            alt="AyuSethu Logo"></img>
+              </div>
+              <div>
+              <div className="Logo-text">AyuSethu</div>
             </div>
           </div>
 

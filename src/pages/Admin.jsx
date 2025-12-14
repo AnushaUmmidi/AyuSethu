@@ -1653,7 +1653,7 @@ const [showNotifications, setShowNotifications] = useState(false);
       {/* Sidebar */}
       <div className="sidebar">
         <div className="logo">
-          <h1><i className="fas fa-leaf"></i> <span>VirtuHerbChain</span></h1>
+          <h1>AyuSethu</h1>
         </div>
         <ul className="nav-menu">
           {navItems.map(item => (
