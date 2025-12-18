@@ -7,14 +7,13 @@ const Admin = () => {
   const [activeSubTab, setActiveSubTab] = useState({
     users: 'create-user',
     batches: 'stage-tracking',
-    analytics: 'consumer-analytics'
+    analytics: 'batch-analytics'
   });
   const [modalOpen, setModalOpen] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
 
   // Chart references
   const batchChartRef = useRef(null);
-  const analyticsChartRef = useRef(null);
   const [chartsInitialized, setChartsInitialized] = useState(false);
 
   // Stable data - no fluctuations
@@ -104,7 +103,13 @@ const Admin = () => {
       harvestRules: 98,
       qualityThresholds: 99,
       aiValidation: 99.3
-    }
+    },
+    mapMarkers: [
+      { id: 1, lat: 28.7041, lng: 77.1025, type: 'farm', name: 'Rajesh Kumar Farm' },
+      { id: 2, lat: 19.0760, lng: 72.8777, type: 'manufacturer', name: 'HerbCare Solutions' },
+      { id: 3, lat: 12.9716, lng: 77.5946, type: 'tester', name: 'AyurTest Labs' },
+      { id: 4, lat: 22.5726, lng: 88.3639, type: 'farm', name: 'East Region Farm' }
+    ]
   });
 
   const [blockchainData] = useState({
@@ -119,17 +124,17 @@ const Admin = () => {
       contractAddress: '0x8a4...c3f2',
       lastTokenId: '#12478',
       lastTxHash: '0x5b2...9e1a'
+    },
+    smartLabeling: {
+      labelsGenerated: 892,
+      productIDs: 892,
+      ipfsAvailable: '100%',
+      nftSuccessRate: '100%',
+      lastLabelId: 'LBL-2023-08-124'
     }
   });
 
   const [analytics] = useState({
-    consumer: {
-      qrScans: 12458,
-      repeatScans: 4235,
-      regionScans: { north: 4521, south: 3245, east: 2154, west: 2538 },
-      authFailures: 25,
-      rating: 4.5
-    },
     batch: {
       completionRate: 92,
       avgDuration: '45 days',
@@ -234,15 +239,14 @@ const Admin = () => {
     { id: 'testers', icon: 'fa-flask', label: 'Tester Management' },
     { id: 'manufacturers', icon: 'fa-industry', label: 'Manufacturer Management' },
     { id: 'geofencing', icon: 'fa-map-marker-alt', label: 'Geo-Fencing' },
-    { id: 'labeling', icon: 'fa-qrcode', label: 'Smart Labeling' },
-    { id: 'blockchain', icon: 'fa-link', label: 'Blockchain' },
+    { id: 'blockchain', icon: 'fa-link', label: 'Blockchain & Labeling' },
     { id: 'analytics', icon: 'fa-chart-bar', label: 'Analytics' },
     { id: 'settings', icon: 'fa-cog', label: 'Settings' },
   ];
 
   const userSubTabs = ['create-user', 'assign-permissions', 'identity-mapping'];
   const batchSubTabs = ['batch-creation', 'stage-tracking', 'compliance'];
-  const analyticsSubTabs = ['consumer-analytics', 'batch-analytics', 'sustainability'];
+  const analyticsSubTabs = ['batch-analytics', 'sustainability'];
 
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
@@ -290,6 +294,10 @@ const Admin = () => {
     alert(`Manufacturer selected for quote ${quoteId}`);
   };
 
+  const updateGeoFencingRules = () => {
+    alert('Geo-fencing rules updated successfully!');
+  };
+
   // Status badge component
   const StatusBadge = ({ status }) => {
     const statusConfig = {
@@ -312,17 +320,7 @@ const Admin = () => {
     </div>
   );
 
-  // Quick actions
-  const quickActions = [
-    { id: 'assignCollector', icon: 'fa-user-plus', label: 'Assign Collector', modal: 'assignCollectorModal' },
-    { id: 'assignTester', icon: 'fa-flask', label: 'Assign Tester', modal: 'assignTesterModal' },
-    { id: 'reviewQuotes', icon: 'fa-file-signature', label: 'Review Manufacturer Quotes', modal: 'reviewQuotesModal' },
-    { id: 'generateLabel', icon: 'fa-qrcode', label: 'Generate LabelID', modal: 'generateLabelModal' },
-    { id: 'reschedule', icon: 'fa-calendar-alt', label: 'Reschedule Collector Visit', modal: 'rescheduleModal' },
-    { id: 'publishTester', icon: 'fa-bullhorn', label: 'Publish Tester Request', modal: 'publishTesterModal' },
-  ];
-
-  // KPI Cards
+  // KPI Cards for dashboard
   const kpiCards = [
     { id: 'farmers', title: 'Active Farmers', value: kpis.activeFarmers.toLocaleString(), icon: 'fa-user-tie', change: { type: 'positive', value: '12% from last month' } },
     { id: 'batches', title: 'Batches in Progress', value: kpis.batchesInProgress, icon: 'fa-spinner', change: { type: 'negative', value: '3% delayed' } },
@@ -352,16 +350,6 @@ const Admin = () => {
               {kpi.change.type === 'negative' && <i className="fas fa-arrow-down"></i>}
               {kpi.change.value}
             </div>
-          </div>
-        ))}
-      </div>
-
-      <h3 className="section-title"><i className="fas fa-bolt"></i> Quick Actions</h3>
-      <div className="quick-actions">
-        {quickActions.map(action => (
-          <div className="action-btn" key={action.id} onClick={() => openModal(action.modal)}>
-            <i className={`fas ${action.icon}`}></i>
-            <span>{action.label}</span>
           </div>
         ))}
       </div>
@@ -437,7 +425,7 @@ const Admin = () => {
                 </td>
                 <td>{batch.timeline}</td>
                 <td><StatusBadge status={batch.status} /></td>
-                <td><button className="btn btn-primary" style={{ padding: '5px 10px', fontSize: '0.9rem' }}>View</button></td>
+                <td><button className="btn btn-primary" style={{ padding: '5px 10px', fontSize: '0.9rem' }} onClick={() => openModal('batchDetailsModal')}>View Details</button></td>
               </tr>
             ))}
           </tbody>
@@ -622,7 +610,7 @@ const Admin = () => {
     );
   };
 
-  const renderBatchManagement = () => {
+const renderBatchManagement = () => {
     const currentSubTab = activeSubTab['batches'] || 'stage-tracking';
     
     return (
@@ -641,6 +629,114 @@ const Admin = () => {
           ))}
         </div>
         
+        {currentSubTab === 'batch-creation' && (
+          <div id="batch-creation" className="subtab-content active">
+            <div className="dashboard-grid">
+               
+              
+              <div className="card">
+                <div className="card-header">
+                  <div className="card-title">Draft Batches</div>
+                  <div className="card-icon">
+                    <i className="fas fa-file-alt"></i>
+                  </div>
+                </div>
+                <div className="card-value">3</div>
+                <div className="card-change negative">Awaiting submission</div>
+              </div>
+              
+              <div className="card">
+                <div className="card-header">
+                  <div className="card-title">Today's Batches</div>
+                  <div className="card-icon">
+                    <i className="fas fa-calendar-day"></i>
+                  </div>
+                </div>
+                <div className="card-value">12</div>
+                <div className="card-change positive"><i className="fas fa-arrow-up"></i> 2 more than yesterday</div>
+              </div>
+              
+              <div className="card">
+                <div className="card-header">
+                  <div className="card-title">This Week</div>
+                  <div className="card-icon">
+                    <i className="fas fa-calendar-week"></i>
+                  </div>
+                </div>
+                <div className="card-value">47</div>
+                <div className="card-change positive">On track for 50</div>
+              </div>
+            </div>
+            
+            <div style={{ background: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginTop: '30px' }}>
+              <h3 style={{ color: '#1b5e20', marginBottom: '20px' }}>Quick Batch Creation</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
+                <div>
+                  <div className="form-group">
+                    <label>Select Herb Type</label>
+                    <select defaultValue="">
+                      <option value="">Choose herb...</option>
+                      <option value="ashwagandha">Ashwagandha</option>
+                      <option value="tulsi">Tulsi</option>
+                      <option value="giloy">Giloy</option>
+                      <option value="turmeric">Turmeric</option>
+                      <option value="neem">Neem</option>
+                      <option value="amla">Amla</option>
+                      <option value="brahmi">Brahmi</option>
+                    </select>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Select Farmer</label>
+                    <select defaultValue="">
+                      <option value="">Assign farmer...</option>
+                      <option value="F-1245">Rajesh Kumar (North India)</option>
+                      <option value="F-1246">Suresh Patel (West India)</option>
+                      <option value="F-1247">Mohan Singh (East India)</option>
+                      <option value="F-1248">Amit Sharma (South India)</option>
+                    </select>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Estimated Quantity (kg)</label>
+                    <input type="number" placeholder="e.g., 100" min="10" max="1000" />
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="form-group">
+                    <label>Target Harvest Date</label>
+                    <input type="date" min={new Date().toISOString().split('T')[0]} />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Quality Grade</label>
+                    <select defaultValue="premium">
+                      <option value="premium">Premium (Organic Certified)</option>
+                      <option value="standard">Standard (Traditional)</option>
+                      <option value="basic">Basic (Commercial)</option>
+                    </select>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Special Requirements</label>
+                    <textarea rows="4" placeholder="Any special instructions or requirements..."></textarea>
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '15px', marginTop: '25px', justifyContent: 'flex-end' }}>
+                <button className="btn btn-secondary">
+                  <i className="fas fa-save"></i> Save as Draft
+                </button>
+                <button className="btn btn-primary" onClick={() => openModal('createBatchModal')}>
+                  <i className="fas fa-check-circle"></i> Create Batch
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {currentSubTab === 'stage-tracking' && (
           <div id="stage-tracking" className="subtab-content active">
             <h3 style={{ margin: '20px 0', color: '#1b5e20' }}>Batch Stage Status</h3>
@@ -657,6 +753,7 @@ const Admin = () => {
                     <th>Testing</th>
                     <th>Manufacturing</th>
                     <th>Completeness</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -676,6 +773,11 @@ const Admin = () => {
                           <ProgressBar percentage={batch.completeness} />
                         </div>
                       </td>
+                      <td>
+                        <button className="btn btn-primary" style={{ padding: '5px 10px', fontSize: '0.9rem' }} onClick={() => openModal('batchDetailsModal')}>
+                          Manage
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -691,6 +793,172 @@ const Admin = () => {
                     <div>{stage}</div>
                   </div>
                 ))}
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+                <div>
+                  <h4 style={{ color: '#1b5e20', marginBottom: '10px' }}>Batch Statistics</h4>
+                  <div style={{ display: 'flex', gap: '15px' }}>
+                    <div style={{ background: '#e8f5e9', padding: '10px', borderRadius: '6px', minWidth: '120px' }}>
+                      <div style={{ fontSize: '0.9rem', color: '#666' }}>In Progress</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2e7d32' }}>{batches.filter(b => b.status === 'inprogress').length}</div>
+                    </div>
+                    <div style={{ background: '#fff3e0', padding: '10px', borderRadius: '6px', minWidth: '120px' }}>
+                      <div style={{ fontSize: '0.9rem', color: '#666' }}>Delayed</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ff9800' }}>{batches.filter(b => b.delay > 0).length}</div>
+                    </div>
+                    <div style={{ background: '#e3f2fd', padding: '10px', borderRadius: '6px', minWidth: '120px' }}>
+                      <div style={{ fontSize: '0.9rem', color: '#666' }}>Completed</div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2196f3' }}>{batches.filter(b => b.status === 'completed').length}</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{ textAlign: 'right' }}>
+                  <button className="btn btn-primary" onClick={() => openModal('bulkUpdateModal')}>
+                    <i className="fas fa-sync-alt"></i> Bulk Update Stages
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {currentSubTab === 'compliance' && (
+          <div id="compliance" className="subtab-content">
+            <div className="dashboard-grid">
+              <div className="card">
+                <div className="card-header">
+                  <div className="card-title">Compliance Score</div>
+                  <div className="card-icon">
+                    <i className="fas fa-check-double"></i>
+                  </div>
+                </div>
+                <div className="card-value">98.2%</div>
+                <div className="card-change positive"><i className="fas fa-arrow-up"></i> 2.1% this month</div>
+              </div>
+              
+              <div className="card">
+                <div className="card-header">
+                  <div className="card-title">Quality Failures</div>
+                  <div className="card-icon">
+                    <i className="fas fa-exclamation-triangle"></i>
+                  </div>
+                </div>
+                <div className="card-value">4</div>
+                <div className="card-change negative"><i className="fas fa-arrow-up"></i> Requires review</div>
+              </div>
+              
+              <div className="card">
+                <div className="card-header">
+                  <div className="card-title">AI Validations</div>
+                  <div className="card-icon">
+                    <i className="fas fa-robot"></i>
+                  </div>
+                </div>
+                <div className="card-value">99.3%</div>
+                <div className="card-change positive">Within thresholds</div>
+              </div>
+              
+              <div className="card">
+                <div className="card-header">
+                  <div className="card-title">Documentation</div>
+                  <div className="card-icon">
+                    <i className="fas fa-file-contract"></i>
+                  </div>
+                </div>
+                <div className="card-value">100%</div>
+                <div className="card-change positive">All batches compliant</div>
+              </div>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '25px', marginTop: '30px' }}>
+              <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                <h3 style={{ color: '#1b5e20', marginBottom: '20px' }}>Compliance Monitoring Dashboard</h3>
+                
+                <div style={{ marginBottom: '25px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <span style={{ fontWeight: '600' }}>Harvest Season Compliance</span>
+                    <span style={{ color: 'green', fontWeight: '600' }}>98% Pass</span>
+                  </div>
+                  <ProgressBar percentage={98} />
+                  <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '5px' }}>
+                    2 violations detected in last 30 days
+                  </div>
+                </div>
+                
+                <div style={{ marginBottom: '25px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <span style={{ fontWeight: '600' }}>Quality Threshold Compliance</span>
+                    <span style={{ color: 'green', fontWeight: '600' }}>99% Pass</span>
+                  </div>
+                  <ProgressBar percentage={99} />
+                  <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '5px' }}>
+                    All batches meet minimum quality standards
+                  </div>
+                </div>
+                
+                <div style={{ marginBottom: '25px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <span style={{ fontWeight: '600' }}>Documentation Compliance</span>
+                    <span style={{ color: 'green', fontWeight: '600' }}>100% Complete</span>
+                  </div>
+                  <ProgressBar percentage={100} color="#2196f3" />
+                  <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '5px' }}>
+                    All required documents uploaded and verified
+                  </div>
+                </div>
+                
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <span style={{ fontWeight: '600' }}>AI Model Validation</span>
+                    <span style={{ color: 'green', fontWeight: '600' }}>99.3% Accurate</span>
+                  </div>
+                  <ProgressBar percentage={99.3} color="#9c27b0" />
+                  <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '5px' }}>
+                    AI predictions validated against lab results
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+                <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                  <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>Recent Compliance Issues</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    <div style={{ background: '#ffebee', padding: '15px', borderRadius: '8px' }}>
+                      <div style={{ fontWeight: 'bold', color: '#f44336' }}>Batch HB-2023-08-110</div>
+                      <div style={{ fontSize: '0.9rem' }}>Harvested outside allowed season window</div>
+                      <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>Status: Escalated to Quality Team</div>
+                    </div>
+                    
+                    <div style={{ background: '#fff3e0', padding: '15px', borderRadius: '8px' }}>
+                      <div style={{ fontWeight: 'bold', color: '#ff9800' }}>Collector C-103</div>
+                      <div style={{ fontSize: '0.9rem' }}>Geofence violation - 15km outside allowed zone</div>
+                      <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>Status: Warning issued</div>
+                    </div>
+                    
+                    <div style={{ background: '#e8f5e9', padding: '15px', borderRadius: '8px' }}>
+                      <div style={{ fontWeight: 'bold', color: '#2e7d32' }}>Batch HB-2023-08-119</div>
+                      <div style={{ fontSize: '0.9rem' }}>Quality thresholds validated successfully</div>
+                      <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>Status: Approved for manufacturing</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                  <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>Compliance Actions</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <button className="btn btn-primary" onClick={() => openModal('complianceReportModal')}>
+                      <i className="fas fa-file-pdf"></i> Generate Compliance Report
+                    </button>
+                    <button className="btn btn-secondary" onClick={() => openModal('auditScheduleModal')}>
+                      <i className="fas fa-calendar-check"></i> Schedule Audit
+                    </button>
+                    <button className="btn btn-secondary" onClick={() => openModal('updateComplianceModal')}>
+                      <i className="fas fa-edit"></i> Update Compliance Rules
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1013,160 +1281,112 @@ const Admin = () => {
         </div>
       </div>
       
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px', marginTop: '30px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '25px', marginTop: '30px' }}>
         <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}><i className="fas fa-map"></i> Compliance Dashboard</h3>
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-              <span>_checkHarvestRules()</span>
-              <span><i className="fas fa-check-circle" style={{ color: 'green' }}></i> {geoFencingData.compliance.harvestRules}% Pass</span>
-            </div>
-            <ProgressBar percentage={geoFencingData.compliance.harvestRules} />
-          </div>
-          
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-              <span>_checkQualityThresholds()</span>
-              <span><i className="fas fa-check-circle" style={{ color: 'green' }}></i> {geoFencingData.compliance.qualityThresholds}% Pass</span>
-            </div>
-            <ProgressBar percentage={geoFencingData.compliance.qualityThresholds} />
-          </div>
-          
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-              <span>AI Model Validation</span>
-              <span><i className="fas fa-check-circle" style={{ color: 'green' }}></i> {geoFencingData.compliance.aiValidation}% Pass</span>
-            </div>
-            <ProgressBar percentage={geoFencingData.compliance.aiValidation} />
-          </div>
-        </div>
-        
-        <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}><i className="fas fa-exclamation-triangle"></i> Recent Violations</h3>
-          {geoFencingData.violations.map(violation => (
-            <div key={violation.id} style={{ background: '#fff3cd', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
-              <div style={{ fontWeight: 'bold' }}>{violation.type}</div>
-              <div style={{ fontSize: '0.9rem' }}>{violation.details}</div>
-              <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>
-                {violation.batchId || violation.collectorId} • {violation.date}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </>
-  );
-
-  const renderSmartLabeling = () => (
-    <>
-      <h2 className="section-title"><i className="fas fa-qrcode"></i> Smart Label Generation</h2>
-      
-      <div className="dashboard-grid">
-        <div className="card">
-          <div className="card-header">
-            <div className="card-title">Labels Generated</div>
-            <div className="card-icon">
-              <i className="fas fa-tags"></i>
-            </div>
-          </div>
-          <div className="card-value">{blockchainData.polygon.nftsMinted}</div>
-          <div className="card-change">This month: 124</div>
-        </div>
-        
-        <div className="card">
-          <div className="card-header">
-            <div className="card-title">ProductIDs Created</div>
-              <div className="card-icon">
-              <i className="fas fa-barcode"></i>
-            </div>
-          </div>
-          <div className="card-value">{blockchainData.polygon.nftsMinted}</div>
-          <div className="card-change">1:1 with batches</div>
-        </div>
-        
-        <div className="card">
-          <div className="card-header">
-            <div className="card-title">IPFS Metadata</div>
-            <div className="card-icon">
-              <i className="fas fa-database"></i>
-            </div>
-          </div>
-          <div className="card-value">100% Available</div>
-          <div className="card-change positive">All pinned</div>
-        </div>
-        
-        <div className="card">
-          <div className="card-header">
-            <div className="card-title">NFT Mint Success</div>
-            <div className="card-icon">
-              <i className="fas fa-check-circle"></i>
-            </div>
-          </div>
-          <div className="card-value">100%</div>
-          <div className="card-change positive">No failures</div>
-        </div>
-      </div>
-      
-      <div style={{ background: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginTop: '30px' }}>
-        <h3 style={{ color: '#1b5e20', marginBottom: '20px' }}>Label Generation Workflow</h3>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '30px' }}>
-          {['ProductID', 'LabelID', 'MetadataCID', 'Mint NFT'].map((step, index) => (
-            <Fragment key={`step-${index}`}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ width: '60px', height: '60px', background: '#2e7d32', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px', fontWeight: 'bold' }}>
-                  {index + 1}
+          <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}><i className="fas fa-map"></i> Google Earth Engine API Map</h3>
+          <div style={{ 
+            background: 'linear-gradient(to bottom right, #e8f5e9, #c8e6c9)', 
+            height: '400px', 
+            borderRadius: '8px',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Simulated Map */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg width="100%" height="100%" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="100%" height="100%" fill="%23e8f5e9"/%3E%3Cpath d="M100,100 L200,150 L300,120 L400,180 L500,140 L600,200 L700,160" stroke="%232e7d32" stroke-width="2" fill="none"/%3E%3Ccircle cx="150" cy="100" r="8" fill="%232e7d32" opacity="0.8"/%3E%3Ccircle cx="300" cy="120" r="8" fill="%23ffb300" opacity="0.8"/%3E%3Ccircle cx="500" cy="140" r="8" fill="%232196f3" opacity="0.8"/%3E%3Ccircle cx="700" cy="160" r="8" fill="%23f44336" opacity="0.8"/%3E%3Ctext x="150" y="90" font-size="12" fill="%232e7d32"%3EFarm%3C/text%3E%3Ctext x="300" y="110" font-size="12" fill="%23ffb300"%3EManufacturer%3C/text%3E%3Ctext x="500" y="130" font-size="12" fill="%232196f3"%3ETester%3C/text%3E%3Ctext x="700" y="150" font-size="12" fill="%23f44336"%3EViolation%3C/text%3E%3C/svg%3E")',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}>
+              {/* Map Legend */}
+              <div style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'rgba(255,255,255,0.9)',
+                padding: '15px',
+                borderRadius: '8px',
+                fontSize: '0.9rem'
+              }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>Map Legend</div>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                  <div style={{ width: '12px', height: '12px', background: '#2e7d32', borderRadius: '50%', marginRight: '8px' }}></div>
+                  <span>Farm Locations</span>
                 </div>
-                <div>{step}</div>
-              </div>
-              {index < 3 && <div style={{ flex: 1, height: '3px', background: '#2e7d32' }}></div>}
-            </Fragment>
-          ))}
-        </div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-          <div>
-            <h4 style={{ color: '#1b5e20', marginBottom: '10px' }}>QR Code Contents</h4>
-            <ul style={{ paddingLeft: '20px' }}>
-              <li>BatchID / TokenId</li>
-              <li>URL to verification page</li>
-              <li>Shortened IPFS gateway link</li>
-              <li>Manufacturing date</li>
-              <li>Expiry date</li>
-              <li>Blockchain verification link</li>
-            </ul>
-          </div>
-          <div>
-            <h4 style={{ color: '#1b5e20', marginBottom: '10px' }}>Verification Status</h4>
-            <div style={{ background: '#e8f5e9', padding: '15px', borderRadius: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                <span>NFT Mint Success:</span>
-                <span><i className="fas fa-check-circle" style={{ color: 'green' }}></i> Confirmed</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                <span>Public Chain Confirmation:</span>
-                <span><i className="fab fa-polygon" style={{ color: 'green' }}></i> Polygon</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                <span>IPFS Metadata:</span>
-                <span><i className="fas fa-check-circle" style={{ color: 'green' }}></i> Available</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>QR Scans:</span>
-                <span>{analytics.consumer.qrScans.toLocaleString()}</span>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                  <div style={{ width: '12px', height: '12px', background: '#ffb300', borderRadius: '50%', marginRight: '8px' }}></div>
+                  <span>Manufacturers</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                  <div style={{ width: '12px', height: '12px', background: '#2196f3', borderRadius: '50%', marginRight: '8px' }}></div>
+                  <span>Testing Labs</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div style={{ width: '12px', height: '12px', background: '#f44336', borderRadius: '50%', marginRight: '8px' }}></div>
+                  <span>Compliance Violations</span>
+                </div>
               </div>
             </div>
-            <button className="btn btn-primary" onClick={() => openModal('generateLabelModal')} style={{ marginTop: '15px', width: '100%' }}>
-              <i className="fas fa-qrcode"></i> Generate New Label
+          </div>
+          <div style={{ marginTop: '15px', display: 'flex', justifyContent: 'flex-end' }}>
+            <button className="btn btn-primary" onClick={updateGeoFencingRules}>
+              <i className="fas fa-sync"></i> Sync Google Earth Engine Data
             </button>
           </div>
         </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+          <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>Compliance Dashboard</h3>
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                <span>_checkHarvestRules()</span>
+                <span><i className="fas fa-check-circle" style={{ color: 'green' }}></i> {geoFencingData.compliance.harvestRules}% Pass</span>
+              </div>
+              <ProgressBar percentage={geoFencingData.compliance.harvestRules} />
+            </div>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                <span>_checkQualityThresholds()</span>
+                <span><i className="fas fa-check-circle" style={{ color: 'green' }}></i> {geoFencingData.compliance.qualityThresholds}% Pass</span>
+              </div>
+              <ProgressBar percentage={geoFencingData.compliance.qualityThresholds} />
+            </div>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                <span>AI Model Validation</span>
+                <span><i className="fas fa-check-circle" style={{ color: 'green' }}></i> {geoFencingData.compliance.aiValidation}% Pass</span>
+              </div>
+              <ProgressBar percentage={geoFencingData.compliance.aiValidation} />
+            </div>
+          </div>
+          
+          <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}><i className="fas fa-exclamation-triangle"></i> Recent Violations</h3>
+            {geoFencingData.violations.map(violation => (
+              <div key={violation.id} style={{ background: '#fff3cd', padding: '15px', borderRadius: '8px', marginBottom: '10px' }}>
+                <div style={{ fontWeight: 'bold' }}>{violation.type}</div>
+                <div style={{ fontSize: '0.9rem' }}>{violation.details}</div>
+                <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>
+                  {violation.batchId || violation.collectorId} • {violation.date}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </>
   );
 
-  const renderBlockchain = () => (
+  const renderBlockchainLabeling = () => (
     <>
-      <h2 className="section-title"><i className="fas fa-link"></i> Blockchain Management Panel</h2>
+      <h2 className="section-title"><i className="fas fa-link"></i> Blockchain & Smart Labeling</h2>
       
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px', marginBottom: '30px' }}>
         <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
@@ -1208,7 +1428,7 @@ const Admin = () => {
         
         <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
           <h3 style={{ color: '#1b5e20', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <i className="fab fa-polygon"></i> Polygon Public Chain
+            <i className="fab fa-polygon"></i> Polygon & Smart Labeling
           </h3>
           
           <div style={{ marginBottom: '20px' }}>
@@ -1217,35 +1437,49 @@ const Admin = () => {
               <span style={{ fontFamily: 'monospace' }}>{blockchainData.polygon.nftsMinted}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span>Last TokenID:</span>
-              <span style={{ fontFamily: 'monospace' }}>{blockchainData.polygon.lastTokenId}</span>
+              <span>Labels Generated:</span>
+              <span style={{ fontFamily: 'monospace' }}>{blockchainData.smartLabeling.labelsGenerated}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span>Contract Address:</span>
-              <span style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>{blockchainData.polygon.contractAddress}</span>
+              <span>Last Label ID:</span>
+              <span style={{ fontFamily: 'monospace' }}>{blockchainData.smartLabeling.lastLabelId}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span>Last Transaction Hash:</span>
-              <span style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>{blockchainData.polygon.lastTxHash}</span>
+              <span>NFT Mint Success:</span>
+              <span style={{ fontFamily: 'monospace', color: 'green' }}>{blockchainData.smartLabeling.nftSuccessRate}</span>
             </div>
           </div>
           
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button className="btn btn-primary" onClick={mintNFT}>
               <i className="fas fa-coins"></i> mintHerbNFT()
             </button>
-            <button className="btn btn-secondary">
-              <i className="fas fa-sync"></i> Re-sync Metadata
+            <button className="btn btn-primary" onClick={() => openModal('generateLabelModal')}>
+              <i className="fas fa-qrcode"></i> Generate Smart Label
             </button>
             <button className="btn btn-secondary">
-              <i className="fas fa-search"></i> Verify NFT
+              <i className="fas fa-sync"></i> Sync IPFS Metadata
             </button>
           </div>
         </div>
       </div>
       
       <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>Recent Blockchain Transactions</h3>
+        <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>Smart Label Workflow</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '30px' }}>
+          {['Fabric Transaction', 'IPFS Metadata', 'Polygon NFT Mint', 'QR Code Generation'].map((step, index) => (
+            <Fragment key={`step-${index}`}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ width: '60px', height: '60px', background: '#2e7d32', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px', fontWeight: 'bold' }}>
+                  {index + 1}
+                </div>
+                <div style={{ fontSize: '0.9rem' }}>{step}</div>
+              </div>
+              {index < 3 && <div style={{ flex: 1, height: '3px', background: '#2e7d32' }}></div>}
+            </Fragment>
+          ))}
+        </div>
+        
         <div className="table-container">
           <table>
             <thead>
@@ -1254,6 +1488,7 @@ const Admin = () => {
                 <th>Transaction ID</th>
                 <th>Type</th>
                 <th>Batch ID</th>
+                <th>Label ID</th>
                 <th>Chain</th>
                 <th>Status</th>
               </tr>
@@ -1264,7 +1499,8 @@ const Admin = () => {
                 <td style={{ fontFamily: 'monospace' }}>Tx-2023-08-124</td>
                 <td>Stage Update</td>
                 <td>HB-2023-08-124</td>
-                <td><StatusBadge status="inprogress" /></td>
+                <td>-</td>
+                <td><span className="status status-inprogress">Fabric</span></td>
                 <td><StatusBadge status="completed" /></td>
               </tr>
               <tr>
@@ -1272,14 +1508,16 @@ const Admin = () => {
                 <td style={{ fontFamily: 'monospace' }}>0x5b2...9e1a</td>
                 <td>NFT Mint</td>
                 <td>HB-2023-08-115</td>
+                <td>LBL-2023-08-115</td>
                 <td><span className="status status-inprogress">Polygon</span></td>
                 <td><StatusBadge status="completed" /></td>
               </tr>
               <tr>
                 <td>2023-08-14 16:12</td>
                 <td style={{ fontFamily: 'monospace' }}>Tx-2023-08-123</td>
-                <td>Manufacturing</td>
+                <td>Smart Label</td>
                 <td>HB-2023-08-119</td>
+                <td>LBL-2023-08-119</td>
                 <td><StatusBadge status="inprogress" /></td>
                 <td><StatusBadge status="completed" /></td>
               </tr>
@@ -1291,7 +1529,7 @@ const Admin = () => {
   );
 
   const renderAnalytics = () => {
-    const currentSubTab = activeSubTab['analytics'] || 'consumer-analytics';
+    const currentSubTab = activeSubTab['analytics'] || 'batch-analytics';
     
     return (
       <>
@@ -1309,83 +1547,83 @@ const Admin = () => {
           ))}
         </div>
         
-        {currentSubTab === 'consumer-analytics' && (
-          <div id="consumer-analytics" className="subtab-content active">
+        {currentSubTab === 'batch-analytics' && (
+          <div id="batch-analytics" className="subtab-content active">
             <div className="dashboard-grid">
               <div className="card">
                 <div className="card-header">
-                  <div className="card-title">QR Scans</div>
+                  <div className="card-title">Batch Completion Rate</div>
                   <div className="card-icon">
-                    <i className="fas fa-qrcode"></i>
+                    <i className="fas fa-chart-line"></i>
                   </div>
                 </div>
-                <div className="card-value">{analytics.consumer.qrScans.toLocaleString()}</div>
-                <div className="card-change positive"><i className="fas fa-arrow-up"></i> 24% this month</div>
+                <div className="card-value">{analytics.batch.completionRate}%</div>
+                <div className="card-change positive"><i className="fas fa-arrow-up"></i> 5% this quarter</div>
               </div>
               
               <div className="card">
                 <div className="card-header">
-                  <div className="card-title">Repeat Scans</div>
+                  <div className="card-title">Average Duration</div>
                   <div className="card-icon">
-                    <i className="fas fa-redo"></i>
+                    <i className="fas fa-clock"></i>
                   </div>
                 </div>
-                <div className="card-value">{analytics.consumer.repeatScans.toLocaleString()}</div>
-                <div className="card-change positive">High engagement</div>
+                <div className="card-value">{analytics.batch.avgDuration}</div>
+                <div className="card-change positive"><i className="fas fa-arrow-down"></i> 3 days faster</div>
               </div>
               
               <div className="card">
                 <div className="card-header">
-                  <div className="card-title">Auth Failures</div>
+                  <div className="card-title">Success Rate</div>
+                  <div className="card-icon">
+                    <i className="fas fa-check-double"></i>
+                  </div>
+                </div>
+                <div className="card-value">{analytics.batch.successRate}%</div>
+                <div className="card-change positive">Quality maintained</div>
+              </div>
+              
+              <div className="card">
+                <div className="card-header">
+                  <div className="card-title">Delay in Stage 3</div>
                   <div className="card-icon">
                     <i className="fas fa-exclamation-triangle"></i>
                   </div>
                 </div>
-                <div className="card-value">{analytics.consumer.authFailures}</div>
-                <div className="card-change positive">Very low (0.2%)</div>
-              </div>
-              
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title">Avg. Consumer Rating</div>
-                  <div className="card-icon">
-                    <i className="fas fa-star"></i>
-                  </div>
-                </div>
-                <div className="card-value">{analytics.consumer.rating}/5.0</div>
-                <div className="card-change positive">Excellent</div>
+                <div className="card-value">{analytics.batch.delayPatterns.stage3}</div>
+                <div className="card-change negative">Requires attention</div>
               </div>
             </div>
             
             <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginTop: '30px' }}>
-              <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>Region-wise QR Scans</h3>
+              <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>Delay Analysis by Stage</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div>
-                  {Object.entries(analytics.consumer.regionScans).map(([region, scans]) => (
-                    <div key={region} style={{ marginBottom: '15px' }}>
+                  {Object.entries(analytics.batch.delayPatterns).map(([stage, count]) => (
+                    <div key={stage} style={{ marginBottom: '15px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                        <span>{region.charAt(0).toUpperCase() + region.slice(1)} India:</span>
-                        <span>{scans.toLocaleString()} scans</span>
+                        <span>Stage {stage.replace('stage', '')}:</span>
+                        <span>{count} delays</span>
                       </div>
-                      <ProgressBar percentage={(scans / analytics.consumer.qrScans) * 100} />
+                      <ProgressBar percentage={(count / Math.max(...Object.values(analytics.batch.delayPatterns))) * 100} color="#ffb300" />
                     </div>
                   ))}
                 </div>
                 <div>
-                  <h4 style={{ color: '#1b5e20', marginBottom: '15px' }}>Consumer Feedback</h4>
+                  <h4 style={{ color: '#1b5e20', marginBottom: '15px' }}>Performance Insights</h4>
                   <div style={{ background: '#e8f5e9', padding: '15px', borderRadius: '8px' }}>
                     <div style={{ marginBottom: '10px' }}>
-                      <div style={{ fontWeight: 'bold' }}>Positive Feedback</div>
-                      <div>"Authentic herbs with complete transparency"</div>
+                      <div style={{ fontWeight: 'bold' }}>Top Performing Stage</div>
+                      <div>Stage 6 (Manufacturing): 96% success rate</div>
                     </div>
                     <div style={{ marginBottom: '10px' }}>
                       <div style={{ fontWeight: 'bold' }}>Areas for Improvement</div>
-                      <div>"Faster QR code loading on mobile"</div>
+                      <div>Stage 3 delays: Collector scheduling optimization needed</div>
                     </div>
                     <div>
-                      <div style={{ fontWeight: 'bold' }}>Satisfaction Score</div>
-                      <ProgressBar percentage={90} color="#ffb300" />
-                      <div style={{ textAlign: 'right', fontSize: '0.9rem', marginTop: '5px' }}>90% Positive</div>
+                      <div style={{ fontWeight: 'bold' }}>Overall Efficiency</div>
+                      <ProgressBar percentage={analytics.batch.completionRate} color="#2e7d32" />
+                      <div style={{ textAlign: 'right', fontSize: '0.9rem', marginTop: '5px' }}>{analytics.batch.completionRate}% Completion Rate</div>
                     </div>
                   </div>
                 </div>
@@ -1538,47 +1776,6 @@ const Admin = () => {
           <button className="btn btn-primary" style={{ marginTop: '15px' }}>Save Automation Settings</button>
         </div>
       </div>
-      
-      <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginTop: '30px' }}>
-        <h3 style={{ color: '#1b5e20', marginBottom: '20px' }}>System Configuration</h3>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-          <div>
-            <h4 style={{ color: '#1b5e20', marginBottom: '15px' }}>Fabric Identity Enrollment</h4>
-            <div className="form-group">
-              <label>CA Server URL</label>
-              <input type="text" value={settings.system.fabricCA} readOnly />
-            </div>
-            <div className="form-group">
-              <label>Admin Certificate Path</label>
-              <input type="text" value="/etc/fabric/certs/admin-cert.pem" readOnly />
-            </div>
-          </div>
-          
-          <div>
-            <h4 style={{ color: '#1b5e20', marginBottom: '15px' }}>Public Chain Configuration</h4>
-            <div className="form-group">
-              <label>NFT Contract Address</label>
-              <input type="text" value={settings.system.nftContract} readOnly />
-            </div>
-            <div className="form-group">
-              <label>Polygon RPC Endpoint</label>
-              <input type="text" value={settings.system.polygonRPC} readOnly />
-            </div>
-          </div>
-        </div>
-        
-        <div style={{ marginTop: '20px' }}>
-          <h4 style={{ color: '#1b5e20', marginBottom: '15px' }}>IPFS Health Monitoring</h4>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#e8f5e9', padding: '15px', borderRadius: '8px' }}>
-            <div>
-              <div style={{ fontWeight: 'bold' }}>Metadata Availability</div>
-              <div>All CIDs pinned and available via {settings.system.ipfsGateway}</div>
-            </div>
-            <div><i className="fas fa-check-circle" style={{ color: 'green', fontSize: '1.5rem' }}></i></div>
-          </div>
-        </div>
-      </div>
     </>
   );
 
@@ -1598,10 +1795,8 @@ const Admin = () => {
         return renderManufacturerManagement();
       case 'geofencing':
         return renderGeofencing();
-      case 'labeling':
-        return renderSmartLabeling();
       case 'blockchain':
-        return renderBlockchain();
+        return renderBlockchainLabeling();
       case 'analytics':
         return renderAnalytics();
       case 'settings':
@@ -1750,7 +1945,7 @@ const Admin = () => {
         <div className="modal" style={{ display: 'flex' }}>
           <div className="modal-content">
             <div className="modal-header">
-              <h2 style={{ color: '#1b5e20' }}>Generate LabelID</h2>
+              <h2 style={{ color: '#1b5e20' }}>Generate Smart Label</h2>
               <span className="close-modal" onClick={closeModal}>&times;</span>
             </div>
             <div className="form-group">
@@ -1776,12 +1971,12 @@ const Admin = () => {
                 <li>ProductID: PRD-{new Date().toISOString().slice(0, 10).replace(/-/g, '')}-01</li>
                 <li>LabelID: LBL-{Math.random().toString(36).substring(2, 15)} (hashed QR)</li>
                 <li>MetadataCID: Qm{Math.random().toString(36).substring(2, 15)} (IPFS)</li>
-                <li>Public Chain Transaction on Polygon</li>
+                <li>NFT Token ID: #{parseInt(blockchainData.polygon.lastTokenId.slice(1)) + 1}</li>
                 <li>QR Code for consumer verification</li>
               </ul>
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button className="btn btn-primary" onClick={generateLabel}>Generate Label</button>
+              <button className="btn btn-primary" onClick={generateLabel}>Generate Label & Mint NFT</button>
               <button className="btn btn-secondary" onClick={closeModal}>Cancel</button>
             </div>
           </div>
