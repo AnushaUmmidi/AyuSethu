@@ -33,8 +33,8 @@ width: 100vw;                           /* full width */
   left:50%;
   transform: translateX(-50%);
   z-index:5000;
-  background: rgba(40, 40, 40, 0.28);
-  backdrop-filter: blur(14px);
+  background:#639601;
+;
   border: none;
   display: flex;
   justify-content: space-between;
@@ -62,7 +62,7 @@ width: 100vw;                           /* full width */
 .Logo-text{
   font-size: 1.5rem;
   font-weight: 700;
-  color: #000000;
+  color: #ffffff;
   display: flex;
   text-align: center;
   margin-left: 600px;
@@ -185,16 +185,17 @@ width: 100vw;                           /* full width */
 /* Dropdown Panels */
 .dropdown-panel {
   position: absolute;
-  right: -70px;
+  right: 0px;
   top: 55px;
-  width: 360px;
-  height:340px;
+  width: 500px;
   background: white;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(99, 150, 1, 0.1);
+  border: 1px solid rgba(47, 125, 50, 0.15);
   z-index: 3000;
-  overflow: hidden;
+
+  max-height: 420px;        /* instead of height */
+  overflow-y: auto;         /* scroll if needed */
 }
 
 /* Notifications Dropdown */
@@ -235,19 +236,20 @@ width: 100vw;                           /* full width */
 }
 
 .action-btn {
-  padding: 6px 16px;
+  padding: 6px 6px;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   border: none;
   transition: all 0.2s ease;
-  height: 30px;
 }
 
 .action-btn.reject {
   border: 1px solid #e0e0e0;
   color: #666;
+  height: 30px;
+  width:10px;
 }
 
 .action-btn.reject:hover {
@@ -257,10 +259,32 @@ width: 100vw;                           /* full width */
 .action-btn.accept {
   background: #639601;
   color: white;
+  height: 30px;
+  width:10px;
+
 }
 
 .action-btn.accept:hover {
   background: #4e7c00;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15); /* dim effect */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 2500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+
+/* Active overlay */
+.overlay.active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .animated-avatar-profile {
@@ -290,7 +314,6 @@ width: 100vw;                           /* full width */
 .animated-avatar-profile img{
   width: 100%;
   height: 100%;
-
 }
 
 .profile-avatar-lg img {
@@ -299,9 +322,6 @@ width: 100vw;                           /* full width */
   object-fit: cover;
 }
 
-
-/* Remove any old animation styles if they're causing issues */
-/* Profile Dropdown */
 .profile-header {
   padding: 24px;
   background: linear-gradient(135deg, #639601, #4e7c00);
@@ -539,6 +559,7 @@ width: 100vw;                           /* full width */
 }
 
 .form-header h2 {
+  margin-left: 24%;
   font-size: 28px;
   font-weight: 700;
   color: #1a1a1a;
@@ -567,7 +588,6 @@ width: 100vw;                           /* full width */
 
 .info-card:hover {
   border-color: #639601;
-  transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(99, 150, 1, 0.1);
 }
 
@@ -595,12 +615,12 @@ width: 100vw;                           /* full width */
 }
 
 .section-header {
-  background: #639601;
+   background: linear-gradient(135deg, #f0f9ec 0%, #e8f1e0 100%);;
   color: white;
   margin:0px;
   padding:17px;
-  border:none;
-  /* border-radius: 14px 14px 0 0 ; */
+  border: 1px solid #7fad29;
+  border-radius: 20px  ;
   cursor: pointer;
   display:block;
   justify-content: space-between;
@@ -612,7 +632,7 @@ width: 100vw;                           /* full width */
 }
 
 .section-header:hover {
-  background: #558000;
+  background: #95b162;
 }
 
 .section-header::after {
@@ -830,7 +850,7 @@ width: 100vw;                           /* full width */
 .btn-save {
     flex: 1;
   padding: 18px 28px;
-  border-radius: 14px;
+  border-radius: 30px;
   font-size: 16px;
   font-weight: 600;
   display: flex;
@@ -840,19 +860,18 @@ width: 100vw;                           /* full width */
   cursor: pointer;
   border: none;
   transition: all 0.4s ease;
-
-  background: #eb2525;
+  background: #639601;
   color: white;
 }
 
 .btn-save:hover {
-  background: #960b0b;
+  background: #a5e180df;
 }
 
 .btn-approve {
     flex: 1;
   padding: 18px 28px;
-  border-radius: 14px;
+  border-radius: 30px;
   font-size: 16px;
   font-weight: 600;
   display: flex;
@@ -874,7 +893,7 @@ width: 100vw;                           /* full width */
 .btn-reject {
     flex: 1;
   padding: 18px 28px;
-  border-radius: 14px;
+  border-radius: 30px;
   font-size: 16px;
   font-weight: 600;
   display: flex;

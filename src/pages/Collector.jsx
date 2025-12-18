@@ -1,27 +1,39 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "../styles/Collector.module.css";
-import { Bell, X, CheckCircle, AlertCircle, MapPin, Camera } from 'lucide-react';
+import { 
+  Bell, X, CheckCircle, AlertCircle, MapPin, Camera, 
+  User, LogOut, Package, Clock, ChevronDown, ChevronUp,
+  FileText, Upload, Eye, Download, Calendar, MapPin as MapPinIcon,
+  Weight, UserCheck, Filter, MoreVertical, Copy, FileCheck,
+  Database, BarChart3, Leaf, Hash, Type, Globe, CalendarDays
+} from 'lucide-react';
+
+// THEME COLORS
+const THEME = "#639601";
+const THEME_LIGHT = "#f0f9ec";
+const THEME_VERY_LIGHT = "#f9fcf7";
+const THEME_DARK = "#4e7c00";
 
 const STAGE_DATA = [
   {
     id: 1,
-    title: "Stage 1",
+    title: "Stage 1: Plantation",
   },
   {
     id: 2,
-    title: "Stage 2",
+    title: "Stage 2: Growth",
   },
   {
     id: 3,
-    title: "Stage 3",
+    title: "Stage 3: Health",
   },
   {
     id: 4,
-    title: "Stage 4",
+    title: "Stage 4: Pre-Harvest",
   },
   {
     id: 5,
-    title: "Stage 5",
+    title: "Stage 5: Final",
   }
 ];
 
@@ -499,33 +511,34 @@ function App() {
         key={stage.id}
         className={`${styles["vhc-timeline-item"]} ${status === "current" ? styles["vhc-timeline-item-current"] : ""}`}
         onClick={() => handleStageClick(stage.id)}
+        style={{
+          borderLeft: status === "current" ? `3px solid ${THEME}` : "3px solid #e5e7eb",
+          backgroundColor: status === "current" ? THEME_VERY_LIGHT : "transparent"
+        }}
       >
-        <div className={`${styles["vhc-timeline-dot"]} ${styles[status]}`}>
+        <div 
+          className={`${styles["vhc-timeline-dot"]} ${styles[status]}`}
+          style={{
+            backgroundColor: status === "current" ? THEME : 
+                           status === "done" ? "#10b981" : "#9ca3af",
+            color: status === "current" ? "white" : "white"
+          }}
+        >
           {status === "done" ? "✓" : stage.id}
         </div>
         <div className={styles["vhc-timeline-content"]}>
           <div className={styles["vhc-timeline-stage"]}>
-            <span className={styles["vhc-timeline-stage-icon"]}></span>
             {stage.title}
           </div>
-          <div className={styles["vhc-timeline-desc"]}>
-            {stage.description}
-          </div>
-          <div className={`${styles["vhc-timeline-status"]} ${styles[status]}`}>
+          <div className={`${styles["vhc-timeline-status"]} ${styles[status]}`}
+               style={{
+                 color: status === "current" ? THEME : 
+                        status === "done" ? "#10b981" : "#6b7280",
+                 backgroundColor: status === "current" ? THEME_LIGHT : "#f3f4f6"
+               }}>
             {getStatusText(status)}
           </div>
         </div>
-        {/* {status === "current" && (
-          <button
-            className={styles["vhc-mark-done-btn"]}
-            onClick={(e) => {
-              e.stopPropagation();
-              markStageDone(stage.id);
-            }}
-          >
-            Mark Complete
-          </button>
-        )} */}
       </div>
     );
   };
@@ -535,12 +548,17 @@ function App() {
       case 1:
         return (
           <div className={styles["vhc-stage-content"]}>
-            <h3 className={styles["vhc-stage-title"]}>Stage 1: Plantation Documentation</h3>
-            <p className={styles["vhc-stage-subtitle"]}>Collect initial farm data and documentation</p>
+            <h3 className={styles["vhc-stage-title"]} style={{ color: THEME }}>
+              Stage 1: Plantation Documentation
+            </h3>
+            <p className={styles["vhc-stage-subtitle"]}>
+              Collect initial farm data and documentation
+            </p>
 
             <div className={styles["vhc-form-grid"]}>
               <div className={styles["vhc-field"]}>
                 <label className={styles["vhc-label"]}>
+                  <User size={16} style={{ marginRight: "8px", color: THEME }} />
                   Farmer Name <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <input
@@ -554,6 +572,7 @@ function App() {
 
               <div className={styles["vhc-field"]}>
                 <label className={styles["vhc-label"]}>
+                  <Hash size={16} style={{ marginRight: "8px", color: THEME }} />
                   Farmer ID (FID) <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <input
@@ -567,6 +586,7 @@ function App() {
 
               <div className={styles["vhc-field"]}>
                 <label className={styles["vhc-label"]}>
+                  <CalendarDays size={16} style={{ marginRight: "8px", color: THEME }} />
                   Visit Date <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <input
@@ -579,12 +599,14 @@ function App() {
 
               <div className={styles["vhc-field"]}>
                 <label className={styles["vhc-label"]}>
+                  <Leaf size={16} style={{ marginRight: "8px", color: THEME }} />
                   Herb Species <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <select
                   className={styles["vhc-select"]}
                   value={stage1Form.species}
                   onChange={(e) => updateStage1Form("species", e.target.value)}
+                  style={{ borderColor: THEME_LIGHT }}
                 >
                   <option value="">Select species</option>
                   <option value="Tulsi (Holy Basil)">Tulsi (Holy Basil)</option>
@@ -597,6 +619,7 @@ function App() {
 
               <div className={styles["vhc-field"]}>
                 <label className={styles["vhc-label"]}>
+                  <Weight size={16} style={{ marginRight: "8px", color: THEME }} />
                   Estimated Quantity (kg) <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <input
@@ -611,11 +634,15 @@ function App() {
               </div>
 
               <div className={styles["vhc-field"]}>
-                <label className={styles["vhc-label"]}>Irrigation Type</label>
+                <label className={styles["vhc-label"]}>
+                  <BarChart3 size={16} style={{ marginRight: "8px", color: THEME }} />
+                  Irrigation Type
+                </label>
                 <select
                   className={styles["vhc-select"]}
                   value={stage1Form.irrigationType}
                   onChange={(e) => updateStage1Form("irrigationType", e.target.value)}
+                  style={{ borderColor: THEME_LIGHT }}
                 >
                   <option value="">Select irrigation type</option>
                   <option value="Drip">Drip Irrigation</option>
@@ -626,11 +653,15 @@ function App() {
               </div>
 
               <div className={styles["vhc-field"]}>
-                <label className={styles["vhc-label"]}>Soil Type</label>
+                <label className={styles["vhc-label"]}>
+                  <Globe size={16} style={{ marginRight: "8px", color: THEME }} />
+                  Soil Type
+                </label>
                 <select
                   className={styles["vhc-select"]}
                   value={stage1Form.soilType}
                   onChange={(e) => updateStage1Form("soilType", e.target.value)}
+                  style={{ borderColor: THEME_LIGHT }}
                 >
                   <option value="">Select soil type</option>
                   <option value="Loamy">Loamy</option>
@@ -642,6 +673,7 @@ function App() {
 
               <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
                 <label className={styles["vhc-label"]}>
+                  <MapPinIcon size={16} style={{ marginRight: "8px", color: THEME }} />
                   GPS Location <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <div className={styles["vhc-gps-row"]}>
@@ -653,8 +685,9 @@ function App() {
                   />
                   <button
                     type="button"
-                    className={`${styles["vhc-btn"]} ${styles["vhc-btn-secondary"]}`}
+                    className={styles["vhc-gps-btn"]}
                     onClick={handleStage1GPS}
+                    style={{ backgroundColor: THEME, color: "white" }}
                   >
                     <MapPin size={16} /> Capture GPS
                   </button>
@@ -662,18 +695,25 @@ function App() {
               </div>
 
               <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
-                <label className={styles["vhc-label"]}>Exact Address</label>
+                <label className={styles["vhc-label"]}>
+                  <MapPinIcon size={16} style={{ marginRight: "8px", color: THEME }} />
+                  Exact Address
+                </label>
                 <textarea
                   className={styles["vhc-textarea"]}
                   value={stage1Form.exactAddress}
                   readOnly
                   placeholder="Will be auto-filled after GPS capture"
                   rows="2"
+                  style={{ borderColor: THEME_LIGHT }}
                 />
               </div>
 
               <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
-                <label className={styles["vhc-label"]}>Farm Photo</label>
+                <label className={styles["vhc-label"]}>
+                  <Camera size={16} style={{ marginRight: "8px", color: THEME }} />
+                  Farm Photo
+                </label>
                 <div className={styles["vhc-photo-upload"]}>
                   {stage1Form.farmPhoto ? (
                     <div className={styles["vhc-photo-preview"]}>
@@ -681,13 +721,15 @@ function App() {
                       <button
                         className={styles["vhc-remove-photo"]}
                         onClick={() => updateStage1Form("farmPhoto", null)}
+                        style={{ backgroundColor: THEME }}
                       >
                         <X size={16} />
                       </button>
                     </div>
                   ) : (
-                    <label className={styles["vhc-upload-area"]}>
-                      <Camera size={24} />
+                    <label className={styles["vhc-upload-area"]}
+                           style={{ borderColor: THEME, borderStyle: "dashed" }}>
+                      <Camera size={24} style={{ color: THEME }} />
                       <span>Click to upload farm photo</span>
                       <input
                         type="file"
@@ -701,13 +743,17 @@ function App() {
               </div>
 
               <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
-                <label className={styles["vhc-label"]}>Notes & Observations</label>
+                <label className={styles["vhc-label"]}>
+                  <FileText size={16} style={{ marginRight: "8px", color: THEME }} />
+                  Notes & Observations
+                </label>
                 <textarea
                   className={styles["vhc-textarea"]}
                   value={stage1Form.notes}
                   onChange={(e) => updateStage1Form("notes", e.target.value)}
                   placeholder="Record your observations about soil health, plant condition, pests, etc."
                   rows="4"
+                  style={{ borderColor: THEME_LIGHT }}
                 />
               </div>
             </div>
@@ -717,6 +763,10 @@ function App() {
                 className={styles["vhc-create-batch-btn"]}
                 onClick={handleCreateBatchClick}
                 disabled={!stage1Form.farmerName || !stage1Form.fid || !stage1Form.species}
+                style={{
+                  backgroundColor: !stage1Form.farmerName || !stage1Form.fid || !stage1Form.species ? "#9ca3af" : THEME,
+                  color: "white"
+                }}
               >
                 <CheckCircle size={20} /> Create New Herb Batch
               </button>
@@ -724,71 +774,154 @@ function App() {
           </div>
         );
 
-case 2:
+      case 2:
   return (
     <div className={styles["vhc-stage-content"]}>
-      <h3 className={styles["vhc-stage-title"]}>
+      <h3
+        className={styles["vhc-stage-title"]}
+        style={{
+          color: "#16a34a",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px"
+        }}
+      >
+
         Stage 2: Growth Monitoring
       </h3>
 
       {/* STATUS BOX */}
-      <div className={styles["vhc-waiting-box"]}>
-        {stage2Form.growthPhotos.length === 0 ? (
-          <>
-            <Camera size={28} />
-            <p>Waiting for farmer to upload growth data</p>
-            <span>No submission received yet</span>
-          </>
-        ) : (
-          <>
-            <CheckCircle size={28} />
-            <p>Farmer has submitted growth data</p>
-            <span>Data is locked and cannot be viewed</span>
-          </>
-        )}
+      <div
+        className={styles["vhc-waiting-box"]}
+        style={{
+          borderColor: "#16a34a",
+          backgroundColor: "#ecfdf5"
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "6px",
+            animation: "fadeSlideUp 0.6s ease-out"
+          }}
+        >
+          <CheckCircle
+            size={32}
+            color="#16a34a"
+            style={{ animation: "tickBounce 0.8s ease-out" }}
+          />
+          <p style={{ fontWeight: 600 }}>Data uploaded</p>
+          <span>Submission received successfully</span>
+        </div>
       </div>
 
       {/* ACTION */}
       <div className={styles["vhc-create-batch-section"]}>
         <button
           className={styles["vhc-create-batch-btn"]}
-          disabled={stage2Form.growthPhotos.length === 0}
           onClick={() => markStageDone(2)}
+          style={{
+            backgroundColor: "#16a34a",
+            color: "white"
+          }}
         >
           <CheckCircle size={20} />
           Approve Growth Monitoring
         </button>
-
-        {stage2Form.growthPhotos.length === 0 && (
-          <p className={styles["vhc-verification-note"]}>
-            Approval enabled only after farmer submission
-          </p>
-        )}
       </div>
+
+      {/* INLINE ANIMATIONS */}
+      <style>
+        {`
+          @keyframes tickPop {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+          }
+
+          @keyframes tickBounce {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.3); }
+            80% { transform: scale(0.95); }
+            100% { transform: scale(1); opacity: 1; }
+          }
+
+          @keyframes fadeSlideUp {
+            0% { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+        `}
+      </style>
     </div>
   );
 
 
-      case 3:
+case 3:
   return (
     <div className={styles["vhc-stage-content"]}>
-      <h3 className={styles["vhc-stage-title"]}>
-        Stage 3: Growth Monitoring
+      <h3
+        className={styles["vhc-stage-title"]}
+        style={{
+          color: stage3Form.assessmentPhotos.length > 0 ? "#16a34a" : THEME,
+          display: "flex",
+          alignItems: "center",
+          gap: "8px"
+        }}
+      >
+        {stage3Form.assessmentPhotos.length > 0 && (
+          <CheckCircle size={20} color="#16a34a" />
+        )}
+        Stage 3: Health Assessment
       </h3>
 
       {/* STATUS BOX */}
-      <div className={styles["vhc-waiting-box"]}>
-        {stage2Form.growthPhotos.length === 0 ? (
+      <div
+        className={styles["vhc-waiting-box"]}
+        style={{
+          borderColor:
+            stage3Form.assessmentPhotos.length > 0 ? "#16a34a" : THEME_LIGHT,
+          backgroundColor:
+            stage3Form.assessmentPhotos.length > 0 ? "#ecfdf5" : THEME_VERY_LIGHT
+        }}
+      >
+        {stage3Form.assessmentPhotos.length > 0 ? (
           <>
-            <Camera size={28} />
-            <p>Waiting for farmer to upload growth data</p>
-            <span>No submission received yet</span>
+            <CheckCircle size={28} color="#16a34a" />
+            <p style={{ fontWeight: 600 }}>Data uploaded</p>
+            <span>Health assessment submitted successfully</span>
           </>
         ) : (
           <>
-            <CheckCircle size={28} />
-            <p>Farmer has submitted growth data</p>
-            <span>Data is locked and cannot be viewed</span>
+            {/* Animated Info / Pending Icon */}
+            <div
+              style={{
+                width: "42px",
+                height: "42px",
+                borderRadius: "50%",
+                background: "rgba(239,68,68,0.1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                animation: "pulseWarn 1.6s infinite"
+              }}
+            >
+              <span
+                style={{
+                  color: "#ef4444",
+                  fontSize: "18px",
+                  fontWeight: 700
+                }}
+              >
+                !
+              </span>
+            </div>
+
+            <p style={{ fontWeight: 600, color: "#b91c1c" }}>
+              Data yet to be submitted
+            </p>
+            <span>Waiting for farmer health assessment</span>
           </>
         )}
       </div>
@@ -797,87 +930,115 @@ case 2:
       <div className={styles["vhc-create-batch-section"]}>
         <button
           className={styles["vhc-create-batch-btn"]}
-          disabled={stage2Form.growthPhotos.length === 0}
-          onClick={() => markStageDone(2)}
+          disabled={stage3Form.assessmentPhotos.length === 0}
+          onClick={() => markStageDone(3)}
+          style={{
+            backgroundColor:
+              stage3Form.assessmentPhotos.length > 0 ? "#16a34a" : "#9ca3af",
+            color: "white"
+          }}
         >
           <CheckCircle size={20} />
-          Approve Growth Monitoring
+          Approve Health Assessment
         </button>
 
-        {stage2Form.growthPhotos.length === 0 && (
+        {stage3Form.assessmentPhotos.length === 0 && (
           <p className={styles["vhc-verification-note"]}>
-            Approval enabled only after farmer submission
+            Approval enabled after data submission
           </p>
         )}
       </div>
+
+      {/* INLINE ANIMATION */}
+      <style>
+        {`
+          @keyframes pulseWarn {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(239,68,68,0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+          }
+        `}
+      </style>
     </div>
   );
 
 
       case 4:
-  return (
-    <div className={styles["vhc-stage-content"]}>
-      <h3 className={styles["vhc-stage-title"]}>
-        Stage 3: Growth Monitoring
-      </h3>
+        return (
+          <div className={styles["vhc-stage-content"]}>
+            <h3 className={styles["vhc-stage-title"]} style={{ color: THEME }}>
+              Stage 4: Pre-Harvest Check
+            </h3>
 
-      {/* STATUS BOX */}
-      <div className={styles["vhc-waiting-box"]}>
-        {stage2Form.growthPhotos.length === 0 ? (
-          <>
-            <Camera size={28} />
-            <p>Waiting for farmer to upload growth data</p>
-            <span>No submission received yet</span>
-          </>
-        ) : (
-          <>
-            <CheckCircle size={28} />
-            <p>Farmer has submitted growth data</p>
-            <span>Data is locked and cannot be viewed</span>
-          </>
-        )}
-      </div>
+            {/* STATUS BOX */}
+            <div className={styles["vhc-waiting-box"]}
+                 style={{ borderColor: THEME_LIGHT, backgroundColor: THEME_VERY_LIGHT }}>
+              {stage4Form.preHarvestPhotos.length === 0 ? (
+                <>
+                  <p>Waiting for farmer to upload pre-harvest data</p>
+                  <span>No submission received yet</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle size={28} style={{ color: THEME }} />
+                  <p>Farmer has submitted pre-harvest data</p>
+                  <span>Data is locked and cannot be viewed</span>
+                </>
+              )}
+            </div>
 
-      {/* ACTION */}
-      <div className={styles["vhc-create-batch-section"]}>
-        <button
-          className={styles["vhc-create-batch-btn"]}
-          disabled={stage2Form.growthPhotos.length === 0}
-          onClick={() => markStageDone(2)}
-        >
-          <CheckCircle size={20} />
-          Approve Growth Monitoring
-        </button>
+            {/* ACTION */}
+            <div className={styles["vhc-create-batch-section"]}>
+              <button
+                className={styles["vhc-create-batch-btn"]}
+                disabled={stage4Form.preHarvestPhotos.length === 0}
+                onClick={() => markStageDone(4)}
+                style={{
+                  backgroundColor: stage4Form.preHarvestPhotos.length === 0 ? "#9ca3af" : THEME,
+                  color: "white"
+                }}
+              >
+                <CheckCircle size={20} />
+                Approve Pre-Harvest Check
+              </button>
 
-        {stage2Form.growthPhotos.length === 0 && (
-          <p className={styles["vhc-verification-note"]}>
-            Approval enabled only after farmer submission
-          </p>
-        )}
-      </div>
-    </div>
-  );
-
+              {stage4Form.preHarvestPhotos.length === 0 && (
+                <p className={styles["vhc-verification-note"]}>
+                  Approval enabled only after farmer submission
+                </p>
+              )}
+            </div>
+          </div>
+        );
 
       case 5:
         return (
           <div className={styles["vhc-stage-content"]}>
-            <h3 className={styles["vhc-stage-title"]}>Stage 5: Final Verification</h3>
-            <p className={styles["vhc-stage-subtitle"]}>Complete final documentation before dispatch</p>
+            <h3 className={styles["vhc-stage-title"]} style={{ color: THEME }}>
+              Stage 5: Final Verification
+            </h3>
+            <p className={styles["vhc-stage-subtitle"]}>
+              Complete final documentation before dispatch
+            </p>
 
             <div className={styles["vhc-form-grid"]}>
               <div className={styles["vhc-field"]}>
-                <label className={styles["vhc-label"]}>Batch ID</label>
+                <label className={styles["vhc-label"]}>
+                  <Hash size={16} style={{ marginRight: "8px", color: THEME }} />
+                  Batch ID
+                </label>
                 <input
                   className={styles["vhc-input"]}
                   type="text"
                   value={stage5Form.batchId}
                   readOnly
+                  style={{ backgroundColor: THEME_VERY_LIGHT }}
                 />
               </div>
 
               <div className={styles["vhc-field"]}>
                 <label className={styles["vhc-label"]}>
+                  <CalendarDays size={16} style={{ marginRight: "8px", color: THEME }} />
                   Final Harvest Date <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <input
@@ -890,6 +1051,7 @@ case 2:
 
               <div className={styles["vhc-field"]}>
                 <label className={styles["vhc-label"]}>
+                  <Weight size={16} style={{ marginRight: "8px", color: THEME }} />
                   Final Quantity (kg) <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <input
@@ -904,7 +1066,10 @@ case 2:
               </div>
 
               <div className={styles["vhc-field"]}>
-                <label className={styles["vhc-label"]}>Sample Collected</label>
+                <label className={styles["vhc-label"]}>
+                  <Package size={16} style={{ marginRight: "8px", color: THEME }} />
+                  Sample Collected
+                </label>
                 <div className={styles["vhc-checkbox-group"]}>
                   <label className={styles["vhc-checkbox-label"]}>
                     <input
@@ -912,6 +1077,7 @@ case 2:
                       checked={stage5Form.sampleCollected}
                       onChange={(e) => updateStage5Form("sampleCollected", e.target.checked)}
                       className={styles["vhc-checkbox"]}
+                      style={{ accentColor: THEME }}
                     />
                     <span>Lab sample collected</span>
                   </label>
@@ -920,6 +1086,7 @@ case 2:
 
               <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
                 <label className={styles["vhc-label"]}>
+                  <MapPinIcon size={16} style={{ marginRight: "8px", color: THEME }} />
                   Final GPS Location <span className={styles["vhc-required"]}>*</span>
                 </label>
                 <div className={styles["vhc-gps-row"]}>
@@ -931,8 +1098,9 @@ case 2:
                   />
                   <button
                     type="button"
-                    className={`${styles["vhc-btn"]} ${styles["vhc-btn-secondary"]}`}
+                    className={styles["vhc-gps-btn"]}
                     onClick={handleStage5GPS}
+                    style={{ backgroundColor: THEME, color: "white" }}
                   >
                     <MapPin size={16} /> Capture GPS
                   </button>
@@ -940,7 +1108,10 @@ case 2:
               </div>
 
               <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
-                <label className={styles["vhc-label"]}>Final Harvest Photo</label>
+                <label className={styles["vhc-label"]}>
+                  <Camera size={16} style={{ marginRight: "8px", color: THEME }} />
+                  Final Harvest Photo
+                </label>
                 <div className={styles["vhc-photo-upload"]}>
                   {stage5Form.finalPhoto ? (
                     <div className={styles["vhc-photo-preview"]}>
@@ -948,13 +1119,15 @@ case 2:
                       <button
                         className={styles["vhc-remove-photo"]}
                         onClick={() => updateStage5Form("finalPhoto", null)}
+                        style={{ backgroundColor: THEME }}
                       >
                         <X size={16} />
                       </button>
                     </div>
                   ) : (
-                    <label className={styles["vhc-upload-area"]}>
-                      <Camera size={24} />
+                    <label className={styles["vhc-upload-area"]}
+                           style={{ borderColor: THEME, borderStyle: "dashed" }}>
+                      <Camera size={24} style={{ color: THEME }} />
                       <span>Click to upload final harvest photo</span>
                       <input
                         type="file"
@@ -966,12 +1139,20 @@ case 2:
                   )}
                 </div>
                 <div className={styles["verify"]}>
-                  <button onClick={() => alert('Herb Verified Successfully!')}>Verify</button>
+                  <button 
+                    onClick={() => alert('Herb Verified Successfully!')}
+                    style={{ backgroundColor: THEME, color: "white" }}
+                  >
+                    Verify Herb
+                  </button>
                 </div>
               </div>
 
               <div className={styles["vhc-field"]}>
-                <label className={styles["vhc-label"]}>Dispatch Authorization</label>
+                <label className={styles["vhc-label"]}>
+                  <FileCheck size={16} style={{ marginRight: "8px", color: THEME }} />
+                  Dispatch Authorization
+                </label>
                 <div className={styles["vhc-checkbox-group"]}>
                   <label className={styles["vhc-checkbox-label"]}>
                     <input
@@ -979,6 +1160,7 @@ case 2:
                       checked={stage5Form.dispatchAuth}
                       onChange={(e) => updateStage5Form("dispatchAuth", e.target.checked)}
                       className={styles["vhc-checkbox"]}
+                      style={{ accentColor: THEME }}
                     />
                     <span>Authorize dispatch</span>
                   </label>
@@ -991,6 +1173,10 @@ case 2:
                 className={styles["vhc-create-batch-btn"]}
                 onClick={() => markStageDone(5)}
                 disabled={!stage5Form.finalHarvestDate || !stage5Form.finalQuantity}
+                style={{
+                  backgroundColor: !stage5Form.finalHarvestDate || !stage5Form.finalQuantity ? "#9ca3af" : THEME,
+                  color: "white"
+                }}
               >
                 <CheckCircle size={20} /> Complete Final Verification
               </button>
@@ -1002,38 +1188,38 @@ case 2:
         );
 
       default:
-        return (
-          <div className={styles["vhc-stage-content"]}>
-            <h3 className={styles["vhc-stage-title"]}>Stage {currentStage}: {STAGE_DATA[currentStage - 1]?.title}</h3>
-            <p className={styles["vhc-stage-subtitle"]}>{STAGE_DATA[currentStage - 1]?.description}</p>
-            <div className={styles["vhc-stage-placeholder"]}>
-              <p>Stage {currentStage} content will appear here. Click "Mark Complete" when done.</p>
-            </div>
-          </div>
-        );
+        return null;
     }
   };
 
   return (
     <>
       {/* Toast Notification */}
+      {toast && (
+        <div className={styles["vhc-toast"]} style={{ backgroundColor: THEME }}>
+          {toast}
+        </div>
+      )}
 
       {/* Create Batch Dialog */}
       {showCreateBatchDialog && (
         <div className={styles["vhc-dialog-overlay"]}>
-          <div className={styles["vhc-dialog-container"]}>
+          <div className={styles["vhc-dialog-container"]} style={{ borderColor: THEME_LIGHT }}>
             <div className={styles["vhc-dialog-header"]}>
-              <h3 className={styles["vhc-dialog-title"]}>Batch Creation Confirmation</h3>
+              <h3 className={styles["vhc-dialog-title"]} style={{ color: THEME }}>
+                Batch Creation Confirmation
+              </h3>
               <button
                 className={styles["vhc-dialog-close"]}
                 onClick={() => setShowCreateBatchDialog(false)}
+                style={{ color: THEME }}
               >
                 <X size={20} />
               </button>
             </div>
 
             <div className={styles["vhc-dialog-content"]}>
-              <div className={styles["vhc-dialog-icon"]}>
+              <div className={styles["vhc-dialog-icon"]} style={{ backgroundColor: THEME_LIGHT, color: THEME }}>
                 📋
               </div>
               <h4 className={styles["vhc-dialog-message"]}>
@@ -1043,24 +1229,34 @@ case 2:
                 Your batch has been registered with the following ID:
               </p>
 
-              <div className={styles["vhc-batch-id-display"]}>
+              <div className={styles["vhc-batch-id-display"]} style={{ borderColor: THEME }}>
                 <div className={styles["vhc-batch-id-label"]}>Batch ID</div>
-                <div className={styles["vhc-batch-id-value"]}>{batchIdFromAdmin}</div>
-                <div className={styles["vhc-batch-id-note"]}>(Received from Admin System)</div>
+                <div className={styles["vhc-batch-id-value"]} style={{ color: THEME }}>
+                  {batchIdFromAdmin}
+                </div>
+                <div className={styles["vhc-batch-id-note"]}>
+                  (Received from Admin System)
+                </div>
               </div>
 
               <div className={styles["vhc-batch-details"]}>
                 <div className={styles["vhc-batch-detail-item"]}>
                   <span className={styles["vhc-detail-label"]}>Farmer Name:</span>
-                  <span className={styles["vhc-detail-value"]}>{stage1Form.farmerName || "Not specified"}</span>
+                  <span className={styles["vhc-detail-value"]}>
+                    {stage1Form.farmerName || "Not specified"}
+                  </span>
                 </div>
                 <div className={styles["vhc-batch-detail-item"]}>
                   <span className={styles["vhc-detail-label"]}>Herb Species:</span>
-                  <span className={styles["vhc-detail-value"]}>{stage1Form.species || "Not selected"}</span>
+                  <span className={styles["vhc-detail-value"]}>
+                    {stage1Form.species || "Not selected"}
+                  </span>
                 </div>
                 <div className={styles["vhc-batch-detail-item"]}>
                   <span className={styles["vhc-detail-label"]}>Estimated Quantity:</span>
-                  <span className={styles["vhc-detail-value"]}>{stage1Form.estimatedQty ? `${stage1Form.estimatedQty} kg` : "Not estimated"}</span>
+                  <span className={styles["vhc-detail-value"]}>
+                    {stage1Form.estimatedQty ? `${stage1Form.estimatedQty} kg` : "Not estimated"}
+                  </span>
                 </div>
                 <div className={styles["vhc-batch-detail-item"]}>
                   <span className={styles["vhc-detail-label"]}>Location:</span>
@@ -1070,23 +1266,28 @@ case 2:
                 </div>
               </div>
 
-              <div className={styles["vhc-dialog-note"]}>
-                <AlertCircle size={16} />
+              <div className={styles["vhc-dialog-note"]} style={{ backgroundColor: THEME_VERY_LIGHT }}>
+                <AlertCircle size={16} style={{ color: THEME }} />
                 <span>This batch will now move to Stage 2. Track progress using the Batch ID.</span>
               </div>
             </div>
 
             <div className={styles["vhc-dialog-footer"]}>
               <button
-                className={`${styles["vhc-dialog-btn"]} ${styles["vhc-dialog-btn-cancel"]}`}
+                className={styles["vhc-dialog-btn-cancel"]}
                 onClick={() => setShowCreateBatchDialog(false)}
+                style={{ borderColor: THEME_LIGHT, color: THEME }}
               >
                 Edit Details
               </button>
               <button
-                className={`${styles["vhc-dialog-btn"]} ${styles["vhc-dialog-btn-confirm"]}`}
+                className={styles["vhc-dialog-btn-confirm"]}
                 onClick={confirmCreateBatch}
                 disabled={!stage1Form.farmerName || !stage1Form.fid || !stage1Form.species}
+                style={{ 
+                  backgroundColor: !stage1Form.farmerName || !stage1Form.fid || !stage1Form.species ? "#9ca3af" : THEME,
+                  color: "white"
+                }}
               >
                 <CheckCircle size={18} />
                 Proceed to Stage 2
@@ -1096,27 +1297,32 @@ case 2:
         </div>
       )}
 
-      {/* NAVBAR */}
-      <nav className={styles["vhc-navbar"]}>
+      {/* NAVBAR - Green Theme */}
+      <nav className={styles["vhc-navbar"]} style={{ backgroundColor: THEME }}>
         <div className={styles["vhc-navbar-left"]}>
           <img
             src="https://res.cloudinary.com/domogztsv/image/upload/v1765220874/WhatsApp_Image_2025-12-09_at_12.36.40_AM_bp8jxt.jpg"
             alt="AyuSethu Logo"
             className={styles["vhc-nav-LogoImage"]}
           />
-
-          <div className={styles["vhc-nav-logo"]}>AyuSethu</div>
+          <div className={styles["vhc-nav-logo"]} style={{ color: "white" }}>
+            AyuSethu
+          </div>
         </div>
 
         <div className={styles["vhc-navbar-right"]}>
+          {/* Notifications */}
           <div className={styles["vhc-notification-container"]} ref={notificationRef}>
             <button
               className={styles["vhc-notification-btn"]}
               onClick={toggleNotificationDropdown}
+              style={{ color: "white" }}
             >
               <Bell size={20} />
               {unreadCount > 0 && (
-                <span className={styles["vhc-notification-badge"]}>{unreadCount}</span>
+                <span className={styles["vhc-notification-badge"]} style={{ backgroundColor: "white", color: THEME }}>
+                  {unreadCount}
+                </span>
               )}
             </button>
 
@@ -1136,12 +1342,20 @@ case 2:
                   <button
                     className={`${styles["vhc-notification-tab"]} ${activeTab === 'admin' ? styles['active'] : ''}`}
                     onClick={() => setActiveTab('admin')}
+                    style={{
+                      backgroundColor: activeTab === 'admin' ? THEME : THEME_LIGHT,
+                      color: activeTab === 'admin' ? 'white' : THEME_DARK
+                    }}
                   >
                     Admin
                   </button>
                   <button
                     className={`${styles["vhc-notification-tab"]} ${activeTab === 'tester' ? styles['active'] : ''}`}
                     onClick={() => setActiveTab('tester')}
+                    style={{
+                      backgroundColor: activeTab === 'tester' ? THEME : THEME_LIGHT,
+                      color: activeTab === 'tester' ? 'white' : THEME_DARK
+                    }}
                   >
                     Tester
                   </button>
@@ -1172,6 +1386,7 @@ case 2:
                         <button
                           className={styles["vhc-mark-read-btn"]}
                           onClick={() => handleMarkNotificationRead(notification.id)}
+                          style={{ backgroundColor: THEME, color: "white" }}
                         >
                           Mark Read
                         </button>
@@ -1182,67 +1397,63 @@ case 2:
             )}
           </div>
 
-          <div className={styles["vhc-user-profile-container"]} ref={profileRef}>
-            <button
-              className={styles["vhc-user-profile-btn"]}
-              onClick={toggleProfileDropdown}
-            >
-              <div className={styles["animated-avatar-profile"]}>
-                <img src={"https://img.freepik.com/premium-photo/young-optimistic-woman-doctor-is-holding-clipboard-her-hands-while-standing-sunny-clinic-portrait-friendly-female-physician-with-stethoscope-perfect-medical-service-hospital-me_665183-12973.jpg"} alt="Profile" />
-              </div>
-            </button>
-
-            {showProfile && (
-              <div className={styles["vhc-profile-dropdown"]}>
-                <div className={styles["vhc-profile-header"]}>
-                  <div className={styles["vhc-profile-details"]}>
-                    <h4>Collector7421</h4>
-                    <p>Senior Field Officer</p>
-                    <div className={styles["vhc-profile-badges"]}>
-                      <span className={styles["vhc-profile-badge"]}>ID: COL-7421</span>
-                      <span className={`${styles["vhc-profile-badge"]} ${styles["active"]}`}>Active</span>
-                    </div>
-                  </div>
+          {/* Profile - Updated to match Labtest.jsx */}
+ <div className="relative" ref={profileRef}>
+              <button
+                className="profile-btn-large"
+                onClick={() => {
+                  setShowProfile(!showProfile);
+                  setShowNotifications(false);
+                }}
+              >
+                <div className="animated-avatar-profile">
+                  <img src={"https://img.freepik.com/premium-photo/young-optimistic-woman-doctor-is-holding-clipboard-her-hands-while-standing-sunny-clinic-portrait-friendly-female-physician-with-stethoscope-perfect-medical-service-hospital-me_665183-12973.jpg"} alt="Profile" />
                 </div>
+              </button>
 
-                <div className={styles["vhc-profile-stats"]}>
-                  <div className={styles["vhc-stat-item"]}>
-                    <div>
-                      <div className={styles["vhc-stat-label"]}>Batches Today</div>
-                      <div className={styles["vhc-stat-value"]}>8</div>
+              {showProfile && (
+                <div className="dropdown-panel">
+                  <div className="profile-header">
+                    <div className="profile-info">
+                      <div className="profile-avatar-lg">
+                        <img src={"https://img.freepik.com/premium-photo/young-optimistic-woman-doctor-is-holding-clipboard-her-hands-while-standing-sunny-clinic-portrait-friendly-female-physician-with-stethoscope-perfect-medical-service-hospital-me_665183-12973.jpg"} alt="Profile" />
+                      </div>
+                      <div className="profile-details">
+                        <h4>Dr. Sarah Chen</h4>
+                        <p>Lead Quality Tester</p>
+                        <button
+                          className="btn-logout"
+                          onClick={() => {
+                            // your logout function here
+                            handleLogout();
+                          }}
+                        >
+                          <h3>LogOut</h3>
+                        </button>
+
+                      </div>
                     </div>
                   </div>
-                  <div className={styles["vhc-stat-item"]}>
-                    <div>
-                      <div className={styles["vhc-stat-label"]}>Success Rate</div>
-                      <div className={styles["vhc-stat-value"]}>94%</div>
+
+                  <div className="profile-stats">
+                    <div className="stat-item">
+                      <div className="stat-label">Customer ID</div>
+                      <div className="stat-value">CID-2024-001</div>
                     </div>
-                  </div>
-                  <div className={styles["vhc-stat-item"]}>
-                    <div>
-                      <div className={styles["vhc-stat-label"]}>Active Farmers</div>
-                      <div className={styles["vhc-stat-value"]}>28</div>
+                    <div className="stat-item">
+                      <div className="stat-label">Active Batches </div>
+                      <div className="stat-value">16</div>
                     </div>
+                   
                   </div>
-                  <div className={styles["vhc-stat-item"]}>
-                    <div>
-                      <div className={styles["vhc-stat-label"]}>Certified Farms</div>
-                      <div className={styles["vhc-stat-value"]}>15</div>
-                    </div>
-                  </div>
+
                 </div>
-
-                <button
-                  className={styles["vhc-logout-btn"]}
-                  onClick={handleLogout}
-                >
-                 Log Out
-                </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+
+
 
       {/* MAIN CONTENT */}
       <main className={styles["vhc-main"]}>
@@ -1253,16 +1464,18 @@ case 2:
           </section>
 
           {/* RIGHT PANEL: TIMELINE & PREVIEW */}
-          <aside className={styles["vhc-card"]}>
+          <aside className={styles["vhc-card"]} style={{ borderColor: THEME_LIGHT }}>
             <div className={styles["vhc-timeline-header"]}>
-              <h2 className={styles["vhc-timeline-title"]}>Batch Integrity Timeline</h2>
+              <h2 className={styles["vhc-timeline-title"]} style={{ color: THEME }}>
+                Batch Integrity Timeline
+              </h2>
               <p className={styles["vhc-timeline-subtitle"]}>
                 Track progress through all stages. Click any stage to manage.
               </p>
             </div>
 
             <div className={styles["vhc-timeline-container"]}>
-              <div className={styles["vhc-timeline-line"]} />
+              <div className={styles["vhc-timeline-line"]} style={{ backgroundColor: THEME_LIGHT }} />
               <div>
                 {STAGE_DATA.map((stage) => renderTimelineItem(stage))}
               </div>
@@ -1270,7 +1483,9 @@ case 2:
 
             {/* LIVE PREVIEW */}
             <div className={styles["vhc-live-preview"]}>
-              <h3 className={styles["vhc-live-preview-title"]}>Live Batch Preview</h3>
+              <h3 className={styles["vhc-live-preview-title"]} style={{ color: THEME }}>
+                Live Batch Preview
+              </h3>
 
               <div className={styles["vhc-preview-container"]}>
                 {currentStage === 1 ? (
@@ -1362,7 +1577,11 @@ case 2:
                     <div className={styles["vhc-preview-item"]}>
                       <div className={styles["vhc-preview-label"]}>Photos Uploaded</div>
                       <div className={styles["vhc-preview-value"]}>
-                        <span className={`${styles["vhc-preview-status-badge"]} ${stage2Form.growthPhotos.length > 0 ? styles['success'] : styles['pending']}`}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage2Form.growthPhotos.length > 0 ? styles['success'] : styles['pending']}`}
+                              style={{ 
+                                backgroundColor: stage2Form.growthPhotos.length > 0 ? THEME_LIGHT : "#fef3c7",
+                                color: stage2Form.growthPhotos.length > 0 ? THEME_DARK : "#92400e"
+                              }}>
                           {stage2Form.growthPhotos.length} photos
                         </span>
                       </div>
@@ -1390,7 +1609,11 @@ case 2:
                     <div className={styles["vhc-preview-item"]}>
                       <div className={styles["vhc-preview-label"]}>Health Status</div>
                       <div className={styles["vhc-preview-value"]}>
-                        <span className={`${styles["vhc-preview-status-badge"]} ${stage3Form.healthStatus === 'Excellent' || stage3Form.healthStatus === 'Good' ? styles['success'] : styles['pending']}`}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage3Form.healthStatus === 'Excellent' || stage3Form.healthStatus === 'Good' ? styles['success'] : styles['pending']}`}
+                              style={{ 
+                                backgroundColor: (stage3Form.healthStatus === 'Excellent' || stage3Form.healthStatus === 'Good') ? THEME_LIGHT : "#fef3c7",
+                                color: (stage3Form.healthStatus === 'Excellent' || stage3Form.healthStatus === 'Good') ? THEME_DARK : "#92400e"
+                              }}>
                           {stage3Form.healthStatus}
                         </span>
                       </div>
@@ -1399,7 +1622,11 @@ case 2:
                     <div className={styles["vhc-preview-item"]}>
                       <div className={styles["vhc-preview-label"]}>Assessment Photos</div>
                       <div className={styles["vhc-preview-value"]}>
-                        <span className={`${styles["vhc-preview-status-badge"]} ${stage3Form.assessmentPhotos.length > 0 ? styles['success'] : styles['pending']}`}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage3Form.assessmentPhotos.length > 0 ? styles['success'] : styles['pending']}`}
+                              style={{ 
+                                backgroundColor: stage3Form.assessmentPhotos.length > 0 ? THEME_LIGHT : "#fef3c7",
+                                color: stage3Form.assessmentPhotos.length > 0 ? THEME_DARK : "#92400e"
+                              }}>
                           {stage3Form.assessmentPhotos.length} photos
                         </span>
                       </div>
@@ -1430,7 +1657,11 @@ case 2:
                     <div className={styles["vhc-preview-item"]}>
                       <div className={styles["vhc-preview-label"]}>Harvest Readiness</div>
                       <div className={styles["vhc-preview-value"]}>
-                        <span className={`${styles["vhc-preview-status-badge"]} ${parseInt(stage4Form.harvestReadiness) > 80 ? styles['success'] : styles['pending']}`}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${parseInt(stage4Form.harvestReadiness) > 80 ? styles['success'] : styles['pending']}`}
+                              style={{ 
+                                backgroundColor: parseInt(stage4Form.harvestReadiness) > 80 ? THEME_LIGHT : "#fef3c7",
+                                color: parseInt(stage4Form.harvestReadiness) > 80 ? THEME_DARK : "#92400e"
+                              }}>
                           {stage4Form.harvestReadiness}%
                         </span>
                       </div>
@@ -1447,7 +1678,11 @@ case 2:
                     <div className={styles["vhc-preview-item"]}>
                       <div className={styles["vhc-preview-label"]}>Quality Check</div>
                       <div className={styles["vhc-preview-value"]}>
-                        <span className={`${styles["vhc-preview-status-badge"]} ${stage4Form.qualityCheck === 'Pass' ? styles['success'] : styles['pending']}`}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage4Form.qualityCheck === 'Pass' ? styles['success'] : styles['pending']}`}
+                              style={{ 
+                                backgroundColor: stage4Form.qualityCheck === 'Pass' ? THEME_LIGHT : "#fee2e2",
+                                color: stage4Form.qualityCheck === 'Pass' ? THEME_DARK : "#dc2626"
+                              }}>
                           {stage4Form.qualityCheck}
                         </span>
                       </div>
@@ -1456,7 +1691,11 @@ case 2:
                     <div className={styles["vhc-preview-item"]}>
                       <div className={styles["vhc-preview-label"]}>Pre-Harvest Photos</div>
                       <div className={styles["vhc-preview-value"]}>
-                        <span className={`${styles["vhc-preview-status-badge"]} ${stage4Form.preHarvestPhotos.length > 0 ? styles['success'] : styles['pending']}`}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage4Form.preHarvestPhotos.length > 0 ? styles['success'] : styles['pending']}`}
+                              style={{ 
+                                backgroundColor: stage4Form.preHarvestPhotos.length > 0 ? THEME_LIGHT : "#fef3c7",
+                                color: stage4Form.preHarvestPhotos.length > 0 ? THEME_DARK : "#92400e"
+                              }}>
                           {stage4Form.preHarvestPhotos.length} photos
                         </span>
                       </div>
@@ -1466,7 +1705,8 @@ case 2:
                   <div className={styles["vhc-preview-grid"]}>
                     <div className={styles["vhc-preview-item"]}>
                       <div className={styles["vhc-preview-label"]}>Batch ID</div>
-                      <div className={`${styles["vhc-preview-value"]} ${styles["vhc-preview-batchid"]}`}>
+                      <div className={`${styles["vhc-preview-value"]} ${styles["vhc-preview-batchid"]}`}
+                           style={{ color: THEME }}>
                         {stage5Form.batchId}
                       </div>
                     </div>
@@ -1490,7 +1730,11 @@ case 2:
                     <div className={styles["vhc-preview-item"]}>
                       <div className={styles["vhc-preview-label"]}>Sample Collected</div>
                       <div className={styles["vhc-preview-value"]}>
-                        <span className={`${styles["vhc-preview-status-badge"]} ${stage5Form.sampleCollected ? styles['success'] : styles['pending']}`}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage5Form.sampleCollected ? styles['success'] : styles['pending']}`}
+                              style={{ 
+                                backgroundColor: stage5Form.sampleCollected ? THEME_LIGHT : "#fef3c7",
+                                color: stage5Form.sampleCollected ? THEME_DARK : "#92400e"
+                              }}>
                           {stage5Form.sampleCollected ? 'Yes' : 'No'}
                         </span>
                       </div>
@@ -1499,7 +1743,11 @@ case 2:
                     <div className={styles["vhc-preview-item"]}>
                       <div className={styles["vhc-preview-label"]}>Dispatch Auth</div>
                       <div className={styles["vhc-preview-value"]}>
-                        <span className={`${styles["vhc-preview-status-badge"]} ${stage5Form.dispatchAuth ? styles['success'] : styles['pending']}`}>
+                        <span className={`${styles["vhc-preview-status-badge"]} ${stage5Form.dispatchAuth ? styles['success'] : styles['pending']}`}
+                              style={{ 
+                                backgroundColor: stage5Form.dispatchAuth ? THEME_LIGHT : "#fef3c7",
+                                color: stage5Form.dispatchAuth ? THEME_DARK : "#92400e"
+                              }}>
                           {stage5Form.dispatchAuth ? 'Authorized' : 'Pending'}
                         </span>
                       </div>
@@ -1516,79 +1764,38 @@ case 2:
                       <div className={styles["vhc-notes-label"]}>Final Photo</div>
                       <div className={styles["vhc-photo-status"]}>
                         {stage5Form.finalPhoto ? (
-                          <span className={styles["vhc-photo-uploaded"]}>✅ Photo uploaded</span>
+                          <span className={styles["vhc-photo-uploaded"]}
+                                style={{ color: THEME }}>
+                            ✅ Photo uploaded
+                          </span>
                         ) : (
                           <span className={styles["vhc-preview-empty"]}>No photo uploaded</span>
                         )}
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <div className={styles["vhc-preview-grid"]}>
-                    <div className={styles["vhc-preview-item"]}>
-                      <div className={styles["vhc-preview-label"]}>Herb Name</div>
-                      <div className={styles["vhc-preview-value"]}>
-                        {form.herb || <span className={styles["vhc-preview-empty"]}>Not selected</span>}
-                      </div>
-                    </div>
-
-                    <div className={styles["vhc-preview-item"]}>
-                      <div className={styles["vhc-preview-label"]}>Harvest Date</div>
-                      <div className={styles["vhc-preview-value"]}>
-                        {form.date ? new Date(form.date).toLocaleDateString('en-GB') :
-                          <span className={styles["vhc-preview-empty"]}>Not set</span>}
-                      </div>
-                    </div>
-
-                    <div className={styles["vhc-preview-item"]}>
-                      <div className={styles["vhc-preview-label"]}>Quality Grade</div>
-                      <div className={styles["vhc-preview-value"]}>
-                        {form.quality || <span className={styles["vhc-preview-empty"]}>Not graded</span>}
-                      </div>
-                    </div>
-
-                    <div className={styles["vhc-preview-item"]}>
-                      <div className={styles["vhc-preview-label"]}>Quantity</div>
-                      <div className={styles["vhc-preview-value"]}>
-                        {form.qty ? `${form.qty} kg` : <span className={styles["vhc-preview-empty"]}>Not specified</span>}
-                      </div>
-                    </div>
-
-                    <div className={styles["vhc-preview-item"]}>
-                      <div className={styles["vhc-preview-label"]}>Weather</div>
-                      <div className={styles["vhc-preview-value"]}>
-                        {form.weather || <span className={styles["vhc-preview-empty"]}>Not recorded</span>}
-                      </div>
-                    </div>
-
-                    <div className={styles["vhc-preview-item"]}>
-                      <div className={styles["vhc-preview-label"]}>GPS Location</div>
-                      <div className={`${styles["vhc-preview-value"]} ${styles["vhc-preview-gps"]}`}>
-                        {form.gps === "Not captured" ?
-                          <span className={styles["vhc-preview-empty"]}>Not captured</span> :
-                          form.gps}
-                      </div>
-                    </div>
-
-                    <div className={styles["vhc-preview-notes"]}>
-                      <div className={styles["vhc-notes-label"]}>Collector Notes</div>
-                      <div className={styles["vhc-notes-content"]}>
-                        {form.notes || <span className={styles["vhc-preview-empty"]}>No notes added</span>}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                ) : null}
 
                 <div className={styles["vhc-preview-status"]}>
-                  <div className={styles["vhc-preview-status-icon"]}>
+                  <div className={styles["vhc-preview-status-icon"]}
+                       style={{ 
+                         backgroundColor: stageStatus[currentStage - 1] === "done" ? THEME_LIGHT : 
+                                       stageStatus[currentStage - 1] === "current" ? THEME_LIGHT : "#f3f4f6",
+                         color: stageStatus[currentStage - 1] === "done" ? THEME : 
+                                stageStatus[currentStage - 1] === "current" ? THEME : "#6b7280"
+                       }}>
                     {stageStatus[currentStage - 1] === "done" ? "✅" :
                       stageStatus[currentStage - 1] === "current" ? "🔄" : "⏳"}
                   </div>
                   <div className={styles["vhc-preview-status-text"]}>
                     <div className={styles["vhc-preview-status-title"]}>
-                      Stage {currentStage}: {STAGE_DATA[currentStage - 1]?.title}
+                      {STAGE_DATA[currentStage - 1]?.title}
                     </div>
-                    <div className={styles["vhc-preview-status-subtitle"]}>
+                    <div className={styles["vhc-preview-status-subtitle"]}
+                         style={{ 
+                           color: stageStatus[currentStage - 1] === "current" ? THEME : 
+                                  stageStatus[currentStage - 1] === "done" ? "#10b981" : "#6b7280"
+                         }}>
                       Status: {getStatusText(stageStatus[currentStage - 1])}
                     </div>
                   </div>
@@ -1602,4 +1809,4 @@ case 2:
   );
 }
 
-export default App; 
+export default App;

@@ -12,6 +12,7 @@ const steps = [
   { icon: <User size={34} />, title: "Consumer", text: "Complete traceability access—origin, purity tests, sustainability, and batch details." }
 ];
 
+
 const Landing = () => {
   const navigate = useNavigate();
 
@@ -43,10 +44,10 @@ const Landing = () => {
       {/* NAVBAR */}
       <div className={styles.navbar}>
         <nav>
-          <img 
-            src="https://res.cloudinary.com/domogztsv/image/upload/v1765220874/WhatsApp_Image_2025-12-09_at_12.36.40_AM_bp8jxt.jpg" 
-            alt="logo" 
-            className={styles.logoImage} 
+          <img
+            src="https://res.cloudinary.com/dmolvlt7e/image/upload/v1766070051/Gemini_Generated_Image_ysxwkbysxwkbysxw-removebg-preview_jezctz.png"
+            alt="logo"
+            className={styles.logoImage}
           />
           <div className={styles.logo}>AyuSethu</div>
           <ul>
@@ -144,7 +145,7 @@ const Landing = () => {
         <div className={styles.aboutContentWrapper}>
           <div className={styles.aboutImageWrapper}>
             <img
-              src="https://res.cloudinary.com/domogztsv/image/upload/v1765249221/WhatsApp_Image_2025-12-09_at_8.29.24_AM_um6q2w.jpg"
+              src="https://res.cloudinary.com/dmolvlt7e/image/upload/v1766033128/WhatsApp_Image_2025-12-09_at_08.28.38-removebg-preview_vtrebu.png"
               className={styles.aboutImage}
               alt="Herbs"
             />
@@ -152,42 +153,22 @@ const Landing = () => {
 
           <div className={styles.aboutTextWrapper}>
             <p className={styles.aboutParagraph}>
-              AYUSETHU aims to bring transparency, trust, and authenticity to the Ayurvedic herbal supply chain. Herbs pass through many hands—cultivators, mandis, labs, and manufacturers—and during this journey, information about origin, quality, and sustainability often gets lost.
-              <br /><br />
-              Our platform uses blockchain and geo-tagging to securely record every stage, from harvest to processing to the final product. Consumers can scan a QR code and see the herb's full journey, including lab tests, sustainability compliance, and fair-trade verification.
-              <br /><br />
-              With AYU SETHU, we ensure that every Ayurvedic product is pure, verifiable, and responsibly sourced, empowering both consumers and stakeholders with confidence in the medicine they use.
-            </p>
+              AYU SETHU brings transparency and trust to the Ayurvedic herbal supply chain by securely recording every stage of a herb’s journey from cultivation and procurement to lab testing and manufacturing—using blockchain and geo-tagging. By scanning a QR code, consumers can instantly verify origin, quality, lab reports, and sustainability compliance, ensuring that every Ayurvedic product is pure, authentic, and responsibly sourced.            </p>
           </div>
         </div>
       </div>
-
-      {/* PARTNERS SECTION */}
-      <div className={styles.partnersSection}>
-        <h3 className={styles.partnersHeading}>Our Partners</h3>
-        
-        <div className={styles.partnersDisplay}>
-          {partners.map((partner, index) => (
-            <div key={index} className={styles.partnerItem}>
-              <img
-                src={partner.logo}
-                alt={partner.name}
-                className={styles.partnerLogo}
-              />
-              <p className={styles.partnerName}>{partner.name}</p>
-            </div>
-          ))}
-        </div>
+      
+      <div className={styles.white}>
+  
       </div>
-
       {/* FOOTER SECTION */}
       <footer className={styles.footer}>
         <div className={styles.footerContent}>
           <div className={styles.footerSection}>
             <div className={styles.footerLogo}>
-              <img 
-                src="https://res.cloudinary.com/domogztsv/image/upload/v1765220874/WhatsApp_Image_2025-12-09_at_12.36.40_AM_bp8jxt.jpg" 
-                alt="AyuSethu Logo" 
+              <img
+                src="https://res.cloudinary.com/domogztsv/image/upload/v1765220874/WhatsApp_Image_2025-12-09_at_12.36.40_AM_bp8jxt.jpg"
+                alt="AyuSethu Logo"
                 className={styles.footerLogoImage}
               />
               <h3 className={styles.footerLogoText}>AyuSethu</h3>

@@ -57,11 +57,11 @@ function Header({
             {/* <div className="logo-icon">
               <Leaf className="w-5 h-5" />
             </div> */}
-              <div className="Logo">
-                <img src="https://res.cloudinary.com/domogztsv/image/upload/v1765220874/WhatsApp_Image_2025-12-09_at_12.36.40_AM_bp8jxt.jpg"
-            alt="AyuSethu Logo"></img>
-              </div>
-              <div>
+            <div className="Logo">
+              <img src="https://res.cloudinary.com/domogztsv/image/upload/v1765220874/WhatsApp_Image_2025-12-09_at_12.36.40_AM_bp8jxt.jpg"
+                alt="AyuSethu Logo"></img>
+            </div>
+            <div>
               <div className="Logo-text">AyuSethu</div>
             </div>
           </div>
@@ -86,108 +86,114 @@ function Header({
               </button>
 
               {showNotifications && (
-                <div className="dropdown-panel">
-                  <div className="notifications-header">
-                    <h3>Notifications</h3>
-                    <span className="text-xs text-gray-500">{notifications.length} total</span>
-                  </div>
-                  <div className="divide-y">
-                    {notifications.filter(n => n.status === "pending").length === 0 ? (
-                      <div className="p-20 text-center text-gray-500">
-                        <BellRing className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                        <p>No new notifications</p>
-                      </div>
-                    ) : (
-                      notifications.filter(n => n.status === "pending").map(notification => (
-                        <div key={notification.id} className="notification-item">
-                          <div className="notification-content">
-                            {notification.message}
-                          </div>
-                          <div className="notification-actions">
-                            <button
-                              className="action-btn reject"
-                              onClick={() => {
-                                onRejectNotification(notification.id, notification.batch_id);
-                                setShowNotifications(false);
-                              }}
-                            >
-                              Reject
-                            </button>
-                            <button
-                              className="action-btn accept"
-                              onClick={() => {
-                                onAcceptNotification(notification.id, notification.batch_id);
-                                setShowNotifications(false);
-                              }}
-                            >
-                              Accept
-                            </button>
-                          </div>
+                <>
+                  <div
+                    className="overlay"
+                    onClick={() => setShowNotifications(false)}
+                  />
+                  <div className="dropdown-panel">
+                    <div className="notifications-header">
+                      <h3>Notifications</h3>
+                      <span className="text-xs text-gray-500">{notifications.length} total</span>
+                    </div>
+                    <div className="divide-y">
+                      {notifications.filter(n => n.status === "pending").length === 0 ? (
+                        <div className="p-20 text-center text-gray-500">
+                          <BellRing className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                          <p>No new notifications</p>
                         </div>
-                      ))
-                    )}
+                      ) : (
+                        notifications.filter(n => n.status === "pending").map(notification => (
+                          <div key={notification.id} className="notification-item">
+                            <div className="notification-content">
+                              {notification.message}
+                            </div>
+                            <div className="notification-actions">
+                              <button
+                                className="action-btn reject"
+                                onClick={() => {
+                                  onRejectNotification(notification.id, notification.batch_id);
+                                  setShowNotifications(false);
+                                }}
+                              >
+                                Reject
+                              </button>
+                              <button
+                                className="action-btn accept"
+                                onClick={() => {
+                                  onAcceptNotification(notification.id, notification.batch_id);
+                                  setShowNotifications(false);
+                                }}
+                              >
+                                Accept
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
-                </div>
+                </>
               )}
-            </div>
-
-            {/* Profile - Larger button without name */}
-            <div className="relative" ref={profileRef}>
-              <button
-                className="profile-btn-large"
-                onClick={() => {
-                  setShowProfile(!showProfile);
-                  setShowNotifications(false);
-                }}
-              >
-                <div className="animated-avatar-profile">
-                  <img src={"https://img.freepik.com/premium-photo/young-optimistic-woman-doctor-is-holding-clipboard-her-hands-while-standing-sunny-clinic-portrait-friendly-female-physician-with-stethoscope-perfect-medical-service-hospital-me_665183-12973.jpg"} alt="Profile" />
                 </div>
-              </button>
 
-              {showProfile && (
-                <div className="dropdown-panel">
-                  <div className="profile-header">
-                    <div className="profile-info">
-                      <div className="profile-avatar-lg">
-                        <img src={"https://img.freepik.com/premium-photo/young-optimistic-woman-doctor-is-holding-clipboard-her-hands-while-standing-sunny-clinic-portrait-friendly-female-physician-with-stethoscope-perfect-medical-service-hospital-me_665183-12973.jpg"} alt="Profile" />
-                      </div>
-                      <div className="profile-details">
-                        <h4>Dr. Sarah Chen</h4>
-                        <p>Lead Quality Tester</p>
-                        <button
-                          className="btn-logout"
-                          onClick={() => {
-                            // your logout function here
-                            handleLogout();
-                          }}
-                        >
-                          <h3>LogOut</h3>
-                        </button>
-
-                      </div>
-                    </div>
+              {/* Profile - Larger button without name */}
+              <div className="relative" ref={profileRef}>
+                <button
+                  className="profile-btn-large"
+                  onClick={() => {
+                    setShowProfile(!showProfile);
+                    setShowNotifications(false);
+                  }}
+                >
+                  <div className="animated-avatar-profile">
+                    <img src={"https://img.freepik.com/premium-photo/young-optimistic-woman-doctor-is-holding-clipboard-her-hands-while-standing-sunny-clinic-portrait-friendly-female-physician-with-stethoscope-perfect-medical-service-hospital-me_665183-12973.jpg"} alt="Profile" />
                   </div>
+                </button>
 
-                  <div className="profile-stats">
-                    <div className="stat-item">
-                      <div className="stat-label">License ID</div>
-                      <div className="stat-value">LIC-2024-001</div>
+                {showProfile && (
+                  <div className="dropdown-panel">
+                    <div className="profile-header">
+                      <div className="profile-info">
+                        <div className="profile-avatar-lg">
+                          <img src={"https://img.freepik.com/premium-photo/young-optimistic-woman-doctor-is-holding-clipboard-her-hands-while-standing-sunny-clinic-portrait-friendly-female-physician-with-stethoscope-perfect-medical-service-hospital-me_665183-12973.jpg"} alt="Profile" />
+                        </div>
+                        <div className="profile-details">
+                          <h4>Dr. Sarah Chen</h4>
+                          <p>Lead Quality Tester</p>
+                          <button
+                            className="btn-logout"
+                            onClick={() => {
+                              // your logout function here
+                              handleLogout();
+                            }}
+                          >
+                            <h3>LogOut</h3>
+                          </button>
+
+                        </div>
+                      </div>
                     </div>
-                    <div className="stat-item">
-                      <div className="stat-label">Laboratory</div>
-                      <div className="stat-value">National Herbal Lab</div>
+
+                    <div className="profile-stats">
+                      <div className="stat-item">
+                        <div className="stat-label">License ID</div>
+                        <div className="stat-value">LIC-2024-001</div>
+                      </div>
+                      <div className="stat-item">
+                        <div className="stat-label">Laboratory</div>
+                        <div className="stat-value">National Herbal Lab</div>
+                      </div>
+                      <div className="stat-item">
+                        <div className="stat-label">Tests Today</div>
+                        <div className="stat-value">12</div>
+                      </div>
                     </div>
-                    <div className="stat-item">
-                      <div className="stat-label">Tests Today</div>
-                      <div className="stat-value">12</div>
-                    </div>
+
                   </div>
-
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
         </nav>
       </div>
 

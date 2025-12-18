@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../styles/Manufacturer.css';
 
 const Manufacturer = () => {
@@ -8,8 +8,10 @@ const Manufacturer = () => {
   const [batches, setBatches] = useState([]);
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [showBarcodeImage, setShowBarcodeImage] = useState(false);
-
-const [showProfileCard, setShowProfileCard] = useState(false);
+  const [showProfileCard, setShowProfileCard] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  
+  const profileRef = useRef(null);
 
   const [quoteForm, setQuoteForm] = useState({
     manufacturerID: 'MANUF-7890',
@@ -175,6 +177,11 @@ const [showProfileCard, setShowProfileCard] = useState(false);
     setNotifications(prev => prev.map(notification => ({ ...notification, read: true })));
   };
 
+  const handleLogout = () => {
+    alert('Logging out...');
+    // Add your logout logic here
+  };
+
   // Update notification count when notifications change
   useEffect(() => {
     const unreadCount = notifications.filter(n => !n.read).length;
@@ -193,19 +200,17 @@ const [showProfileCard, setShowProfileCard] = useState(false);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [showNotifications]);
 
+  // Handle click outside profile dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        showProfileMenu &&
-        !event.target.closest(".vhc-user-profile")
-      ) {
-        setShowProfileMenu(false);
+      if (showProfile && profileRef.current && !profileRef.current.contains(event.target)) {
+        setShowProfile(false);
       }
     };
 
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
-  }, [showProfileMenu]);
+  }, [showProfile]);
 
   // Handle batch selection
   const handleBatchSelect = (batch) => {
@@ -693,12 +698,16 @@ const [showProfileCard, setShowProfileCard] = useState(false);
                 onChange={(e) => handleManufacturingChange('geoTag', e.target.value)}
                 placeholder="Latitude, Longitude"
               />
-              <button className="gps-btn" onClick={() => {
-                // Mock GPS capture
-                const mockGPS = `${(Math.random() * 90).toFixed(6)}, ${(Math.random() * 180).toFixed(6)}`;
-                handleManufacturingChange('geoTag', mockGPS);
-                alert(`GPS captured: ${mockGPS}`);
-              }}>
+              <button 
+                type="button"
+                className="gps-btn" 
+                onClick={() => {
+                  // Mock GPS capture
+                  const mockGPS = `${(Math.random() * 90).toFixed(6)}, ${(Math.random() * 180).toFixed(6)}`;
+                  handleManufacturingChange('geoTag', mockGPS);
+                  alert(`GPS captured: ${mockGPS}`);
+                }}
+              >
                 <i className="fas fa-location-dot"></i> Capture GPS
               </button>
             </div>
@@ -765,7 +774,6 @@ const [showProfileCard, setShowProfileCard] = useState(false);
           </div>
         </div>
 
-
         <div className="barcode-preview">
           <h4>Final Barcode</h4>
           <div className="barcode-container">
@@ -776,11 +784,11 @@ const [showProfileCard, setShowProfileCard] = useState(false);
             <div className="barcode-info">
               <p>Scan this barcode to verify product authenticity</p>
               <button
-  className="btn-secondary"
-  onClick={() => window.open("https://res.cloudinary.com/domogztsv/image/upload/v1765720436/WhatsApp_Image_2025-12-14_at_6.07.45_PM_ehfirz.jpg", "_blank")}
->
-  <i className="fas fa-print"></i> Print Barcode
-</button>
+                className="btn-secondary"
+                onClick={() => window.open("https://res.cloudinary.com/domogztsv/image/upload/v1765720436/WhatsApp_Image_2025-12-14_at_6.07.45_PM_ehfirz.jpg", "_blank")}
+              >
+                <i className="fas fa-print"></i> Print Barcode
+              </button>
             </div>
           </div>
         </div>
@@ -799,7 +807,6 @@ const [showProfileCard, setShowProfileCard] = useState(false);
 
   return (
     <div className="manufacturer-portal">
-
       {/* Navigation */}
       <nav className="vhc-navbar">
         {/* LEFT SIDE */}
@@ -814,9 +821,6 @@ const [showProfileCard, setShowProfileCard] = useState(false);
 
         {/* RIGHT SIDE */}
         <div className="vhc-navbar-right">
-          {/* PHASE NAVIGATION */}
-
-
           {/* NOTIFICATIONS */}
           <div className="vhc-notification-container">
             <button
@@ -855,11 +859,15 @@ const [showProfileCard, setShowProfileCard] = useState(false);
                   {notifications.map(notification => (
                     <div
                       key={notification.id}
-                      className={`vhc-notification-item ${notification.read ? "" : "unread"}`}
+                      className={`vhc-notification-item ${
+                        notification.read ? "" : "unread"
+                      }`}
                       onClick={() => {
                         markNotificationAsRead(notification.id);
                         if (notification.batchId) {
-                          const batch = batches.find(b => b.id === notification.batchId);
+                          const batch = batches.find(
+                            b => b.id === notification.batchId
+                          );
                           if (batch) {
                             setSelectedBatch(batch);
                             setActivePhase("receive");
@@ -887,7 +895,9 @@ const [showProfileCard, setShowProfileCard] = useState(false);
                         </div>
                       </div>
 
-                      {!notification.read && <div className="vhc-unread-dot"></div>}
+                      {!notification.read && (
+                        <div className="vhc-unread-dot"></div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -901,27 +911,60 @@ const [showProfileCard, setShowProfileCard] = useState(false);
             )}
           </div>
 
-          {/* USER PROFILE */}
-<div className="vhc-user-profile">
-  <div
-    className="vhc-avatar"
-    onClick={() => setShowProfileCard(prev => !prev)}
-  >
-    M
-  </div>
+          {/* PROFILE */}
+          <div className="relative" ref={profileRef}>
+            <button
+              className="profile-btn-large"
+              onClick={() => {
+                setShowProfile(!showProfile);
+                setShowNotifications(false);
+              }}
+            >
+              <div className="animated-avatar-profile">
+                <img
+                  src="https://img.freepik.com/premium-photo/young-optimistic-woman-doctor-is-holding-clipboard-her-hands-while-standing-sunny-clinic-portrait-friendly-female-physician-with-stethoscope-perfect-medical-service-hospital-me_665183-12973.jpg"
+                  alt="Profile"
+                />
+              </div>
+            </button>
 
-  {showProfileCard && (
-    <div className="vhc-user-card-dropdown">
-      <div className="vhc-user-name">Herbal Solutions Inc.</div>
-      <div className="vhc-user-id">Manufacturer ID: MANUF-7890</div>
-      <div className="vhc-user-email">Email: contact@herbal.com</div>
-      <div className="vhc-user-role">Role: Manufacturer</div>
-    </div>
-  )}
-</div>
+            {showProfile && (
+              <div className="dropdown-panel">
+                <div className="profile-header">
+                  <div className="profile-info">
+                    <div className="profile-avatar-lg">
+                      <img
+                        src="https://img.freepik.com/premium-photo/young-optimistic-woman-doctor-is-holding-clipboard-her-hands-while-standing-sunny-clinic-portrait-friendly-female-physician-with-stethoscope-perfect-medical-service-hospital-me_665183-12973.jpg"
+                        alt="Profile"
+                      />
+                    </div>
 
+                    <div className="profile-details">
+                      <h4>Dr. Sarah Chen</h4>
+                      <p>Lead Quality Tester</p>
+                      <button className="btn-logout" onClick={handleLogout}>
+                        <h3>LogOut</h3>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="profile-stats">
+                    <div className="stat-item">
+                      <div className="stat-label">Manufacturer ID</div>
+                      <div className="stat-value">MID-2024-001</div>
+                    </div>
+                    <div className="stat-item">
+                      <div className="stat-label">Active Batches </div>
+                      <div className="stat-value">16</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
+
+      {/* PHASE NAVIGATION */}
       <div className="vhc-phase-nav">
         <button
           className={`vhc-phase-item ${activePhase === "receive" ? "active" : ""}`}
@@ -955,8 +998,6 @@ const [showProfileCard, setShowProfileCard] = useState(false);
           <span>Packaging</span>
         </button>
       </div>
-
-
 
       {/* Main Content */}
       <main className="portal-main">
