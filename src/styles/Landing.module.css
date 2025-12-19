@@ -1237,3 +1237,44 @@ gap: 1rem;
 text-align: center;
 }
 }
+
+
+
+/* Testimonials layout */
+.testimonialsSection {
+  position: relative;
+  padding: 120px 0;
+  background: #f9fbf7;
+}
+
+.testimonialsWrapper {
+  display: flex;
+  max-width: 1200px;
+  margin: auto;
+  gap: 80px;
+}
+
+/* Sticky Image */
+.stickyImageWrapper {
+  flex: 1;
+  position: sticky;
+  top: 50%;
+  transform: translateY(-50%);
+  height: fit-content;
+}
+
+.stickyImage {
+  width: 100%;
+  max-width: 350px;
+}
+
+/* Reviews scroll normally */
+.reviewsWrapper {
+  flex: 1.2;
+}
+
+/* Keep existing styles working */
+.carouselContainer {
+  position: relative;
+  margin-top: 40px;
+}

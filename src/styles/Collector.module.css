@@ -59,8 +59,8 @@ body {
   height: 60px;
   border-radius: 50%;
   object-fit: cover;
-  margin-left:-3%;
   flex-shrink: 0;
+  margin-top:-20px;
 }
 
 .vhc-nav-logo {
@@ -1838,4 +1838,368 @@ display: flex;
   margin-top: 10px;
   font-size: 13px;
   color: #6b7280;
+}
+
+/* ===============================
+   BATCHES PANEL STYLES
+   =============================== */
+
+.vhc-batches-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  background: #f8fafc;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.vhc-batches-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.vhc-batches-tab:hover {
+  background: #e2e8f0;
+}
+
+.vhc-batches-tab.active {
+  background: #639601;
+  color: white;
+  box-shadow: 0 2px 8px rgba(99, 150, 1, 0.2);
+}
+
+.vhc-batches-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.vhc-batches-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.vhc-batches-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.vhc-new-batch-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #639601, #7bb206);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vhc-new-batch-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 150, 1, 0.3);
+}
+
+.vhc-batches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.vhc-batch-item {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.vhc-batch-item:hover {
+  transform: translateY(-0.5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e1;
+}
+
+.vhc-batch-item.selected {
+  background: linear-gradient(135deg, #f9fcf7, #f0f9ec);
+  border-color: #639601;
+  box-shadow: 0 4px 16px rgba(99, 150, 1, 0.15);
+}
+
+.vhc-batch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.vhc-batch-id {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+}
+
+.vhc-batch-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vhc-batch-status.completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.vhc-batch-status.in-progress {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.vhc-batch-status.waiting {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.vhc-batch-status.not-started {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.vhc-batch-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 12px;
+}
+
+.vhc-batch-details {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.vhc-batch-detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.vhc-batch-detail svg {
+  width: 12px;
+  height: 12px;
+  color: #94a3b8;
+}
+
+.vhc-batch-stage {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vhc-stage-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.vhc-stage-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.vhc-stage-dot {
+  width: 20px;
+  height: 8px;
+  border-radius: 4px;
+  background: #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.vhc-stage-dot.active {
+  background: #639601;
+}
+
+.vhc-stage-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.vhc-batch-arrow {
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.vhc-batch-item:hover .vhc-batch-arrow {
+  transform: translateX(4px);
+  color: #639601;
+}
+
+.vhc-selected-batch-info {
+  background: white;
+  border: 2px solid #f0f9ec;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+  animation: slideUp 0.3s ease;
+}
+
+.vhc-selected-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.vhc-selected-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.vhc-clear-selection {
+  background: none;
+  border: none;
+  color: #639601;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.vhc-clear-selection:hover {
+  background: #f0f9ec;
+}
+
+.vhc-selected-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vhc-selected-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.vhc-selected-item:last-child {
+  border-bottom: none;
+}
+
+.vhc-selected-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.vhc-selected-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  text-align: right;
+}
+
+/* Custom scrollbar for batches list */
+.vhc-batches-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.vhc-batches-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.vhc-batches-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.vhc-batches-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .vhc-batches-toggle {
+    flex-direction: column;
+  }
+  
+  .vhc-batches-tab {
+    width: 100%;
+  }
+  
+  .vhc-batches-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .vhc-new-batch-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .vhc-batch-details {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .vhc-selected-details {
+    gap: 12px;
+  }
+}
+
+.vhc-mark-read-btn{
+  height:50px;
 }

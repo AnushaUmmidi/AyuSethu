@@ -288,6 +288,8 @@ const Landing = () => {
         </div>
       </section>
 
+      
+
       <div className={styles.white}></div>
 
       {/* FOOTER SECTION */}
