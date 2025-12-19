@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef, Fragment } from 'react';
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+
 import '../styles/Admin.css';
 
 const Admin = () => {
@@ -37,60 +39,94 @@ const Admin = () => {
   });
 
   const [batches] = useState([
-    { id: 'HB-2023-08-124', herb: 'Ashwagandha', farmer: 'Rajesh Kumar', collector: 'Anand Kumar', 
-      tester: 'HerbCheck Labs', manufacturer: 'Pending', stage: 3, completeness: 40, 
-      timeline: 'On track', status: 'inprogress', delay: 0 },
-    { id: 'HB-2023-08-123', herb: 'Tulsi', farmer: 'Suresh Patel', collector: 'Anand Kumar', 
-      tester: 'AyurTest Labs', manufacturer: 'Pending', stage: 5, completeness: 80, 
-      timeline: 'Delayed 2d', status: 'pending', delay: 2 },
-    { id: 'HB-2023-08-122', herb: 'Giloy', farmer: 'Mohan Singh', collector: 'Ravi Shankar', 
-      tester: 'HerbCheck Labs', manufacturer: 'Pending', stage: 2, completeness: 20, 
-      timeline: 'On track', status: 'inprogress', delay: 0 },
-    { id: 'HB-2023-08-121', herb: 'Turmeric', farmer: 'Amit Sharma', collector: 'Sanjay Patel', 
-      tester: 'AyurTest Labs', manufacturer: 'AyurPharma Ltd.', stage: 6, completeness: 100, 
-      timeline: 'Manufacturing', status: 'inprogress', delay: 0 },
-    { id: 'HB-2023-08-120', herb: 'Neem', farmer: 'Vijay Kumar', collector: 'Ravi Shankar', 
-      tester: 'HerbCheck Labs', manufacturer: 'Nature\'s Way', stage: 7, completeness: 100, 
-      timeline: 'Completed', status: 'completed', delay: 0 },
+    {
+      id: 'HB-2023-08-124', herb: 'Ashwagandha', farmer: 'Rajesh Kumar', collector: 'Anand Kumar',
+      tester: 'HerbCheck Labs', manufacturer: 'Pending', stage: 3, completeness: 40,
+      timeline: 'On track', status: 'inprogress', delay: 0
+    },
+    {
+      id: 'HB-2023-08-123', herb: 'Tulsi', farmer: 'Suresh Patel', collector: 'Anand Kumar',
+      tester: 'AyurTest Labs', manufacturer: 'Pending', stage: 5, completeness: 80,
+      timeline: 'Delayed 2d', status: 'pending', delay: 2
+    },
+    {
+      id: 'HB-2023-08-122', herb: 'Giloy', farmer: 'Mohan Singh', collector: 'Ravi Shankar',
+      tester: 'HerbCheck Labs', manufacturer: 'Pending', stage: 2, completeness: 20,
+      timeline: 'On track', status: 'inprogress', delay: 0
+    },
+    {
+      id: 'HB-2023-08-121', herb: 'Turmeric', farmer: 'Amit Sharma', collector: 'Sanjay Patel',
+      tester: 'AyurTest Labs', manufacturer: 'AyurPharma Ltd.', stage: 6, completeness: 100,
+      timeline: 'Manufacturing', status: 'inprogress', delay: 0
+    },
+    {
+      id: 'HB-2023-08-120', herb: 'Neem', farmer: 'Vijay Kumar', collector: 'Ravi Shankar',
+      tester: 'HerbCheck Labs', manufacturer: 'Nature\'s Way', stage: 7, completeness: 100,
+      timeline: 'Completed', status: 'completed', delay: 0
+    },
   ]);
 
   const [collectors] = useState([
-    { id: 'C-101', name: 'Anand Kumar', region: 'North India', phone: '+91 9876543210', 
-      email: 'anand@virtuherbchain.com', assignedBatches: 24, completed: 22, 
-      avgTime: '2.1 hrs', accuracy: '99%', status: 'active', rating: 4.8 },
-    { id: 'C-102', name: 'Ravi Shankar', region: 'South India', phone: '+91 9876543211', 
-      email: 'ravi@virtuherbchain.com', assignedBatches: 18, completed: 16, 
-      avgTime: '2.8 hrs', accuracy: '97%', status: 'active', rating: 4.5 },
-    { id: 'C-103', name: 'Sanjay Patel', region: 'West India', phone: '+91 9876543212', 
-      email: 'sanjay@virtuherbchain.com', assignedBatches: 15, completed: 12, 
-      avgTime: '3.2 hrs', accuracy: '95%', status: 'delayed', rating: 4.2 },
+    {
+      id: 'C-101', name: 'Anand Kumar', region: 'Vijayawada', phone: '+91 9876543210',
+      email: 'anand@virtuherbchain.com', assignedBatches: 'B201', completed: 'Verification',
+      avgTime: '18-12-2025', accuracy: 'Reassign', status: 'delayed',
+    },
+    {
+      id: 'C-102', name: 'Ravi Shankar', region: 'Hyderabad', phone: '+91 9876543211',
+      email: 'ravi@virtuherbchain.com', assignedBatches: 'B202', completed: 'Collection',
+      avgTime: '22-12-2025', accuracy: 'In progress', status: 'active',
+    },
+    {
+      id: 'C-103', name: 'Sanjay Patel', region: 'Warangal', phone: '+91 9876543212',
+      email: 'sanjay@virtuherbchain.com', assignedBatches: 'B202', completed: 'Collection',
+      avgTime: '15-12-2025', accuracy: 'Reassign', status: 'delayed', rating: 4.2
+    },
   ]);
 
   const [testers] = useState([
-    { id: 'T-101', name: 'HerbCheck Labs', location: 'Delhi', accreditation: 'NABL Certified', 
-      turnaround: '36 hrs', accuracy: '99.1%', acceptanceRate: '92%', rating: 4.8, status: 'active' },
-    { id: 'T-102', name: 'AyurTest Labs', location: 'Bangalore', accreditation: 'ISO 17025', 
-      turnaround: '42 hrs', accuracy: '98.7%', acceptanceRate: '88%', rating: 4.6, status: 'active' },
-    { id: 'T-103', name: 'Vedic Quality Labs', location: 'Mumbai', accreditation: 'FSSAI Approved', 
-      turnaround: '48 hrs', accuracy: '97.5%', acceptanceRate: '85%', rating: 4.3, status: 'active' },
+    {
+      id: 'T-101', name: 'HerbCheck Labs', location: 'Delhi', accreditation: 'NABL Certified',
+      turnaround: 'B201', accuracy: '01-01-2026', acceptanceRate: '05-01-2026', rating: 'Approved', status: 'Pass'
+    },
+    {
+      id: 'T-102', name: 'AyurTest Labs', location: 'Bangalore', accreditation: 'ISO 17025',
+      turnaround: 'B202', accuracy: '31-12-2025', acceptanceRate: '06-01-2026', rating: 'Pending', status: 'Pending'
+    },
+    {
+      id: 'T-103', name: 'Vedic Quality Labs', location: 'Mumbai', accreditation: 'FSSAI Approved',
+      turnaround: 'B203', accuracy: '21-12-2025', acceptanceRate: '02-01-2026', rating: 'Approved', status: 'Pass'
+    },
   ]);
 
   const [manufacturers] = useState([
-    { id: 'M-101', name: 'AyurPharma Ltd.', location: 'Gujarat', license: 'GMP Certified', 
-      capacity: '5000 kg/month', successRate: '94%', avgProcessing: '5.2 days', rating: 4.7, status: 'active' },
-    { id: 'M-102', name: 'HerbCare Solutions', location: 'Maharashtra', license: 'USFDA Approved', 
-      capacity: '3000 kg/month', successRate: '91%', avgProcessing: '6.1 days', rating: 4.5, status: 'active' },
-    { id: 'M-103', name: 'Nature\'s Way', location: 'Kerala', license: 'Organic Certified', 
-      capacity: '2000 kg/month', successRate: '96%', avgProcessing: '4.8 days', rating: 4.9, status: 'active' },
+    {
+      id: 'M-101', name: 'AyurPharma Ltd.', location: 'Gujarat', license: 'GMP Certified',
+      capacity: '5000 kg/month', successRate: '94%', avgProcessing: '5.2 days', rating: 4.7, status: 'active'
+    },
+    {
+      id: 'M-102', name: 'HerbCare Solutions', location: 'Maharashtra', license: 'USFDA Approved',
+      capacity: '3000 kg/month', successRate: '91%', avgProcessing: '6.1 days', rating: 4.5, status: 'active'
+    },
+    {
+      id: 'M-103', name: 'Nature\'s Way', location: 'Kerala', license: 'Organic Certified',
+      capacity: '2000 kg/month', successRate: '96%', avgProcessing: '4.8 days', rating: 4.9, status: 'active'
+    },
   ]);
 
   const [manufacturerQuotes] = useState([
-    { id: 'Q-001', batchId: 'HB-2023-08-119', manufacturer: 'AyurPharma Ltd.', amount: '₹124,500', 
-      time: '5 days', score: '94/100', status: 'pending', submitted: '2023-08-15' },
-    { id: 'Q-002', batchId: 'HB-2023-08-119', manufacturer: 'HerbCare Solutions', amount: '₹118,200', 
-      time: '6 days', score: '91/100', status: 'pending', submitted: '2023-08-15' },
-    { id: 'Q-003', batchId: 'HB-2023-08-118', manufacturer: 'Nature\'s Way', amount: '₹135,800', 
-      time: '4 days', score: '96/100', status: 'selected', submitted: '2023-08-14' },
+    {
+      id: 'Q-001', batchId: 'HB-2023-08-119', manufacturer: 'AyurPharma Ltd.', amount: '₹124,500',
+      time: '5 days', score: '94/100', status: 'pending', submitted: '2023-08-15'
+    },
+    {
+      id: 'Q-002', batchId: 'HB-2023-08-119', manufacturer: 'HerbCare Solutions', amount: '₹118,200',
+      time: '6 days', score: '91/100', status: 'pending', submitted: '2023-08-15'
+    },
+    {
+      id: 'Q-003', batchId: 'HB-2023-08-118', manufacturer: 'Nature\'s Way', amount: '₹135,800',
+      time: '4 days', score: '96/100', status: 'selected', submitted: '2023-08-14'
+    },
   ]);
 
   const [geoFencingData] = useState({
@@ -112,7 +148,18 @@ const Admin = () => {
     ]
   });
 
-  const [blockchainData] = useState({
+const mapContainerStyle = {
+  width: "100%",
+  height: "400px",
+  borderRadius: "8px",
+};
+
+const center = {
+  lat: 17.385044, // Hyderabad (change if needed)
+  lng: 78.486671,
+};
+
+const [blockchainData] = useState({
     fabric: {
       transactions: 5241,
       chaincodeCalls: 8920,
@@ -179,7 +226,7 @@ const Admin = () => {
     const initializeCharts = async () => {
       try {
         const { Chart } = await import('chart.js/auto');
-        
+
         // Batch Completion Chart
         if (batchChartRef.current) {
           const ctx = batchChartRef.current.getContext('2d');
@@ -233,19 +280,16 @@ const Admin = () => {
   // Navigation
   const navItems = [
     { id: 'dashboard', icon: 'fa-tachometer-alt', label: 'Dashboard' },
-    { id: 'users', icon: 'fa-users', label: 'User Management' },
-    { id: 'batches', icon: 'fa-boxes', label: 'Batch Management' },
     { id: 'collectors', icon: 'fa-truck-pickup', label: 'Collector Management' },
     { id: 'testers', icon: 'fa-flask', label: 'Tester Management' },
     { id: 'manufacturers', icon: 'fa-industry', label: 'Manufacturer Management' },
     { id: 'geofencing', icon: 'fa-map-marker-alt', label: 'Geo-Fencing' },
-    { id: 'blockchain', icon: 'fa-link', label: 'Blockchain & Labeling' },
     { id: 'analytics', icon: 'fa-chart-bar', label: 'Analytics' },
     { id: 'settings', icon: 'fa-cog', label: 'Settings' },
   ];
 
-  const userSubTabs = ['create-user', 'assign-permissions', 'identity-mapping'];
-  const batchSubTabs = ['batch-creation', 'stage-tracking', 'compliance'];
+  const userSubTabs = ['create-user', 'assign-permissions'];
+  const batchSubTabs = ['batch-creation', 'compliance'];
   const analyticsSubTabs = ['batch-analytics', 'sustainability'];
 
   const handleTabClick = (tabId) => {
@@ -327,9 +371,7 @@ const Admin = () => {
     { id: 'tester', title: 'Pending Tester Assignments', value: kpis.pendingTesterAssignments, icon: 'fa-tasks', change: { type: 'positive', value: 'Assign now' } },
     { id: 'quotes', title: 'Pending Manufacturer Quotes', value: kpis.pendingManufacturerQuotes, icon: 'fa-file-invoice-dollar', change: { type: 'neutral', value: 'Waiting for review' } },
     { id: 'completed', title: 'Completed Batches', value: kpis.completedBatches, icon: 'fa-check-circle', change: { type: 'positive', value: '8% this month' } },
-    { id: 'blockchain', title: 'Blockchain Transactions', value: kpis.blockchainTransactions.toLocaleString(), icon: 'fa-link', change: { type: 'positive', value: 'All successful' } },
     { id: 'delayed', title: 'Delayed Stages', value: kpis.delayedStages, icon: 'fa-clock', change: { type: 'negative', value: 'Needs attention' } },
-    { id: 'violations', title: 'Compliance Violations', value: kpis.complianceViolations, icon: 'fa-exclamation-triangle', change: { type: 'negative', value: 'Requires action' } },
   ];
 
   // Render functions for different tabs
@@ -361,7 +403,7 @@ const Admin = () => {
             <canvas ref={batchChartRef}></canvas>
           </div>
         </div>
-        
+
         <div className="notifications-container">
           <h3 className="section-title"><i className="fas fa-bell"></i> Recent Activity</h3>
           <div className="activity-list">
@@ -434,539 +476,6 @@ const Admin = () => {
     </>
   );
 
-  const renderUserManagement = () => {
-    const currentSubTab = activeSubTab['users'] || 'create-user';
-    
-    return (
-      <>
-        <h2 className="section-title"><i className="fas fa-users"></i> User & Role Management</h2>
-        
-        <div className="tabs">
-          {userSubTabs.map(subTab => (
-            <div 
-              key={subTab} 
-              className={`tab ${currentSubTab === subTab ? 'active' : ''}`}
-              onClick={() => handleSubTabClick(subTab, 'users')}
-            >
-              {subTab.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-            </div>
-          ))}
-        </div>
-        
-        {currentSubTab === 'create-user' && (
-          <div id="create-user" className="subtab-content active">
-            <div className="dashboard-grid">
-              <div className="card" onClick={() => openModal('createFarmerModal')} style={{ cursor: 'pointer' }}>
-                <div className="card-header">
-                  <div className="card-title">Create Farmer</div>
-                  <div className="card-icon">
-                    <i className="fas fa-user-tie"></i>
-                  </div>
-                </div>
-                <div className="card-value">{kpis.activeFarmers.toLocaleString()}</div>
-                <div className="card-change">Click to add new farmer</div>
-              </div>
-              
-              <div className="card" onClick={() => openModal('createCollectorModal')} style={{ cursor: 'pointer' }}>
-                <div className="card-header">
-                  <div className="card-title">Create Collector</div>
-                  <div className="card-icon">
-                    <i className="fas fa-truck-pickup"></i>
-                  </div>
-                </div>
-                <div className="card-value">{collectors.length}</div>
-                <div className="card-change">Click to add new collector</div>
-              </div>
-              
-              <div className="card" onClick={() => openModal('createTesterModal')} style={{ cursor: 'pointer' }}>
-                <div className="card-header">
-                  <div className="card-title">Create Tester</div>
-                  <div className="card-icon">
-                    <i className="fas fa-flask"></i>
-                  </div>
-                </div>
-                <div className="card-value">{testers.length}</div>
-                <div className="card-change">Click to add new tester</div>
-              </div>
-              
-              <div className="card" onClick={() => openModal('createManufacturerModal')} style={{ cursor: 'pointer' }}>
-                <div className="card-header">
-                  <div className="card-title">Create Manufacturer</div>
-                  <div className="card-icon">
-                    <i className="fas fa-industry"></i>
-                  </div>
-                </div>
-                <div className="card-value">{manufacturers.length}</div>
-                <div className="card-change">Click to add new manufacturer</div>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {currentSubTab === 'assign-permissions' && (
-          <div id="assign-permissions" className="subtab-content">
-            <h3 style={{ margin: '20px 0', color: '#1b5e20' }}>Role Permissions Matrix</h3>
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Role</th>
-                    <th>Stage 1 & 5</th>
-                    <th>Stage 2-4</th>
-                    <th>Test Reports</th>
-                    <th>Manufacturing</th>
-                    <th>View Only</th>
-                    <th>Fabric Cert</th>
-                    <th>Public Wallet</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>Farmer</strong></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                    <td><i className="fas fa-check" style={{ color: 'green' }}></i></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                    <td><i className="fas fa-check" style={{ color: 'green' }}></i></td>
-                    <td><i className="fas fa-check" style={{ color: 'green' }}></i></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Collector</strong></td>
-                    <td><i className="fas fa-check" style={{ color: 'green' }}></i></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                    <td><i className="fas fa-check" style={{ color: 'green' }}></i></td>
-                    <td><i className="fas fa-check" style={{ color: 'green' }}></i></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Tester</strong></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                    <td><i className="fas fa-check" style={{ color: 'green' }}></i></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                    <td><i className="fas fa-check" style={{ color: 'green' }}></i></td>
-                    <td><i className="fas fa-check" style={{ color: 'green' }}></i></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Manufacturer</strong></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                    <td><i className="fas fa-times" style={{ color: 'red' }}></i></td>
-                    <td><i className="fas fa-check" style={{ color: 'green' }}></i></td>
-                    <td><i className="fas fa-check" style={{ color: 'green' }}></i></td>
-                    <td><i className="fas fa-check" style={{ color: 'green' }}></i></td>
-                    <td><i className="fas fa-check" style={{ color: 'green' }}></i></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-        
-        {currentSubTab === 'identity-mapping' && (
-          <div id="identity-mapping" className="subtab-content">
-            <h3 style={{ margin: '20px 0', color: '#1b5e20' }}>Fabric Identity & Wallet Management</h3>
-            <div className="dashboard-grid">
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title">Fabric CA Certificates</div>
-                  <div className="card-icon">
-                    <i className="fas fa-certificate"></i>
-                  </div>
-                </div>
-                <div className="card-value">1,315 Issued</div>
-                <div className="card-change">X.509 certificates for all participants</div>
-              </div>
-              
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title">Public Chain Wallets</div>
-                  <div className="card-icon">
-                    <i className="fas fa-wallet"></i>
-                  </div>
-                </div>
-                <div className="card-value">{manufacturers.length}</div>
-                <div className="card-change">Polygon wallet addresses stored</div>
-              </div>
-              
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title">Internal Role Groups</div>
-                  <div className="card-icon">
-                    <i className="fas fa-layer-group"></i>
-                  </div>
-                </div>
-                <div className="card-value">4 Groups</div>
-                <div className="card-change">Farmer, Collector, Tester, Manufacturer</div>
-              </div>
-            </div>
-          </div>
-        )}
-      </>
-    );
-  };
-
-const renderBatchManagement = () => {
-    const currentSubTab = activeSubTab['batches'] || 'stage-tracking';
-    
-    return (
-      <>
-        <h2 className="section-title"><i className="fas fa-boxes"></i> Batch Management System</h2>
-        
-        <div className="tabs">
-          {batchSubTabs.map(subTab => (
-            <div 
-              key={subTab} 
-              className={`tab ${currentSubTab === subTab ? 'active' : ''}`}
-              onClick={() => handleSubTabClick(subTab, 'batches')}
-            >
-              {subTab.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-            </div>
-          ))}
-        </div>
-        
-        {currentSubTab === 'batch-creation' && (
-          <div id="batch-creation" className="subtab-content active">
-            <div className="dashboard-grid">
-               
-              
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title">Draft Batches</div>
-                  <div className="card-icon">
-                    <i className="fas fa-file-alt"></i>
-                  </div>
-                </div>
-                <div className="card-value">3</div>
-                <div className="card-change negative">Awaiting submission</div>
-              </div>
-              
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title">Today's Batches</div>
-                  <div className="card-icon">
-                    <i className="fas fa-calendar-day"></i>
-                  </div>
-                </div>
-                <div className="card-value">12</div>
-                <div className="card-change positive"><i className="fas fa-arrow-up"></i> 2 more than yesterday</div>
-              </div>
-              
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title">This Week</div>
-                  <div className="card-icon">
-                    <i className="fas fa-calendar-week"></i>
-                  </div>
-                </div>
-                <div className="card-value">47</div>
-                <div className="card-change positive">On track for 50</div>
-              </div>
-            </div>
-            
-            <div style={{ background: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginTop: '30px' }}>
-              <h3 style={{ color: '#1b5e20', marginBottom: '20px' }}>Quick Batch Creation</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
-                <div>
-                  <div className="form-group">
-                    <label>Select Herb Type</label>
-                    <select defaultValue="">
-                      <option value="">Choose herb...</option>
-                      <option value="ashwagandha">Ashwagandha</option>
-                      <option value="tulsi">Tulsi</option>
-                      <option value="giloy">Giloy</option>
-                      <option value="turmeric">Turmeric</option>
-                      <option value="neem">Neem</option>
-                      <option value="amla">Amla</option>
-                      <option value="brahmi">Brahmi</option>
-                    </select>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label>Select Farmer</label>
-                    <select defaultValue="">
-                      <option value="">Assign farmer...</option>
-                      <option value="F-1245">Rajesh Kumar (North India)</option>
-                      <option value="F-1246">Suresh Patel (West India)</option>
-                      <option value="F-1247">Mohan Singh (East India)</option>
-                      <option value="F-1248">Amit Sharma (South India)</option>
-                    </select>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label>Estimated Quantity (kg)</label>
-                    <input type="number" placeholder="e.g., 100" min="10" max="1000" />
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="form-group">
-                    <label>Target Harvest Date</label>
-                    <input type="date" min={new Date().toISOString().split('T')[0]} />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label>Quality Grade</label>
-                    <select defaultValue="premium">
-                      <option value="premium">Premium (Organic Certified)</option>
-                      <option value="standard">Standard (Traditional)</option>
-                      <option value="basic">Basic (Commercial)</option>
-                    </select>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label>Special Requirements</label>
-                    <textarea rows="4" placeholder="Any special instructions or requirements..."></textarea>
-                  </div>
-                </div>
-              </div>
-              
-              <div style={{ display: 'flex', gap: '15px', marginTop: '25px', justifyContent: 'flex-end' }}>
-                <button className="btn btn-secondary">
-                  <i className="fas fa-save"></i> Save as Draft
-                </button>
-                <button className="btn btn-primary" onClick={() => openModal('createBatchModal')}>
-                  <i className="fas fa-check-circle"></i> Create Batch
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {currentSubTab === 'stage-tracking' && (
-          <div id="stage-tracking" className="subtab-content active">
-            <h3 style={{ margin: '20px 0', color: '#1b5e20' }}>Batch Stage Status</h3>
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Batch ID</th>
-                    <th>Stage 1</th>
-                    <th>Stage 2</th>
-                    <th>Stage 3</th>
-                    <th>Stage 4</th>
-                    <th>Stage 5</th>
-                    <th>Testing</th>
-                    <th>Manufacturing</th>
-                    <th>Completeness</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {batches.map(batch => (
-                    <tr key={batch.id}>
-                      <td>{batch.id}</td>
-                      <td><i className="fas fa-check-circle" style={{ color: batch.stage >= 1 ? 'green' : 'gray' }}></i></td>
-                      <td><i className="fas fa-check-circle" style={{ color: batch.stage >= 2 ? 'green' : 'gray' }}></i></td>
-                      <td><i className={`fas ${batch.stage >= 3 ? (batch.delay > 0 ? 'fa-exclamation-triangle text-warning' : 'fa-check-circle text-success') : 'fa-clock text-gray'}`}></i></td>
-                      <td><i className="fas fa-check-circle" style={{ color: batch.stage >= 4 ? 'green' : 'gray' }}></i></td>
-                      <td><i className="fas fa-check-circle" style={{ color: batch.stage >= 5 ? 'green' : 'gray' }}></i></td>
-                      <td><i className="fas fa-flask" style={{ color: batch.stage >= 6 ? 'green' : 'gray' }}></i></td>
-                      <td><i className="fas fa-industry" style={{ color: batch.stage >= 7 ? 'green' : 'gray' }}></i></td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <div style={{ width: '40px' }}>{batch.completeness}%</div>
-                          <ProgressBar percentage={batch.completeness} />
-                        </div>
-                      </td>
-                      <td>
-                        <button className="btn btn-primary" style={{ padding: '5px 10px', fontSize: '0.9rem' }} onClick={() => openModal('batchDetailsModal')}>
-                          Manage
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            
-            <div style={{ marginTop: '30px', background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-              <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>Stage Visualization</h3>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '60px', background: '#e8f5e9', padding: '0 10px', borderRadius: '8px', marginBottom: '10px' }}>
-                {['Collection', 'Planting', 'Growth', 'Harvest', 'Verify', 'Testing', 'Manufacturing'].map((stage, index) => (
-                  <div key={index} style={{ textAlign: 'center', flex: 1, borderLeft: index > 0 ? '2px solid #2e7d32' : 'none' }}>
-                    <div style={{ fontWeight: 'bold' }}>Stage {index + 1}</div>
-                    <div>{stage}</div>
-                  </div>
-                ))}
-              </div>
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-                <div>
-                  <h4 style={{ color: '#1b5e20', marginBottom: '10px' }}>Batch Statistics</h4>
-                  <div style={{ display: 'flex', gap: '15px' }}>
-                    <div style={{ background: '#e8f5e9', padding: '10px', borderRadius: '6px', minWidth: '120px' }}>
-                      <div style={{ fontSize: '0.9rem', color: '#666' }}>In Progress</div>
-                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2e7d32' }}>{batches.filter(b => b.status === 'inprogress').length}</div>
-                    </div>
-                    <div style={{ background: '#fff3e0', padding: '10px', borderRadius: '6px', minWidth: '120px' }}>
-                      <div style={{ fontSize: '0.9rem', color: '#666' }}>Delayed</div>
-                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ff9800' }}>{batches.filter(b => b.delay > 0).length}</div>
-                    </div>
-                    <div style={{ background: '#e3f2fd', padding: '10px', borderRadius: '6px', minWidth: '120px' }}>
-                      <div style={{ fontSize: '0.9rem', color: '#666' }}>Completed</div>
-                      <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2196f3' }}>{batches.filter(b => b.status === 'completed').length}</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div style={{ textAlign: 'right' }}>
-                  <button className="btn btn-primary" onClick={() => openModal('bulkUpdateModal')}>
-                    <i className="fas fa-sync-alt"></i> Bulk Update Stages
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {currentSubTab === 'compliance' && (
-          <div id="compliance" className="subtab-content">
-            <div className="dashboard-grid">
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title">Compliance Score</div>
-                  <div className="card-icon">
-                    <i className="fas fa-check-double"></i>
-                  </div>
-                </div>
-                <div className="card-value">98.2%</div>
-                <div className="card-change positive"><i className="fas fa-arrow-up"></i> 2.1% this month</div>
-              </div>
-              
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title">Quality Failures</div>
-                  <div className="card-icon">
-                    <i className="fas fa-exclamation-triangle"></i>
-                  </div>
-                </div>
-                <div className="card-value">4</div>
-                <div className="card-change negative"><i className="fas fa-arrow-up"></i> Requires review</div>
-              </div>
-              
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title">AI Validations</div>
-                  <div className="card-icon">
-                    <i className="fas fa-robot"></i>
-                  </div>
-                </div>
-                <div className="card-value">99.3%</div>
-                <div className="card-change positive">Within thresholds</div>
-              </div>
-              
-              <div className="card">
-                <div className="card-header">
-                  <div className="card-title">Documentation</div>
-                  <div className="card-icon">
-                    <i className="fas fa-file-contract"></i>
-                  </div>
-                </div>
-                <div className="card-value">100%</div>
-                <div className="card-change positive">All batches compliant</div>
-              </div>
-            </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '25px', marginTop: '30px' }}>
-              <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                <h3 style={{ color: '#1b5e20', marginBottom: '20px' }}>Compliance Monitoring Dashboard</h3>
-                
-                <div style={{ marginBottom: '25px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <span style={{ fontWeight: '600' }}>Harvest Season Compliance</span>
-                    <span style={{ color: 'green', fontWeight: '600' }}>98% Pass</span>
-                  </div>
-                  <ProgressBar percentage={98} />
-                  <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '5px' }}>
-                    2 violations detected in last 30 days
-                  </div>
-                </div>
-                
-                <div style={{ marginBottom: '25px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <span style={{ fontWeight: '600' }}>Quality Threshold Compliance</span>
-                    <span style={{ color: 'green', fontWeight: '600' }}>99% Pass</span>
-                  </div>
-                  <ProgressBar percentage={99} />
-                  <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '5px' }}>
-                    All batches meet minimum quality standards
-                  </div>
-                </div>
-                
-                <div style={{ marginBottom: '25px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <span style={{ fontWeight: '600' }}>Documentation Compliance</span>
-                    <span style={{ color: 'green', fontWeight: '600' }}>100% Complete</span>
-                  </div>
-                  <ProgressBar percentage={100} color="#2196f3" />
-                  <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '5px' }}>
-                    All required documents uploaded and verified
-                  </div>
-                </div>
-                
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <span style={{ fontWeight: '600' }}>AI Model Validation</span>
-                    <span style={{ color: 'green', fontWeight: '600' }}>99.3% Accurate</span>
-                  </div>
-                  <ProgressBar percentage={99.3} color="#9c27b0" />
-                  <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '5px' }}>
-                    AI predictions validated against lab results
-                  </div>
-                </div>
-              </div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-                <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                  <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>Recent Compliance Issues</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                    <div style={{ background: '#ffebee', padding: '15px', borderRadius: '8px' }}>
-                      <div style={{ fontWeight: 'bold', color: '#f44336' }}>Batch HB-2023-08-110</div>
-                      <div style={{ fontSize: '0.9rem' }}>Harvested outside allowed season window</div>
-                      <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>Status: Escalated to Quality Team</div>
-                    </div>
-                    
-                    <div style={{ background: '#fff3e0', padding: '15px', borderRadius: '8px' }}>
-                      <div style={{ fontWeight: 'bold', color: '#ff9800' }}>Collector C-103</div>
-                      <div style={{ fontSize: '0.9rem' }}>Geofence violation - 15km outside allowed zone</div>
-                      <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>Status: Warning issued</div>
-                    </div>
-                    
-                    <div style={{ background: '#e8f5e9', padding: '15px', borderRadius: '8px' }}>
-                      <div style={{ fontWeight: 'bold', color: '#2e7d32' }}>Batch HB-2023-08-119</div>
-                      <div style={{ fontSize: '0.9rem' }}>Quality thresholds validated successfully</div>
-                      <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>Status: Approved for manufacturing</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                  <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>Compliance Actions</h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <button className="btn btn-primary" onClick={() => openModal('complianceReportModal')}>
-                      <i className="fas fa-file-pdf"></i> Generate Compliance Report
-                    </button>
-                    <button className="btn btn-secondary" onClick={() => openModal('auditScheduleModal')}>
-                      <i className="fas fa-calendar-check"></i> Schedule Audit
-                    </button>
-                    <button className="btn btn-secondary" onClick={() => openModal('updateComplianceModal')}>
-                      <i className="fas fa-edit"></i> Update Compliance Rules
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </>
-    );
-  };
-
   const renderCollectorManagement = () => (
     <>
       <h2 className="section-title"><i className="fas fa-truck-pickup"></i> Collector Management</h2>
@@ -981,7 +490,7 @@ const renderBatchManagement = () => {
           <div className="card-value">{collectors.filter(c => c.status === 'active').length}</div>
           <div className="card-change positive"><i className="fas fa-arrow-up"></i> 5 new this month</div>
         </div>
-        
+
         <div className="card">
           <div className="card-header">
             <div className="card-title">Avg. Assignment Time</div>
@@ -992,7 +501,7 @@ const renderBatchManagement = () => {
           <div className="card-value">2.4 hrs</div>
           <div className="card-change negative"><i className="fas fa-arrow-up"></i> 0.3 hrs longer</div>
         </div>
-        
+
         <div className="card">
           <div className="card-header">
             <div className="card-title">Missed Visits</div>
@@ -1003,33 +512,21 @@ const renderBatchManagement = () => {
           <div className="card-value">12</div>
           <div className="card-change positive"><i className="fas fa-arrow-down"></i> 3 less than last month</div>
         </div>
-        
-        <div className="card">
-          <div className="card-header">
-            <div className="card-title">Stage 1 & 5 Accuracy</div>
-            <div className="card-icon">
-              <i className="fas fa-check-double"></i>
-            </div>
-          </div>
-          <div className="card-value">98.2%</div>
-          <div className="card-change positive"><i className="fas fa-arrow-up"></i> High compliance</div>
-        </div>
       </div>
-      
+
       <div className="table-container" style={{ marginTop: '30px' }}>
-        <h3 style={{ padding: '20px 20px 0 20px', color: '#1b5e20' }}>Collector Performance</h3>
+        <h3 style={{ padding: '20px 20px 0 20px', color: '#1b5e20' }}>Collector Status</h3>
         <table>
           <thead>
             <tr>
               <th>Collector ID</th>
               <th>Name</th>
               <th>Region</th>
-              <th>Assigned</th>
-              <th>Completed</th>
-              <th>Avg. Time</th>
-              <th>Accuracy</th>
-              <th>Rating</th>
+              <th>Assigned Batch ID</th>
+              <th>Current Task</th>
+              <th>Due By</th>
               <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -1041,9 +538,8 @@ const renderBatchManagement = () => {
                 <td>{collector.assignedBatches}</td>
                 <td>{collector.completed}</td>
                 <td>{collector.avgTime}</td>
-                <td>{collector.accuracy}</td>
-                <td>{collector.rating}/5.0</td>
                 <td><StatusBadge status={collector.status} /></td>
+                <td>{collector.accuracy}</td>
               </tr>
             ))}
           </tbody>
@@ -1066,7 +562,7 @@ const renderBatchManagement = () => {
           <div className="card-value">{kpis.pendingTesterAssignments}</div>
           <div className="card-change">Awaiting results</div>
         </div>
-        
+
         <div className="card">
           <div className="card-header">
             <div className="card-title">Avg. Turnaround Time</div>
@@ -1077,7 +573,7 @@ const renderBatchManagement = () => {
           <div className="card-value">36 hrs</div>
           <div className="card-change positive"><i className="fas fa-arrow-down"></i> 4 hrs faster</div>
         </div>
-        
+
         <div className="card">
           <div className="card-header">
             <div className="card-title">Test Accuracy</div>
@@ -1088,19 +584,9 @@ const renderBatchManagement = () => {
           <div className="card-value">99.1%</div>
           <div className="card-change">AI validated</div>
         </div>
-        
-        <div className="card">
-          <div className="card-header">
-            <div className="card-title">Blockchain Test Entries</div>
-            <div className="card-icon">
-              <i className="fas fa-link"></i>
-            </div>
-          </div>
-          <div className="card-value">892</div>
-          <div className="card-change positive">All confirmed</div>
-        </div>
+
       </div>
-      
+
       <div className="table-container" style={{ marginTop: '30px' }}>
         <h3 style={{ padding: '20px 20px 0 20px', color: '#1b5e20' }}>Testing Labs</h3>
         <table>
@@ -1109,11 +595,12 @@ const renderBatchManagement = () => {
               <th>Lab ID</th>
               <th>Name</th>
               <th>Accreditation</th>
-              <th>Turnaround</th>
-              <th>Accuracy</th>
-              <th>Acceptance Rate</th>
-              <th>Rating</th>
+              <th>Batch ID</th>
+              <th>Sample Received On</th>
+              <th>Expected Result Date</th>
               <th>Status</th>
+              <th>Action</th>
+
             </tr>
           </thead>
           <tbody>
@@ -1125,8 +612,8 @@ const renderBatchManagement = () => {
                 <td>{tester.turnaround}</td>
                 <td>{tester.accuracy}</td>
                 <td>{tester.acceptanceRate}</td>
-                <td>{tester.rating}/5.0</td>
                 <td><StatusBadge status={tester.status} /></td>
+                <td>{tester.rating}</td>
               </tr>
             ))}
           </tbody>
@@ -1138,7 +625,7 @@ const renderBatchManagement = () => {
   const renderManufacturerManagement = () => (
     <>
       <h2 className="section-title"><i className="fas fa-industry"></i> Manufacturer Management</h2>
-      
+
       <div className="dashboard-grid">
         <div className="card">
           <div className="card-header">
@@ -1150,7 +637,7 @@ const renderBatchManagement = () => {
           <div className="card-value">{kpis.pendingManufacturerQuotes}</div>
           <div className="card-change">Awaiting review</div>
         </div>
-        
+
         <div className="card">
           <div className="card-header">
             <div className="card-title">Avg. Processing Time</div>
@@ -1161,7 +648,7 @@ const renderBatchManagement = () => {
           <div className="card-value">5.2 days</div>
           <div className="card-change positive"><i className="fas fa-arrow-down"></i> 0.8 days faster</div>
         </div>
-        
+
         <div className="card">
           <div className="card-header">
             <div className="card-title">Quote Success Rate</div>
@@ -1172,19 +659,8 @@ const renderBatchManagement = () => {
           <div className="card-value">87%</div>
           <div className="card-change positive"><i className="fas fa-arrow-up"></i> 5% increase</div>
         </div>
-        
-        <div className="card">
-          <div className="card-header">
-            <div className="card-title">Fabric Transactions</div>
-            <div className="card-icon">
-              <i className="fas fa-database"></i>
-            </div>
-          </div>
-          <div className="card-value">457</div>
-          <div className="card-change positive">manufactureMedicine()</div>
-        </div>
       </div>
-      
+
       <div className="table-container" style={{ marginTop: '30px' }}>
         <h3 style={{ padding: '20px 20px 0 20px', color: '#1b5e20' }}>Manufacturer Quotes</h3>
         <table>
@@ -1198,7 +674,6 @@ const renderBatchManagement = () => {
               <th>Quality Score</th>
               <th>Submitted</th>
               <th>Status</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -1212,17 +687,6 @@ const renderBatchManagement = () => {
                 <td>{quote.score}</td>
                 <td>{quote.submitted}</td>
                 <td><StatusBadge status={quote.status} /></td>
-                <td>
-                  {quote.status === 'pending' ? (
-                    <button className="btn btn-primary" style={{ padding: '5px 10px', fontSize: '0.9rem' }} onClick={() => selectManufacturer(quote.id)}>
-                      Select
-                    </button>
-                  ) : (
-                    <button className="btn btn-secondary" style={{ padding: '5px 10px', fontSize: '0.9rem' }}>
-                      View
-                    </button>
-                  )}
-                </td>
               </tr>
             ))}
           </tbody>
@@ -1234,7 +698,7 @@ const renderBatchManagement = () => {
   const renderGeofencing = () => (
     <>
       <h2 className="section-title"><i className="fas fa-map-marker-alt"></i> Geo-Fencing & Compliance Monitoring</h2>
-      
+
       <div className="dashboard-grid">
         <div className="card">
           <div className="card-header">
@@ -1246,7 +710,7 @@ const renderBatchManagement = () => {
           <div className="card-value">{geoFencingData.allowedZones.length}</div>
           <div className="card-change">India: North, South, East, West</div>
         </div>
-        
+
         <div className="card">
           <div className="card-header">
             <div className="card-title">Season Window Violations</div>
@@ -1257,7 +721,7 @@ const renderBatchManagement = () => {
           <div className="card-value">{geoFencingData.violations.filter(v => v.type === 'Season Window').length}</div>
           <div className="card-change negative"><i className="fas fa-arrow-up"></i> This month</div>
         </div>
-        
+
         <div className="card">
           <div className="card-header">
             <div className="card-title">AI Threshold Compliance</div>
@@ -1268,7 +732,7 @@ const renderBatchManagement = () => {
           <div className="card-value">{geoFencingData.compliance.aiValidation}%</div>
           <div className="card-change positive"><i className="fas fa-arrow-up"></i> Within limits</div>
         </div>
-        
+
         <div className="card">
           <div className="card-header">
             <div className="card-title">Out-of-Range Violations</div>
@@ -1280,67 +744,31 @@ const renderBatchManagement = () => {
           <div className="card-change negative"><i className="fas fa-arrow-up"></i> Collector moved</div>
         </div>
       </div>
-      
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '25px', marginTop: '30px' }}>
-        <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}><i className="fas fa-map"></i> Google Earth Engine API Map</h3>
-          <div style={{ 
-            background: 'linear-gradient(to bottom right, #e8f5e9, #c8e6c9)', 
-            height: '400px', 
-            borderRadius: '8px',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
-            {/* Simulated Map */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundImage: 'url("data:image/svg+xml,%3Csvg width="100%" height="100%" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg"%3E%3Crect width="100%" height="100%" fill="%23e8f5e9"/%3E%3Cpath d="M100,100 L200,150 L300,120 L400,180 L500,140 L600,200 L700,160" stroke="%232e7d32" stroke-width="2" fill="none"/%3E%3Ccircle cx="150" cy="100" r="8" fill="%232e7d32" opacity="0.8"/%3E%3Ccircle cx="300" cy="120" r="8" fill="%23ffb300" opacity="0.8"/%3E%3Ccircle cx="500" cy="140" r="8" fill="%232196f3" opacity="0.8"/%3E%3Ccircle cx="700" cy="160" r="8" fill="%23f44336" opacity="0.8"/%3E%3Ctext x="150" y="90" font-size="12" fill="%232e7d32"%3EFarm%3C/text%3E%3Ctext x="300" y="110" font-size="12" fill="%23ffb300"%3EManufacturer%3C/text%3E%3Ctext x="500" y="130" font-size="12" fill="%232196f3"%3ETester%3C/text%3E%3Ctext x="700" y="150" font-size="12" fill="%23f44336"%3EViolation%3C/text%3E%3C/svg%3E")',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}>
-              {/* Map Legend */}
-              <div style={{
-                position: 'absolute',
-                top: '20px',
-                right: '20px',
-                background: 'rgba(255,255,255,0.9)',
-                padding: '15px',
-                borderRadius: '8px',
-                fontSize: '0.9rem'
-              }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>Map Legend</div>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                  <div style={{ width: '12px', height: '12px', background: '#2e7d32', borderRadius: '50%', marginRight: '8px' }}></div>
-                  <span>Farm Locations</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                  <div style={{ width: '12px', height: '12px', background: '#ffb300', borderRadius: '50%', marginRight: '8px' }}></div>
-                  <span>Manufacturers</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-                  <div style={{ width: '12px', height: '12px', background: '#2196f3', borderRadius: '50%', marginRight: '8px' }}></div>
-                  <span>Testing Labs</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <div style={{ width: '12px', height: '12px', background: '#f44336', borderRadius: '50%', marginRight: '8px' }}></div>
-                  <span>Compliance Violations</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div style={{ marginTop: '15px', display: 'flex', justifyContent: 'flex-end' }}>
-            <button className="btn btn-primary" onClick={updateGeoFencingRules}>
-              <i className="fas fa-sync"></i> Sync Google Earth Engine Data
-            </button>
-          </div>
-        </div>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-          <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+
+<LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+  <GoogleMap
+    mapContainerStyle={mapContainerStyle}
+    center={center}
+    zoom={6}
+  >
+    {/* Farm */}
+    <Marker position={{ lat: 17.5, lng: 78.4 }} />
+
+    {/* Manufacturer */}
+    <Marker position={{ lat: 16.8, lng: 80.6 }} />
+
+    {/* Testing Lab */}
+    <Marker position={{ lat: 18.1, lng: 79.2 }} />
+
+    {/* Violation */}
+    <Marker
+      position={{ lat: 15.9, lng: 77.5 }}
+      icon="http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+    />
+  </GoogleMap>
+</LoadScript>
+ <div style={{ display: 'flex', gap: '100px', marginTop:'40px' }}>
+          <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)',marginLeft:'100px' }}>
             <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>Compliance Dashboard</h3>
             <div style={{ marginBottom: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
@@ -1380,165 +808,20 @@ const renderBatchManagement = () => {
             ))}
           </div>
         </div>
-      </div>
-    </>
-  );
-
-  const renderBlockchainLabeling = () => (
-    <>
-      <h2 className="section-title"><i className="fas fa-link"></i> Blockchain & Smart Labeling</h2>
-      
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px', marginBottom: '30px' }}>
-        <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <h3 style={{ color: '#1b5e20', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <i className="fab fa-hyperledger"></i> Hyperledger Fabric
-          </h3>
-          
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span>Last Transaction:</span>
-              <span style={{ fontFamily: 'monospace' }}>{blockchainData.fabric.lastTx}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span>Batch States:</span>
-              <span>{blockchainData.fabric.worldState} in world state</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span>Chaincode Executions:</span>
-              <span>{blockchainData.fabric.chaincodeCalls.toLocaleString()} successful</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span>Total Transactions:</span>
-              <span>{blockchainData.fabric.transactions.toLocaleString()}</span>
-            </div>
-          </div>
-          
-          <div style={{ background: '#e8f5e9', padding: '15px', borderRadius: '8px' }}>
-            <h4 style={{ color: '#1b5e20', marginBottom: '10px' }}>Fabric Chaincode Functions</h4>
-            <div style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>
-              <div>• createBatch()</div>
-              <div>• updateStage()</div>
-              <div>• _checkHarvestRules()</div>
-              <div>• _checkQualityThresholds()</div>
-              <div>• manufactureMedicine()</div>
-              <div>• generateLabel()</div>
-            </div>
-          </div>
-        </div>
-        
-        <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <h3 style={{ color: '#1b5e20', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <i className="fab fa-polygon"></i> Polygon & Smart Labeling
-          </h3>
-          
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span>NFTs Minted:</span>
-              <span style={{ fontFamily: 'monospace' }}>{blockchainData.polygon.nftsMinted}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span>Labels Generated:</span>
-              <span style={{ fontFamily: 'monospace' }}>{blockchainData.smartLabeling.labelsGenerated}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span>Last Label ID:</span>
-              <span style={{ fontFamily: 'monospace' }}>{blockchainData.smartLabeling.lastLabelId}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span>NFT Mint Success:</span>
-              <span style={{ fontFamily: 'monospace', color: 'green' }}>{blockchainData.smartLabeling.nftSuccessRate}</span>
-            </div>
-          </div>
-          
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            <button className="btn btn-primary" onClick={mintNFT}>
-              <i className="fas fa-coins"></i> mintHerbNFT()
-            </button>
-            <button className="btn btn-primary" onClick={() => openModal('generateLabelModal')}>
-              <i className="fas fa-qrcode"></i> Generate Smart Label
-            </button>
-            <button className="btn btn-secondary">
-              <i className="fas fa-sync"></i> Sync IPFS Metadata
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>Smart Label Workflow</h3>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '30px' }}>
-          {['Fabric Transaction', 'IPFS Metadata', 'Polygon NFT Mint', 'QR Code Generation'].map((step, index) => (
-            <Fragment key={`step-${index}`}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ width: '60px', height: '60px', background: '#2e7d32', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px', fontWeight: 'bold' }}>
-                  {index + 1}
-                </div>
-                <div style={{ fontSize: '0.9rem' }}>{step}</div>
-              </div>
-              {index < 3 && <div style={{ flex: 1, height: '3px', background: '#2e7d32' }}></div>}
-            </Fragment>
-          ))}
-        </div>
-        
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Transaction ID</th>
-                <th>Type</th>
-                <th>Batch ID</th>
-                <th>Label ID</th>
-                <th>Chain</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>2023-08-15 14:23</td>
-                <td style={{ fontFamily: 'monospace' }}>Tx-2023-08-124</td>
-                <td>Stage Update</td>
-                <td>HB-2023-08-124</td>
-                <td>-</td>
-                <td><span className="status status-inprogress">Fabric</span></td>
-                <td><StatusBadge status="completed" /></td>
-              </tr>
-              <tr>
-                <td>2023-08-15 11:47</td>
-                <td style={{ fontFamily: 'monospace' }}>0x5b2...9e1a</td>
-                <td>NFT Mint</td>
-                <td>HB-2023-08-115</td>
-                <td>LBL-2023-08-115</td>
-                <td><span className="status status-inprogress">Polygon</span></td>
-                <td><StatusBadge status="completed" /></td>
-              </tr>
-              <tr>
-                <td>2023-08-14 16:12</td>
-                <td style={{ fontFamily: 'monospace' }}>Tx-2023-08-123</td>
-                <td>Smart Label</td>
-                <td>HB-2023-08-119</td>
-                <td>LBL-2023-08-119</td>
-                <td><StatusBadge status="inprogress" /></td>
-                <td><StatusBadge status="completed" /></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
     </>
   );
 
   const renderAnalytics = () => {
     const currentSubTab = activeSubTab['analytics'] || 'batch-analytics';
-    
+
     return (
       <>
         <h2 className="section-title"><i className="fas fa-chart-bar"></i> Analytics & Reports</h2>
-        
+
         <div className="tabs">
           {analyticsSubTabs.map(subTab => (
-            <div 
-              key={subTab} 
+            <div
+              key={subTab}
               className={`tab ${currentSubTab === subTab ? 'active' : ''}`}
               onClick={() => handleSubTabClick(subTab, 'analytics')}
             >
@@ -1546,7 +829,7 @@ const renderBatchManagement = () => {
             </div>
           ))}
         </div>
-        
+
         {currentSubTab === 'batch-analytics' && (
           <div id="batch-analytics" className="subtab-content active">
             <div className="dashboard-grid">
@@ -1560,7 +843,7 @@ const renderBatchManagement = () => {
                 <div className="card-value">{analytics.batch.completionRate}%</div>
                 <div className="card-change positive"><i className="fas fa-arrow-up"></i> 5% this quarter</div>
               </div>
-              
+
               <div className="card">
                 <div className="card-header">
                   <div className="card-title">Average Duration</div>
@@ -1571,7 +854,7 @@ const renderBatchManagement = () => {
                 <div className="card-value">{analytics.batch.avgDuration}</div>
                 <div className="card-change positive"><i className="fas fa-arrow-down"></i> 3 days faster</div>
               </div>
-              
+
               <div className="card">
                 <div className="card-header">
                   <div className="card-title">Success Rate</div>
@@ -1582,7 +865,7 @@ const renderBatchManagement = () => {
                 <div className="card-value">{analytics.batch.successRate}%</div>
                 <div className="card-change positive">Quality maintained</div>
               </div>
-              
+
               <div className="card">
                 <div className="card-header">
                   <div className="card-title">Delay in Stage 3</div>
@@ -1594,7 +877,7 @@ const renderBatchManagement = () => {
                 <div className="card-change negative">Requires attention</div>
               </div>
             </div>
-            
+
             <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginTop: '30px' }}>
               <h3 style={{ color: '#1b5e20', marginBottom: '15px' }}>Delay Analysis by Stage</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -1631,7 +914,7 @@ const renderBatchManagement = () => {
             </div>
           </div>
         )}
-        
+
         {currentSubTab === 'sustainability' && (
           <div id="sustainability" className="subtab-content">
             <div className="dashboard-grid">
@@ -1645,7 +928,7 @@ const renderBatchManagement = () => {
                 <div className="card-value">{analytics.sustainability.carbonFootprint}</div>
                 <div className="card-change positive"><i className="fas fa-arrow-down"></i> 15% reduction</div>
               </div>
-              
+
               <div className="card">
                 <div className="card-header">
                   <div className="card-title">Water Saved</div>
@@ -1656,7 +939,7 @@ const renderBatchManagement = () => {
                 <div className="card-value">{analytics.sustainability.waterSaved}</div>
                 <div className="card-change positive">Traditional farming</div>
               </div>
-              
+
               <div className="card">
                 <div className="card-header">
                   <div className="card-title">Organic Compliance</div>
@@ -1667,7 +950,7 @@ const renderBatchManagement = () => {
                 <div className="card-value">{analytics.sustainability.organicCompliance}%</div>
                 <div className="card-change positive">Certified organic</div>
               </div>
-              
+
               <div className="card">
                 <div className="card-header">
                   <div className="card-title">Geo-Conservation</div>
@@ -1688,91 +971,91 @@ const renderBatchManagement = () => {
   const renderSettings = () => (
     <>
       <h2 className="section-title"><i className="fas fa-cog"></i> Settings & Automation</h2>
-      
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
         <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
           <h3 style={{ color: '#1b5e20', marginBottom: '20px' }}>Notification Rules</h3>
-          
+
           <div className="form-group">
             <label>
-              <input type="checkbox" checked={settings.notifications.delayReminders} readOnly /> 
+              <input type="checkbox" checked={settings.notifications.delayReminders} readOnly />
               Delay reminders
             </label>
           </div>
           <div className="form-group">
             <label>
-              <input type="checkbox" checked={settings.notifications.visitSchedule} readOnly /> 
+              <input type="checkbox" checked={settings.notifications.visitSchedule} readOnly />
               Visit schedule alerts
             </label>
           </div>
           <div className="form-group">
             <label>
-              <input type="checkbox" checked={settings.notifications.batchCompletion} readOnly /> 
+              <input type="checkbox" checked={settings.notifications.batchCompletion} readOnly />
               Batch completion alerts
             </label>
           </div>
           <div className="form-group">
             <label>
-              <input type="checkbox" checked={settings.notifications.testerAcceptance} readOnly /> 
+              <input type="checkbox" checked={settings.notifications.testerAcceptance} readOnly />
               Tester acceptance alerts
             </label>
           </div>
           <div className="form-group">
             <label>
-              <input type="checkbox" checked={settings.notifications.manufacturerQuotes} readOnly /> 
+              <input type="checkbox" checked={settings.notifications.manufacturerQuotes} readOnly />
               Manufacturer quote alerts
             </label>
           </div>
           <div className="form-group">
             <label>
-              <input type="checkbox" checked={settings.notifications.blockchainTx} readOnly /> 
+              <input type="checkbox" checked={settings.notifications.blockchainTx} readOnly />
               Blockchain transaction alerts
             </label>
           </div>
-          
+
           <button className="btn btn-primary" style={{ marginTop: '15px' }}>Save Notification Settings</button>
         </div>
-        
+
         <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
           <h3 style={{ color: '#1b5e20', marginBottom: '20px' }}>Automation Settings</h3>
-          
+
           <div className="form-group">
             <label>
-              <input type="checkbox" checked={settings.automation.autoSelectTester} readOnly /> 
+              <input type="checkbox" checked={settings.automation.autoSelectTester} readOnly />
               Auto-select first tester
             </label>
           </div>
           <div className="form-group">
             <label>
-              <input type="checkbox" checked={settings.automation.autoEscalate} readOnly /> 
+              <input type="checkbox" checked={settings.automation.autoEscalate} readOnly />
               Auto-escalate delayed stages
             </label>
           </div>
           <div className="form-group">
             <label>
-              <input type="checkbox" checked={settings.automation.weeklyAnalytics} readOnly /> 
+              <input type="checkbox" checked={settings.automation.weeklyAnalytics} readOnly />
               Auto-generate analytics weekly
             </label>
           </div>
           <div className="form-group">
             <label>
-              <input type="checkbox" checked={settings.automation.autoSyncIPFS} readOnly /> 
+              <input type="checkbox" checked={settings.automation.autoSyncIPFS} readOnly />
               Auto-sync IPFS reports
             </label>
           </div>
           <div className="form-group">
             <label>
-              <input type="checkbox" checked={settings.automation.autoAssignCollector} readOnly /> 
+              <input type="checkbox" checked={settings.automation.autoAssignCollector} readOnly />
               Auto-assign nearest collector
             </label>
           </div>
           <div className="form-group">
             <label>
-              <input type="checkbox" checked={settings.automation.autoValidateAI} readOnly /> 
+              <input type="checkbox" checked={settings.automation.autoValidateAI} readOnly />
               Auto-validate AI thresholds
             </label>
           </div>
-          
+
           <button className="btn btn-primary" style={{ marginTop: '15px' }}>Save Automation Settings</button>
         </div>
       </div>
@@ -1785,8 +1068,6 @@ const renderBatchManagement = () => {
         return renderDashboard();
       case 'users':
         return renderUserManagement();
-      case 'batches':
-        return renderBatchManagement();
       case 'collectors':
         return renderCollectorManagement();
       case 'testers':
@@ -1795,8 +1076,6 @@ const renderBatchManagement = () => {
         return renderManufacturerManagement();
       case 'geofencing':
         return renderGeofencing();
-      case 'blockchain':
-        return renderBlockchainLabeling();
       case 'analytics':
         return renderAnalytics();
       case 'settings':
@@ -1815,7 +1094,7 @@ const renderBatchManagement = () => {
         </div>
         <ul className="nav-menu">
           {navItems.map(item => (
-            <li 
+            <li
               key={item.id}
               className={`nav-item ${activeTab === item.id ? 'active' : ''}`}
               onClick={() => handleTabClick(item.id)}
@@ -1839,8 +1118,8 @@ const renderBatchManagement = () => {
           </div>
           <div className="user-info">
             <div className="notification-icon-container">
-              <i 
-                className="fas fa-bell" 
+              <i
+                className="fas fa-bell"
                 style={{ fontSize: '1.2rem', color: '#2e7d32', cursor: 'pointer', position: 'relative' }}
                 onClick={() => setShowNotifications(!showNotifications)}
               >
@@ -1849,13 +1128,13 @@ const renderBatchManagement = () => {
                   <span className="notification-badge">{notifications.length}</span>
                 )}
               </i>
-              
+
               {/* Notifications Dropdown */}
               {showNotifications && (
                 <div className="notifications-dropdown">
                   <div className="notifications-header">
                     <h4>Notifications ({notifications.length})</h4>
-                    <button 
+                    <button
                       className="btn btn-sm btn-secondary"
                       onClick={() => setShowNotifications(false)}
                     >

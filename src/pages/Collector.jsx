@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "../styles/Collector.module.css";
-import { 
-  Bell, X, CheckCircle, AlertCircle, MapPin, Camera, 
+import {
+  Bell, X, CheckCircle, AlertCircle, MapPin, Camera,
   User, LogOut, Package, Clock, ChevronDown, ChevronUp,
   FileText, Upload, Eye, Download, Calendar, MapPin as MapPinIcon,
   Weight, UserCheck, Filter, MoreVertical, Copy, FileCheck,
@@ -18,23 +18,23 @@ const THEME_DARK = "#4e7c00";
 const STAGE_DATA = [
   {
     id: 1,
-    title: "Stage 1: ",
+    title: "Stage 1: Farm Registration & Initial Assessment",
   },
   {
     id: 2,
-    title: "Stage 2: ",
+    title: "Stage 2: Growth Monitoring",
   },
   {
     id: 3,
-    title: "Stage 3: ",
+    title: "Stage 3: Health Assessment",
   },
   {
     id: 4,
-    title: "Stage 4: ",
+    title: "Stage 4: Pre-Harvest Check",
   },
   {
     id: 5,
-    title: "Stage 5: ",
+    title: "Stage 5: Final Harvest & Verification",
   }
 ];
 
@@ -137,6 +137,7 @@ function App() {
     sampleCollected: false,
     finalPhoto: null,
     finalGeotag: "",
+    exactAddress: "",
     dispatchAuth: false
   });
 
@@ -200,6 +201,9 @@ function App() {
   const notificationRef = useRef(null);
   const profileRef = useRef(null);
 
+  const [showSubmissionConfirmation, setShowSubmissionConfirmation] = useState(false);
+  const [submittedBatch, setSubmittedBatch] = useState(null);
+
   // Close notifications when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
@@ -215,6 +219,26 @@ function App() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // Handle Escape key for dialogs
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape') {
+        if (showCreateBatchDialog) {
+          setShowCreateBatchDialog(false);
+        }
+        if (showSubmissionConfirmation) {
+          setShowSubmissionConfirmation(false);
+          setSubmittedBatch(null);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [showCreateBatchDialog, showSubmissionConfirmation]);
 
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
@@ -369,9 +393,10 @@ function App() {
           console.log("REVERSE GEOCODE RESPONSE:", data);
 
           if (data && data.display_name) {
-            setToast("✅ Final GPS location captured!");
+            updateStage5Form("exactAddress", data.display_name);
+            setToast("✅ Exact address captured!");
           } else {
-            setToast("⚠️ GPS location captured, but no address found");
+            setToast("✅ GPS captured, but no address found");
           }
 
         } catch (err) {
@@ -457,7 +482,7 @@ function App() {
   const handleStageClick = (stageId) => {
     setCurrentStage(stageId);
     setActiveTab(`stage${stageId}`);
-    setToast(`Stage ${stageId}`);
+    setToast(`Switched to Stage ${stageId}`);
     setTimeout(() => setToast(""), 3000);
   };
 
@@ -471,13 +496,33 @@ function App() {
     setTimeout(() => setToast(""), 3000);
 
     if (stageId === 5) {
-      setTimeout(() => {
-        setToast("Batch completed and ready for dispatch!");
-      }, 500);
+      // Prepare batch data for submission
+      const batchData = {
+        batchId: stage5Form.batchId,
+        farmerName: stage1Form.farmerName,
+        herbSpecies: stage1Form.species,
+        finalQuantity: stage5Form.finalQuantity,
+        finalHarvestDate: stage5Form.finalHarvestDate,
+        location: stage5Form.exactAddress,
+        coordinates: stage5Form.finalGeotag,
+        sampleCollected: stage5Form.sampleCollected,
+        dispatchAuthorized: stage5Form.dispatchAuth,
+        timestamp: new Date().toISOString()
+      };
+
+      setSubmittedBatch(batchData);
+      setShowSubmissionConfirmation(true);
     }
   };
 
   const handleCreateBatchClick = () => {
+    // Check if required fields are filled
+    if (!stage1Form.farmerName || !stage1Form.fid || !stage1Form.species) {
+      setToast("Please fill all required fields: Farmer Name, Farmer ID, and Herb Species");
+      setTimeout(() => setToast(""), 3000);
+      return;
+    }
+
     // Generate a batch ID from admin (simulated)
     const adminBatchId = `BATCH-${new Date().getFullYear()}-${Math.floor(Math.random() * 9000 + 1000)}-ADM`;
     setBatchIdFromAdmin(adminBatchId);
@@ -553,19 +598,19 @@ function App() {
 
   const handleBatchSelect = (batch) => {
     setSelectedBatch(batch);
-    
+
     // Update current stage based on selected batch
     if (batch.stage) {
       setCurrentStage(batch.stage);
       setActiveTab(`stage${batch.stage}`);
-      
+
       // Update stage status based on batch progress
       const newStatus = ["waiting", "waiting", "waiting", "waiting", "waiting"];
       for (let i = 0; i < batch.stage; i++) {
         newStatus[i] = i === batch.stage - 1 ? "current" : "done";
       }
       setStageStatus(newStatus);
-      
+
       // Set toast notification
       setToast(`✅ Loaded batch: ${batch.id}`);
       setTimeout(() => setToast(""), 3000);
@@ -577,10 +622,10 @@ function App() {
     setCurrentStage(1);
     setActiveTab("stage1");
     setSelectedBatch(null);
-    
+
     // Reset stage status
     setStageStatus(["current", "waiting", "waiting", "waiting", "waiting"]);
-    
+
     // Reset forms
     setStage1Form({
       farmerName: "",
@@ -595,7 +640,7 @@ function App() {
       irrigationType: "",
       soilType: ""
     });
-    
+
     setToast("✨ Starting new batch creation");
     setTimeout(() => setToast(""), 3000);
   };
@@ -613,11 +658,11 @@ function App() {
           backgroundColor: status === "current" ? THEME_VERY_LIGHT : "transparent"
         }}
       >
-        <div 
+        <div
           className={`${styles["vhc-timeline-dot"]} ${styles[status]}`}
           style={{
-            backgroundColor: status === "current" ? THEME : 
-                           status === "done" ? "#10b981" : "#9ca3af",
+            backgroundColor: status === "current" ? THEME :
+              status === "done" ? "#10b981" : "#9ca3af",
             color: status === "current" ? "white" : "white"
           }}
         >
@@ -628,11 +673,11 @@ function App() {
             {stage.title}
           </div>
           <div className={`${styles["vhc-timeline-status"]} ${styles[status]}`}
-               style={{
-                 color: status === "current" ? THEME : 
-                        status === "done" ? "#10b981" : "#6b7280",
-                 backgroundColor: status === "current" ? THEME_LIGHT : "#f3f4f6"
-               }}>
+            style={{
+              color: status === "current" ? THEME :
+                status === "done" ? "#10b981" : "#6b7280",
+              backgroundColor: status === "current" ? THEME_LIGHT : "#f3f4f6"
+            }}>
             {getStatusText(status)}
           </div>
         </div>
@@ -646,7 +691,7 @@ function App() {
         return (
           <div className={styles["vhc-stage-content"]}>
             <h3 className={styles["vhc-stage-title"]} style={{ color: THEME }}>
-              Stage 1: 
+              Stage 1: Farm Registration & Initial Assessment
             </h3>
             <p className={styles["vhc-stage-subtitle"]}>
               Collect initial farm data and documentation
@@ -825,7 +870,7 @@ function App() {
                     </div>
                   ) : (
                     <label className={styles["vhc-upload-area"]}
-                           style={{ borderColor: THEME, borderStyle: "dashed" }}>
+                      style={{ borderColor: THEME, borderStyle: "dashed" }}>
                       <Camera size={24} style={{ color: THEME }} />
                       <span>Click to upload farm photo</span>
                       <input
@@ -883,7 +928,7 @@ function App() {
                 gap: "10px"
               }}
             >
-              Stage 2: 
+              Stage 2: Growth Monitoring
             </h3>
 
             {/* STATUS BOX */}
@@ -968,7 +1013,7 @@ function App() {
               {stage3Form.assessmentPhotos.length > 0 && (
                 <CheckCircle size={20} color="#16a34a" />
               )}
-              Stage 3: 
+              Stage 3: Health Assessment
             </h3>
 
             {/* STATUS BOX */}
@@ -1061,12 +1106,12 @@ function App() {
         return (
           <div className={styles["vhc-stage-content"]}>
             <h3 className={styles["vhc-stage-title"]} style={{ color: THEME }}>
-              Stage 4: 
+              Stage 4: Pre-Harvest Check
             </h3>
 
             {/* STATUS BOX */}
             <div className={styles["vhc-waiting-box"]}
-                 style={{ borderColor: THEME_LIGHT, backgroundColor: THEME_VERY_LIGHT }}>
+              style={{ borderColor: THEME_LIGHT, backgroundColor: THEME_VERY_LIGHT }}>
               {stage4Form.preHarvestPhotos.length === 0 ? (
                 <>
                   <p>Waiting for farmer to upload pre-harvest data</p>
@@ -1109,7 +1154,7 @@ function App() {
         return (
           <div className={styles["vhc-stage-content"]}>
             <h3 className={styles["vhc-stage-title"]} style={{ color: THEME }}>
-              Stage 5: 
+              Stage 5: Final Harvest & Verification
             </h3>
             <p className={styles["vhc-stage-subtitle"]}>
               Complete final documentation before dispatch
@@ -1177,7 +1222,6 @@ function App() {
                   </label>
                 </div>
               </div>
-
               <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
                 <label className={styles["vhc-label"]}>
                   <MapPinIcon size={16} style={{ marginRight: "8px", color: THEME }} />
@@ -1203,6 +1247,21 @@ function App() {
 
               <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
                 <label className={styles["vhc-label"]}>
+                  <MapPinIcon size={16} style={{ marginRight: "8px", color: THEME }} />
+                  Exact Address
+                </label>
+                <textarea
+                  className={styles["vhc-textarea"]}
+                  value={stage5Form.exactAddress}
+                  readOnly
+                  placeholder="Will be auto-filled after GPS capture"
+                  rows="2"
+                  style={{ borderColor: THEME_LIGHT }}
+                />
+              </div>
+
+              <div className={`${styles["vhc-field"]} ${styles["vhc-field-full"]}`}>
+                <label className={styles["vhc-label"]}>
                   <Camera size={16} style={{ marginRight: "8px", color: THEME }} />
                   Final Harvest Photo
                 </label>
@@ -1220,7 +1279,7 @@ function App() {
                     </div>
                   ) : (
                     <label className={styles["vhc-upload-area"]}
-                           style={{ borderColor: THEME, borderStyle: "dashed" }}>
+                      style={{ borderColor: THEME, borderStyle: "dashed" }}>
                       <Camera size={24} style={{ color: THEME }} />
                       <span>Click to upload final harvest photo</span>
                       <input
@@ -1233,7 +1292,7 @@ function App() {
                   )}
                 </div>
                 <div className={styles["verify"]}>
-                  <button 
+                  <button
                     onClick={() => alert('Herb Verified Successfully!')}
                     style={{ backgroundColor: THEME, color: "white" }}
                   >
@@ -1263,19 +1322,52 @@ function App() {
             </div>
 
             <div className={styles["vhc-final-verification"]}>
-              <button
-                className={styles["vhc-create-batch-btn"]}
-                onClick={() => markStageDone(5)}
-                disabled={!stage5Form.finalHarvestDate || !stage5Form.finalQuantity}
-                style={{
-                  backgroundColor: !stage5Form.finalHarvestDate || !stage5Form.finalQuantity ? "#9ca3af" : THEME,
-                  color: "white"
-                }}
-              >
-                <CheckCircle size={20} /> Complete Final Verification
-              </button>
+              <div className={styles["vhc-button-group"]}>
+                <button
+                  className={styles["vhc-create-batch-btn"]}
+                  onClick={() => markStageDone(5)}
+                  disabled={!stage5Form.finalHarvestDate || !stage5Form.finalQuantity}
+                  style={{
+                    backgroundColor: !stage5Form.finalHarvestDate || !stage5Form.finalQuantity ? "#9ca3af" : THEME,
+                    color: "white"
+                  }}
+                >
+                  <CheckCircle size={20} /> Complete Final Verification
+                </button>
+
+                <button
+                  className={styles["vhc-submit-btn"]}
+                  onClick={() => {
+                    if (!stage5Form.finalHarvestDate || !stage5Form.finalQuantity) {
+                      setToast("Please complete all required fields first");
+                      return;
+                    }
+                    const batchData = {
+                      batchId: stage5Form.batchId,
+                      farmerName: stage1Form.farmerName,
+                      herbSpecies: stage1Form.species,
+                      finalQuantity: stage5Form.finalQuantity,
+                      finalHarvestDate: stage5Form.finalHarvestDate,
+                      location: stage5Form.exactAddress,
+                      coordinates: stage5Form.finalGeotag,
+                      sampleCollected: stage5Form.sampleCollected,
+                      dispatchAuthorized: stage5Form.dispatchAuth,
+                      timestamp: new Date().toISOString()
+                    };
+                    setSubmittedBatch(batchData);
+                    setShowSubmissionConfirmation(true);
+                  }}
+                  disabled={!stage5Form.finalHarvestDate || !stage5Form.finalQuantity}
+                  style={{
+                    backgroundColor: !stage5Form.finalHarvestDate || !stage5Form.finalQuantity ? "#9ca3af" : "#16a34a",
+                    color: "white"
+                  }}
+                >
+                  <Upload size={20} /> Submit Batch
+                </button>
+              </div>
               <p className={styles["vhc-verification-note"]}>
-                Note: Once verified, batch will be locked and sent for processing
+                Note: Once submitted, batch will be locked and sent for processing
               </p>
             </div>
           </div>
@@ -1297,8 +1389,15 @@ function App() {
 
       {/* Create Batch Dialog */}
       {showCreateBatchDialog && (
-        <div className={styles["vhc-dialog-overlay"]}>
-          <div className={styles["vhc-dialog-container"]} style={{ borderColor: THEME_LIGHT }}>
+        <div 
+          className={styles["vhc-dialog-overlay"]}
+          onClick={() => setShowCreateBatchDialog(false)}
+        >
+          <div 
+            className={styles["vhc-dialog-container"]} 
+            style={{ borderColor: THEME_LIGHT }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles["vhc-dialog-header"]}>
               <h3 className={styles["vhc-dialog-title"]} style={{ color: THEME }}>
                 Batch Creation Confirmation
@@ -1378,13 +1477,195 @@ function App() {
                 className={styles["vhc-dialog-btn-confirm"]}
                 onClick={confirmCreateBatch}
                 disabled={!stage1Form.farmerName || !stage1Form.fid || !stage1Form.species}
-                style={{ 
+                style={{
                   backgroundColor: !stage1Form.farmerName || !stage1Form.fid || !stage1Form.species ? "#9ca3af" : THEME,
                   color: "white"
                 }}
               >
                 <CheckCircle size={18} />
                 Proceed to Stage 2
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Submission Confirmation Window */}
+      {showSubmissionConfirmation && submittedBatch && (
+        <div 
+          className={styles["vhc-dialog-overlay"]}
+          onClick={() => {
+            setShowSubmissionConfirmation(false);
+            setSubmittedBatch(null);
+          }}
+        >
+          <div 
+            className={styles["vhc-dialog-container"]} 
+            style={{ borderColor: "#16a34a", maxWidth: "500px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles["vhc-dialog-header"]}>
+              <h3 className={styles["vhc-dialog-title"]} style={{ color: "#16a34a" }}>
+                ✅ Batch Submitted Successfully!
+              </h3>
+              <button
+                className={styles["vhc-dialog-close"]}
+                onClick={() => {
+                  setShowSubmissionConfirmation(false);
+                  setSubmittedBatch(null);
+                }}
+                style={{ color: "#16a34a" }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className={styles["vhc-dialog-content"]}>
+              <div className={styles["vhc-dialog-icon"]} style={{
+                backgroundColor: "#dcfce7",
+                color: "#16a34a",
+                fontSize: "32px"
+              }}>
+                ✓
+              </div>
+
+              <h4 className={styles["vhc-dialog-message"]}>
+                Batch Ready for Dispatch
+              </h4>
+              <p className={styles["vhc-dialog-description"]}>
+                Your batch has been submitted and is now locked for processing.
+              </p>
+
+              <div className={styles["vhc-submission-details"]}>
+                <div className={styles["vhc-submission-section"]}>
+                  <h5 style={{ color: "#16a34a", marginBottom: "10px" }}>
+                    Batch Information
+                  </h5>
+                  <div className={styles["vhc-submission-row"]}>
+                    <span className={styles["vhc-submission-label"]}>Batch ID:</span>
+                    <span className={styles["vhc-submission-value"]} style={{ color: THEME, fontWeight: "bold" }}>
+                      {submittedBatch.batchId}
+                    </span>
+                  </div>
+                  <div className={styles["vhc-submission-row"]}>
+                    <span className={styles["vhc-submission-label"]}>Farmer:</span>
+                    <span className={styles["vhc-submission-value"]}>
+                      {submittedBatch.farmerName}
+                    </span>
+                  </div>
+                  <div className={styles["vhc-submission-row"]}>
+                    <span className={styles["vhc-submission-label"]}>Herb Species:</span>
+                    <span className={styles["vhc-submission-value"]}>
+                      {submittedBatch.herbSpecies}
+                    </span>
+                  </div>
+                  <div className={styles["vhc-submission-row"]}>
+                    <span className={styles["vhc-submission-label"]}>Final Quantity:</span>
+                    <span className={styles["vhc-submission-value"]}>
+                      {submittedBatch.finalQuantity} kg
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles["vhc-submission-section"]}>
+                  <h5 style={{ color: "#16a34a", marginBottom: "10px" }}>
+                    Location Details
+                  </h5>
+                  <div className={styles["vhc-submission-row"]}>
+                    <span className={styles["vhc-submission-label"]}>Harvest Date:</span>
+                    <span className={styles["vhc-submission-value"]}>
+                      {new Date(submittedBatch.finalHarvestDate).toLocaleDateString('en-GB')}
+                    </span>
+                  </div>
+                  <div className={styles["vhc-submission-row"]}>
+                    <span className={styles["vhc-submission-label"]}>Coordinates:</span>
+                    <span className={styles["vhc-submission-value"]}>
+                      {submittedBatch.coordinates}
+                    </span>
+                  </div>
+                  <div className={styles["vhc-submission-row"]}>
+                    <span className={styles["vhc-submission-label"]}>Address:</span>
+                    <span className={styles["vhc-submission-value"]}>
+                      {submittedBatch.location}
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles["vhc-submission-section"]}>
+                  <h5 style={{ color: "#16a34a", marginBottom: "10px" }}>
+                    Final Checks
+                  </h5>
+                  <div className={styles["vhc-submission-row"]}>
+                    <span className={styles["vhc-submission-label"]}>Sample Collected:</span>
+                    <span className={styles["vhc-submission-value"]}>
+                      {submittedBatch.sampleCollected ? '✅ Yes' : '❌ No'}
+                    </span>
+                  </div>
+                  <div className={styles["vhc-submission-row"]}>
+                    <span className={styles["vhc-submission-label"]}>Dispatch Auth:</span>
+                    <span className={styles["vhc-submission-value"]}>
+                      {submittedBatch.dispatchAuthorized ? '✅ Authorized' : '⏳ Pending'}
+                    </span>
+                  </div>
+                  <div className={styles["vhc-submission-row"]}>
+                    <span className={styles["vhc-submission-label"]}>Submission Time:</span>
+                    <span className={styles["vhc-submission-value"]}>
+                      {new Date(submittedBatch.timestamp).toLocaleTimeString('en-GB', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles["vhc-dialog-note"]} style={{
+                backgroundColor: "#dcfce7",
+                borderColor: "#16a34a"
+              }}>
+                <FileCheck size={16} style={{ color: "#16a34a" }} />
+                <span>This batch is now sealed and ready for quality testing. Track progress using the Batch ID.</span>
+              </div>
+            </div>
+
+            <div className={styles["vhc-dialog-footer"]}>
+              <button
+                className={styles["vhc-dialog-btn-cancel"]}
+                onClick={() => {
+                  setShowSubmissionConfirmation(false);
+                  setSubmittedBatch(null);
+                  // Reset to stage 1 for new batch
+                  handleNewBatch();
+                }}
+                style={{
+                  borderColor: "#16a34a",
+                  color: "#16a34a",
+                  flex: 1
+                }}
+              >
+                Start New Batch
+              </button>
+              <button
+                className={styles["vhc-dialog-btn-confirm"]}
+                onClick={() => {
+                  setShowSubmissionConfirmation(false);
+                  setSubmittedBatch(null);
+                  // Update the batch in the batches list
+                  const updatedBatches = batches.map(b =>
+                    b.id === submittedBatch.batchId
+                      ? { ...b, status: "completed", stage: 5 }
+                      : b
+                  );
+                  setBatches(updatedBatches);
+                }}
+                style={{
+                  backgroundColor: "#16a34a",
+                  color: "white",
+                  flex: 1
+                }}
+              >
+                <CheckCircle size={18} />
+                View Batch List
               </button>
             </div>
           </div>
@@ -1612,16 +1893,16 @@ function App() {
                           {batch.id}
                         </div>
                         <div className={`${styles["vhc-batch-status"]} ${styles[batch.status]}`}>
-                          {batch.status === "completed" ? " Completed" : 
-                           batch.status === "in-progress" ? "In Progress" : 
-                           batch.status === "waiting" ? " Waiting" : "Not Started"}
+                          {batch.status === "completed" ? " Completed" :
+                            batch.status === "in-progress" ? "In Progress" :
+                              batch.status === "waiting" ? " Waiting" : "Not Started"}
                         </div>
                       </div>
-                      
+
                       <div className={styles["vhc-batch-name"]}>
                         {batch.name}
                       </div>
-                      
+
                       <div className={styles["vhc-batch-details"]}>
                         <div className={styles["vhc-batch-detail"]}>
                           <User size={12} />
@@ -1632,16 +1913,15 @@ function App() {
                           <span>{new Date(batch.date).toLocaleDateString('en-GB')}</span>
                         </div>
                       </div>
-                      
+
                       <div className={styles["vhc-batch-stage"]}>
                         <div className={styles["vhc-stage-progress"]}>
                           <div className={styles["vhc-stage-dots"]}>
                             {[1, 2, 3, 4, 5].map((stageNum) => (
                               <div
                                 key={stageNum}
-                                className={`${styles["vhc-stage-dot"]} ${
-                                  stageNum <= batch.stage ? styles["active"] : ""
-                                }`}
+                                className={`${styles["vhc-stage-dot"]} ${stageNum <= batch.stage ? styles["active"] : ""
+                                  }`}
                                 style={{
                                   backgroundColor: stageNum <= batch.stage ? batch.color : "#e5e7eb"
                                 }}
@@ -1809,10 +2089,10 @@ function App() {
                           <div className={styles["vhc-preview-label"]}>Photos Uploaded</div>
                           <div className={styles["vhc-preview-value"]}>
                             <span className={`${styles["vhc-preview-status-badge"]} ${stage2Form.growthPhotos.length > 0 ? styles['success'] : styles['pending']}`}
-                                  style={{ 
-                                    backgroundColor: stage2Form.growthPhotos.length > 0 ? THEME_LIGHT : "#fef3c7",
-                                    color: stage2Form.growthPhotos.length > 0 ? THEME_DARK : "#92400e"
-                                  }}>
+                              style={{
+                                backgroundColor: stage2Form.growthPhotos.length > 0 ? THEME_LIGHT : "#fef3c7",
+                                color: stage2Form.growthPhotos.length > 0 ? THEME_DARK : "#92400e"
+                              }}>
                               {stage2Form.growthPhotos.length} photos
                             </span>
                           </div>
@@ -1841,10 +2121,10 @@ function App() {
                           <div className={styles["vhc-preview-label"]}>Health Status</div>
                           <div className={styles["vhc-preview-value"]}>
                             <span className={`${styles["vhc-preview-status-badge"]} ${stage3Form.healthStatus === 'Excellent' || stage3Form.healthStatus === 'Good' ? styles['success'] : styles['pending']}`}
-                                  style={{ 
-                                    backgroundColor: (stage3Form.healthStatus === 'Excellent' || stage3Form.healthStatus === 'Good') ? THEME_LIGHT : "#fef3c7",
-                                    color: (stage3Form.healthStatus === 'Excellent' || stage3Form.healthStatus === 'Good') ? THEME_DARK : "#92400e"
-                                  }}>
+                              style={{
+                                backgroundColor: (stage3Form.healthStatus === 'Excellent' || stage3Form.healthStatus === 'Good') ? THEME_LIGHT : "#fef3c7",
+                                color: (stage3Form.healthStatus === 'Excellent' || stage3Form.healthStatus === 'Good') ? THEME_DARK : "#92400e"
+                              }}>
                               {stage3Form.healthStatus}
                             </span>
                           </div>
@@ -1854,10 +2134,10 @@ function App() {
                           <div className={styles["vhc-preview-label"]}>Assessment Photos</div>
                           <div className={styles["vhc-preview-value"]}>
                             <span className={`${styles["vhc-preview-status-badge"]} ${stage3Form.assessmentPhotos.length > 0 ? styles['success'] : styles['pending']}`}
-                                  style={{ 
-                                    backgroundColor: stage3Form.assessmentPhotos.length > 0 ? THEME_LIGHT : "#fef3c7",
-                                    color: stage3Form.assessmentPhotos.length > 0 ? THEME_DARK : "#92400e"
-                                  }}>
+                              style={{
+                                backgroundColor: stage3Form.assessmentPhotos.length > 0 ? THEME_LIGHT : "#fef3c7",
+                                color: stage3Form.assessmentPhotos.length > 0 ? THEME_DARK : "#92400e"
+                              }}>
                               {stage3Form.assessmentPhotos.length} photos
                             </span>
                           </div>
@@ -1889,10 +2169,10 @@ function App() {
                           <div className={styles["vhc-preview-label"]}>Harvest Readiness</div>
                           <div className={styles["vhc-preview-value"]}>
                             <span className={`${styles["vhc-preview-status-badge"]} ${parseInt(stage4Form.harvestReadiness) > 80 ? styles['success'] : styles['pending']}`}
-                                  style={{ 
-                                    backgroundColor: parseInt(stage4Form.harvestReadiness) > 80 ? THEME_LIGHT : "#fef3c7",
-                                    color: parseInt(stage4Form.harvestReadiness) > 80 ? THEME_DARK : "#92400e"
-                                  }}>
+                              style={{
+                                backgroundColor: parseInt(stage4Form.harvestReadiness) > 80 ? THEME_LIGHT : "#fef3c7",
+                                color: parseInt(stage4Form.harvestReadiness) > 80 ? THEME_DARK : "#92400e"
+                              }}>
                               {stage4Form.harvestReadiness}%
                             </span>
                           </div>
@@ -1910,10 +2190,10 @@ function App() {
                           <div className={styles["vhc-preview-label"]}>Quality Check</div>
                           <div className={styles["vhc-preview-value"]}>
                             <span className={`${styles["vhc-preview-status-badge"]} ${stage4Form.qualityCheck === 'Pass' ? styles['success'] : styles['pending']}`}
-                                  style={{ 
-                                    backgroundColor: stage4Form.qualityCheck === 'Pass' ? THEME_LIGHT : "#fee2e2",
-                                    color: stage4Form.qualityCheck === 'Pass' ? THEME_DARK : "#dc2626"
-                                  }}>
+                              style={{
+                                backgroundColor: stage4Form.qualityCheck === 'Pass' ? THEME_LIGHT : "#fee2e2",
+                                color: stage4Form.qualityCheck === 'Pass' ? THEME_DARK : "#dc2626"
+                              }}>
                               {stage4Form.qualityCheck}
                             </span>
                           </div>
@@ -1923,10 +2203,10 @@ function App() {
                           <div className={styles["vhc-preview-label"]}>Pre-Harvest Photos</div>
                           <div className={styles["vhc-preview-value"]}>
                             <span className={`${styles["vhc-preview-status-badge"]} ${stage4Form.preHarvestPhotos.length > 0 ? styles['success'] : styles['pending']}`}
-                                  style={{ 
-                                    backgroundColor: stage4Form.preHarvestPhotos.length > 0 ? THEME_LIGHT : "#fef3c7",
-                                    color: stage4Form.preHarvestPhotos.length > 0 ? THEME_DARK : "#92400e"
-                                  }}>
+                              style={{
+                                backgroundColor: stage4Form.preHarvestPhotos.length > 0 ? THEME_LIGHT : "#fef3c7",
+                                color: stage4Form.preHarvestPhotos.length > 0 ? THEME_DARK : "#92400e"
+                              }}>
                               {stage4Form.preHarvestPhotos.length} photos
                             </span>
                           </div>
@@ -1937,7 +2217,7 @@ function App() {
                         <div className={styles["vhc-preview-item"]}>
                           <div className={styles["vhc-preview-label"]}>Batch ID</div>
                           <div className={`${styles["vhc-preview-value"]} ${styles["vhc-preview-batchid"]}`}
-                               style={{ color: THEME }}>
+                            style={{ color: THEME }}>
                             {stage5Form.batchId}
                           </div>
                         </div>
@@ -1962,10 +2242,10 @@ function App() {
                           <div className={styles["vhc-preview-label"]}>Sample Collected</div>
                           <div className={styles["vhc-preview-value"]}>
                             <span className={`${styles["vhc-preview-status-badge"]} ${stage5Form.sampleCollected ? styles['success'] : styles['pending']}`}
-                                  style={{ 
-                                    backgroundColor: stage5Form.sampleCollected ? THEME_LIGHT : "#fef3c7",
-                                    color: stage5Form.sampleCollected ? THEME_DARK : "#92400e"
-                                  }}>
+                              style={{
+                                backgroundColor: stage5Form.sampleCollected ? THEME_LIGHT : "#fef3c7",
+                                color: stage5Form.sampleCollected ? THEME_DARK : "#92400e"
+                              }}>
                               {stage5Form.sampleCollected ? 'Yes' : 'No'}
                             </span>
                           </div>
@@ -1975,10 +2255,10 @@ function App() {
                           <div className={styles["vhc-preview-label"]}>Dispatch Auth</div>
                           <div className={styles["vhc-preview-value"]}>
                             <span className={`${styles["vhc-preview-status-badge"]} ${stage5Form.dispatchAuth ? styles['success'] : styles['pending']}`}
-                                  style={{ 
-                                    backgroundColor: stage5Form.dispatchAuth ? THEME_LIGHT : "#fef3c7",
-                                    color: stage5Form.dispatchAuth ? THEME_DARK : "#92400e"
-                                  }}>
+                              style={{
+                                backgroundColor: stage5Form.dispatchAuth ? THEME_LIGHT : "#fef3c7",
+                                color: stage5Form.dispatchAuth ? THEME_DARK : "#92400e"
+                              }}>
                               {stage5Form.dispatchAuth ? 'Authorized' : 'Pending'}
                             </span>
                           </div>
@@ -1996,7 +2276,7 @@ function App() {
                           <div className={styles["vhc-photo-status"]}>
                             {stage5Form.finalPhoto ? (
                               <span className={styles["vhc-photo-uploaded"]}
-                                    style={{ color: THEME }}>
+                                style={{ color: THEME }}>
                                 ✅ Photo uploaded
                               </span>
                             ) : (
@@ -2009,12 +2289,12 @@ function App() {
 
                     <div className={styles["vhc-preview-status"]}>
                       <div className={styles["vhc-preview-status-icon"]}
-                           style={{ 
-                             backgroundColor: stageStatus[currentStage - 1] === "done" ? THEME_LIGHT : 
-                                           stageStatus[currentStage - 1] === "current" ? THEME_LIGHT : "#f3f4f6",
-                             color: stageStatus[currentStage - 1] === "done" ? THEME : 
-                                    stageStatus[currentStage - 1] === "current" ? THEME : "#6b7280"
-                           }}>
+                        style={{
+                          backgroundColor: stageStatus[currentStage - 1] === "done" ? THEME_LIGHT :
+                            stageStatus[currentStage - 1] === "current" ? THEME_LIGHT : "#f3f4f6",
+                          color: stageStatus[currentStage - 1] === "done" ? THEME :
+                            stageStatus[currentStage - 1] === "current" ? THEME : "#6b7280"
+                        }}>
                         {stageStatus[currentStage - 1] === "done" ? "✅" :
                           stageStatus[currentStage - 1] === "current" ? "🔄" : "⏳"}
                       </div>
@@ -2023,10 +2303,10 @@ function App() {
                           {STAGE_DATA[currentStage - 1]?.title}
                         </div>
                         <div className={styles["vhc-preview-status-subtitle"]}
-                             style={{ 
-                               color: stageStatus[currentStage - 1] === "current" ? THEME : 
-                                      stageStatus[currentStage - 1] === "done" ? "#10b981" : "#6b7280"
-                             }}>
+                          style={{
+                            color: stageStatus[currentStage - 1] === "current" ? THEME :
+                              stageStatus[currentStage - 1] === "done" ? "#10b981" : "#6b7280"
+                          }}>
                           Status: {getStatusText(stageStatus[currentStage - 1])}
                         </div>
                       </div>
@@ -2043,4 +2323,3 @@ function App() {
 }
 
 export default App;
-

@@ -52,10 +52,11 @@ width: 100vw;                           /* full width */
 
 .Logo img{
   width: 60px;
-  height: 60px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
   margin-left:-3%;
+  margin-top: -25px;
   flex-shrink: 0;
 }
 
@@ -187,7 +188,7 @@ width: 100vw;                           /* full width */
   position: absolute;
   right: 0px;
   top: 55px;
-  width: 500px;
+  width: 510px;
   background: white;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
@@ -249,7 +250,6 @@ width: 100vw;                           /* full width */
   border: 1px solid #e0e0e0;
   color: #666;
   height: 30px;
-  width:10px;
 }
 
 .action-btn.reject:hover {
@@ -260,7 +260,6 @@ width: 100vw;                           /* full width */
   background: #639601;
   color: white;
   height: 30px;
-  width:10px;
 
 }
 

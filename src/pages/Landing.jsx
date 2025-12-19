@@ -17,6 +17,7 @@ import {
   Linkedin,
   ChevronLeft,
   ChevronRight,
+  Quote,
 } from "lucide-react";
 
 const steps = [
@@ -91,13 +92,13 @@ const Landing = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   const nextTestimonial = () => {
-    setCurrentTestimonial((prev) => 
+    setCurrentTestimonial((prev) =>
       prev === testimonialsData.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevTestimonial = () => {
-    setCurrentTestimonial((prev) => 
+    setCurrentTestimonial((prev) =>
       prev === 0 ? testimonialsData.length - 1 : prev - 1
     );
   };
@@ -107,9 +108,9 @@ const Landing = () => {
     const interval = setInterval(() => {
       nextTestimonial();
     }, 5000);
-    
+
     return () => clearInterval(interval);
-  }, [currentTestimonial]);
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -123,9 +124,9 @@ const Landing = () => {
           />
           <div className={styles.logo}>AyuSethu</div>
           <ul>
-            <li>About</li>
-            <li>How We Work</li>
-            <li>Contact</li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#working">How We Work</a></li>
+            <li><a href="#footer">Contact</a></li>
           </ul>
         </nav>
       </div>
@@ -192,7 +193,7 @@ const Landing = () => {
       </div>
 
       {/* HOW WE WORK SECTION */}
-      <section className={styles.workSection}>
+      <section className={styles.workSection} id="working">
         <h3 className={styles.workHeading}>How We Work</h3>
         <p className={styles.workTagline}>
           Ensuring transparency, purity, and trust at every stage.
@@ -211,7 +212,7 @@ const Landing = () => {
       </section>
 
       {/* ABOUT SECTION */}
-      <div className={styles.aboutSection}>
+      <div className={styles.aboutSection} id="about">
         <h2 className={styles.aboutTitle}>Motive Of AyuSethu</h2>
 
         <div className={styles.aboutContentWrapper}>
@@ -233,67 +234,68 @@ const Landing = () => {
 
       {/* TESTIMONIALS SECTION */}
       <section className={styles.testimonialsSection}>
-        <div className={styles.testimonialsHeader}>
-          <h2>What Our Customers Say</h2>
-          <p>
-            Hear from people who have trusted AyuSethu for their wellness journey.
-          </p>
-        </div>
+        <div className={styles.testimonialsOverlay}></div>
+        <div className={styles.testimonialsContent}>
+          <div className={styles.testimonialsHeader}>
+            <h2>What Our Customers Say</h2>
+            <p>
+              Hear from people who have trusted AyuSethu for their wellness journey.
+            </p>
+          </div>
 
-        <div className={styles.carouselContainer}>
-          <button className={`${styles.navArrow} ${styles.navArrowLeft}`} onClick={prevTestimonial}>
-            <ChevronLeft size={24} />
-          </button>
+          <div className={styles.carouselContainer}>
+            <button
+              className={`${styles.navArrow} ${styles.navArrowLeft}`}
+              onClick={prevTestimonial}
+            >
+              <ChevronLeft size={24} />
+            </button>
 
-          <div className={styles.carouselSlide}>
-            <div className={styles.testimonialContent}>
-              <div className={styles.quoteIcon}>
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="#2e7d32" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
-                  <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" />
-                </svg>
-              </div>
-              <p className={styles.testimonialQuote}>
-                "{testimonialsData[currentTestimonial].quote}"
-              </p>
-              <div className={styles.testimonialAuthor}>
-                <img
-                  src={testimonialsData[currentTestimonial].image}
-                  alt={testimonialsData[currentTestimonial].name}
-                  className={styles.authorAvatar}
-                />
-                <div className={styles.authorInfo}>
-                  <h3>{testimonialsData[currentTestimonial].name}</h3>
-                  <p>{testimonialsData[currentTestimonial].role}</p>
+            <div className={styles.carouselSlide}>
+              <div className={styles.testimonialCard} key={currentTestimonial}>
+                <Quote className={styles.quoteIcon} size={48} />
+                <p className={styles.testimonialQuote}>
+                  "{testimonialsData[currentTestimonial].quote}"
+                </p>
+                <div className={styles.testimonialAuthor}>
+                  <img
+                    src={testimonialsData[currentTestimonial].image}
+                    alt={testimonialsData[currentTestimonial].name}
+                    className={styles.authorAvatar}
+                  />
+                  <div className={styles.authorInfo}>
+                    <h3>{testimonialsData[currentTestimonial].name}</h3>
+                    <p>{testimonialsData[currentTestimonial].role}</p>
+                  </div>
                 </div>
               </div>
             </div>
+
+            <button
+              className={`${styles.navArrow} ${styles.navArrowRight}`}
+              onClick={nextTestimonial}
+            >
+              <ChevronRight size={24} />
+            </button>
           </div>
 
-          <button className={`${styles.navArrow} ${styles.navArrowRight}`} onClick={nextTestimonial}>
-            <ChevronRight size={24} />
-          </button>
-        </div>
-
-        <div className={styles.carouselIndicators}>
-          {testimonialsData.map((_, index) => (
-            <button
-              key={index}
-              className={`${styles.indicator} ${
-                index === currentTestimonial ? styles.active : ""
-              }`}
-              onClick={() => setCurrentTestimonial(index)}
-            />
-          ))}
+          <div className={styles.carouselIndicators}>
+            {testimonialsData.map((_, index) => (
+              <button
+                key={index}
+                className={`${styles.indicator} ${index === currentTestimonial ? styles.activeIndicator : ""
+                  }`}
+                onClick={() => setCurrentTestimonial(index)}
+              />
+            ))}
+          </div>
         </div>
       </section>
-
-      
 
       <div className={styles.white}></div>
 
       {/* FOOTER SECTION */}
-      <footer className={styles.footer}>
+      <footer className={styles.footer} id="footer">
         <div className={styles.footerContent}>
           <div className={styles.footerSection}>
             <div className={styles.footerLogo}>

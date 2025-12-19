@@ -7,11 +7,16 @@ const Manufacturer = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [batches, setBatches] = useState([]);
   const [selectedBatch, setSelectedBatch] = useState(null);
-  const [showBarcodeImage, setShowBarcodeImage] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
   const [showProfileCard, setShowProfileCard] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   
   const profileRef = useRef(null);
+
+  // Herb states for dynamic inputs
+  const [herbs, setHerbs] = useState([
+    { id: 1, name: '', quantity: '', unit: 'kg' }
+  ]);
 
   const [quoteForm, setQuoteForm] = useState({
     manufacturerID: 'MANUF-7890',
@@ -20,6 +25,7 @@ const Manufacturer = () => {
     validityTime: '',
     notes: ''
   });
+  
   const [manufacturingForm, setManufacturingForm] = useState({
     receivedQuantity: '',
     receivedTimestamp: '',
@@ -35,8 +41,10 @@ const Manufacturer = () => {
     manufacturingCertificate: null,
     manufacturingPhotos: [],
     geoTag: '',
-    batchNumber: ''
+    batchNumber: '',
+    herbsUsed: []
   });
+  
   const [packagingForm, setPackagingForm] = useState({
     labelID: '',
     printedTimestamp: '',
@@ -97,7 +105,7 @@ const Manufacturer = () => {
     }
   ]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notificationCount, setNotificationCount] = useState(2); // 2 unread notifications
+  const [notificationCount, setNotificationCount] = useState(2);
 
   // Mock data for batches
   useEffect(() => {
@@ -107,7 +115,12 @@ const Manufacturer = () => {
         name: 'Immunity Boost Syrup Base',
         status: 'ready_for_quote',
         herbType: 'Multi-Herb',
-        quantity: 50,
+        herbs: [
+          { name: 'Ashwagandha', quantity: 20, unit: 'kg' },
+          { name: 'Tulsi', quantity: 15, unit: 'kg' },
+          { name: 'Giloy', quantity: 15, unit: 'kg' }
+        ],
+        totalQuantity: 50,
         testResults: 'Passed',
         testScore: 92,
         testDetails: {
@@ -127,7 +140,10 @@ const Manufacturer = () => {
         name: 'Organic Turmeric Powder',
         status: 'quote_submitted',
         herbType: 'Single Herb',
-        quantity: 40,
+        herbs: [
+          { name: 'Turmeric', quantity: 40, unit: 'kg' }
+        ],
+        totalQuantity: 40,
         testResults: 'Passed',
         testScore: 95,
         testDetails: {
@@ -147,7 +163,12 @@ const Manufacturer = () => {
         name: 'Digestive Health Mix',
         status: 'manufacturing',
         herbType: 'Multi-Herb',
-        quantity: 35,
+        herbs: [
+          { name: 'Mint', quantity: 15, unit: 'kg' },
+          { name: 'Fennel', quantity: 10, unit: 'kg' },
+          { name: 'Coriander', quantity: 10, unit: 'kg' }
+        ],
+        totalQuantity: 35,
         testResults: 'Passed',
         testScore: 88,
         testDetails: {
@@ -166,7 +187,37 @@ const Manufacturer = () => {
     setBatches(mockBatches);
   }, []);
 
-  // NOTIFICATION FUNCTIONS - ADDED
+  // Herb management functions
+  const addHerbField = () => {
+    setHerbs([...herbs, { 
+      id: Date.now(), 
+      name: '', 
+      quantity: '', 
+      unit: 'kg' 
+    }]);
+  };
+
+  const removeHerbField = (id) => {
+    if (herbs.length > 1) {
+      setHerbs(herbs.filter(herb => herb.id !== id));
+    }
+  };
+
+  const updateHerbField = (id, field, value) => {
+    setHerbs(herbs.map(herb => 
+      herb.id === id ? { ...herb, [field]: value } : herb
+    ));
+  };
+
+  // Herb suggestions for autocomplete
+  const herbSuggestions = [
+    'Ashwagandha', 'Tulsi', 'Giloy', 'Turmeric', 'Neem', 'Aloe Vera',
+    'Amla', 'Brahmi', 'Shatavari', 'Ginger', 'Cinnamon', 'Cardamom',
+    'Black Pepper', 'Licorice', 'Mint', 'Fennel', 'Coriander', 'Cumin',
+    'Fenugreek', 'Basil', 'Lemongrass', 'Peppermint', 'Chamomile', 'Lavender'
+  ];
+
+  // NOTIFICATION FUNCTIONS
   const markNotificationAsRead = (id) => {
     setNotifications(prev => prev.map(notification =>
       notification.id === id ? { ...notification, read: true } : notification
@@ -179,7 +230,6 @@ const Manufacturer = () => {
 
   const handleLogout = () => {
     alert('Logging out...');
-    // Add your logout logic here
   };
 
   // Update notification count when notifications change
@@ -216,12 +266,30 @@ const Manufacturer = () => {
   const handleBatchSelect = (batch) => {
     setSelectedBatch(batch);
     setQuoteForm(prev => ({ ...prev, batchID: batch.id }));
+    // Pre-fill herbs based on selected batch
+    if (batch.herbs) {
+      setHerbs(batch.herbs.map((herb, index) => ({
+        id: index + 1,
+        name: herb.name,
+        quantity: herb.quantity,
+        unit: herb.unit
+      })));
+    }
   };
 
   // Handle quote submission
   const handleQuoteSubmit = (e) => {
     e.preventDefault();
-    alert(`Quote submitted for ${quoteForm.batchID}\nAmount: ₹${quoteForm.quoteAmount}/kg\nValidity: ${quoteForm.validityTime}`);
+    // Prepare herbs data
+    const herbsData = herbs.filter(herb => herb.name && herb.quantity);
+    
+    const quoteData = {
+      ...quoteForm,
+      herbsUsed: herbsData,
+      totalHerbQuantity: herbsData.reduce((sum, herb) => sum + parseFloat(herb.quantity || 0), 0)
+    };
+
+    alert(`Quote submitted for ${quoteForm.batchID}\nAmount: ₹${quoteForm.quoteAmount}/kg\nHerbs: ${herbsData.length} types`);
 
     // Update batch status
     setBatches(prev => prev.map(batch =>
@@ -251,14 +319,214 @@ const Manufacturer = () => {
 
   // Handle manufacturing submission
   const handleManufacturingSubmit = () => {
-    alert('Manufacturing process submitted to admin for verification');
+    // Prepare herbs data for manufacturing
+    const herbsData = herbs.filter(herb => herb.name && herb.quantity);
+    
+    const manufacturingData = {
+      ...manufacturingForm,
+      herbsUsed: herbsData,
+      totalHerbQuantity: herbsData.reduce((sum, herb) => sum + parseFloat(herb.quantity || 0), 0)
+    };
+
+    alert(`Manufacturing process submitted with ${herbsData.length} herbs`);
     setActivePhase('packaging');
   };
 
   // Handle packaging submission
   const handlePackagingSubmit = () => {
     alert('Packaging completed and sent to blockchain');
+    setShowQRModal(true);
   };
+
+  // Render QR Modal
+  const renderQRModal = () => {
+    if (!showQRModal) return null;
+
+    return (
+      <div className="modal-overlay">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h3>Product QR Code Generated</h3>
+            <p>Scan this QR code to verify product authenticity on blockchain</p>
+          </div>
+          
+          <div className="modal-body">
+            <div className="qr-container">
+              <div className="qr-code">
+                <img 
+                  src="https://res.cloudinary.com/domogztsv/image/upload/v1765720436/WhatsApp_Image_2025-12-14_at_6.07.45_PM_ehfirz.jpg" 
+                  alt="Product QR Code" 
+                  className="qr-image"
+                />
+              </div>
+              
+              <div className="qr-info">
+                <div className="qr-details">
+                  <div className="qr-detail">
+                    <span className="qr-label">Product ID:</span>
+                    <span className="qr-value">PROD-{selectedBatch?.id?.replace('BTH-', '') || 'XXXX'}</span>
+                  </div>
+                  <div className="qr-detail">
+                    <span className="qr-label">Batch Number:</span>
+                    <span className="qr-value">{packagingForm.labelID || 'N/A'}</span>
+                  </div>
+                  <div className="qr-detail">
+                    <span className="qr-label">Manufacturing Date:</span>
+                    <span className="qr-value">{manufacturingForm.receivedTimestamp || 'N/A'}</span>
+                  </div>
+                  <div className="qr-detail">
+                    <span className="qr-label">Herbs Used:</span>
+                    <span className="qr-value">{herbs.filter(h => h.name).length} types</span>
+                  </div>
+                </div>
+                
+                <div className="qr-actions">
+                  <button className="qr-btn print" onClick={() => window.print()}>
+                    <i className="fas fa-print"></i> Print QR Code
+                  </button>
+                  <button className="qr-btn download" onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = "https://res.cloudinary.com/domogztsv/image/upload/v1765720436/WhatsApp_Image_2025-12-14_at_6.07.45_PM_ehfirz.jpg";
+                    link.download = `QR-${selectedBatch?.id || 'PRODUCT'}.jpg`;
+                    link.click();
+                  }}>
+                    <i className="fas fa-download"></i> Download
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="modal-footer">
+            <button 
+              className="modal-btn close" 
+              onClick={() => setShowQRModal(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Render Herb Input Fields
+  const renderHerbFields = () => (
+    <div className="herbs-section">
+      <div className="herbs-header">
+        <h4>
+          <i className="fas fa-leaf"></i> Herbs Used in Product
+        </h4>
+        <button 
+          type="button" 
+          className="add-herb-btn"
+          onClick={addHerbField}
+        >
+          <i className="fas fa-plus"></i> Add Herb
+        </button>
+      </div>
+      
+      <div className="herbs-grid">
+        {herbs.map((herb, index) => (
+          <div key={herb.id} className="herb-input-group">
+            <div className="herb-input-row">
+              <div className="herb-input">
+                <label>Herb Name {index + 1}</label>
+                <div className="autocomplete-container">
+                  <input
+                    type="text"
+                    value={herb.name}
+                    onChange={(e) => updateHerbField(herb.id, 'name', e.target.value)}
+                    placeholder="Enter herb name"
+                    list={`herb-suggestions-${herb.id}`}
+                  />
+                  <datalist id={`herb-suggestions-${herb.id}`}>
+                    {herbSuggestions.map((suggestion, i) => (
+                      <option key={i} value={suggestion} />
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+              
+              <div className="herb-input">
+                <label>Quantity</label>
+                <div className="quantity-input-group">
+                  <input
+                    type="number"
+                    value={herb.quantity}
+                    onChange={(e) => updateHerbField(herb.id, 'quantity', e.target.value)}
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0"
+                  />
+                  <select
+                    value={herb.unit}
+                    onChange={(e) => updateHerbField(herb.id, 'unit', e.target.value)}
+                  >
+                    <option value="kg">kg</option>
+                    <option value="g">g</option>
+                    <option value="mg">mg</option>
+                    <option value="lb">lb</option>
+                    <option value="oz">oz</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="herb-actions">
+                {herbs.length > 1 && (
+                  <button
+                    type="button"
+                    className="remove-herb-btn"
+                    onClick={() => removeHerbField(herb.id)}
+                    title="Remove herb"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                )}
+              </div>
+            </div>
+            
+            {/* Herb validation */}
+            {herb.name && herb.quantity && (
+              <div className="herb-preview">
+                <span className="herb-tag">
+                  {herb.name}: {herb.quantity} {herb.unit}
+                </span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      
+      {/* Herb Summary */}
+      <div className="herbs-summary">
+        <div className="summary-item">
+          <span className="summary-label">Total Herbs:</span>
+          <span className="summary-value">{herbs.filter(h => h.name).length}</span>
+        </div>
+        <div className="summary-item">
+          <span className="summary-label">Total Quantity:</span>
+          <span className="summary-value">
+            {herbs
+              .filter(h => h.name && h.quantity)
+              .reduce((sum, herb) => {
+                const qty = parseFloat(herb.quantity) || 0;
+                let multiplier = 1;
+                switch(herb.unit) {
+                  case 'g': multiplier = 0.001; break;
+                  case 'mg': multiplier = 0.000001; break;
+                  case 'lb': multiplier = 0.453592; break;
+                  case 'oz': multiplier = 0.0283495; break;
+                  default: multiplier = 1;
+                }
+                return sum + (qty * multiplier);
+              }, 0)
+              .toFixed(2)} kg
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 
   // Render phase content
   const renderPhaseContent = () => {
@@ -284,7 +552,7 @@ const Manufacturer = () => {
           <i className="fas fa-inbox"></i>
         </div>
         <div>
-          <h3>Batch Reception Dashboard</h3>
+          <h3>Batch Reception</h3>
           <p>Review available batches, test results, and pickup instructions</p>
         </div>
       </div>
@@ -302,14 +570,28 @@ const Manufacturer = () => {
 
             <h4 className="batch-name">{batch.name}</h4>
 
+            {/* Herb List in Batch Card */}
+            <div className="herbs-list">
+              <div className="herbs-list-title">
+                <i className="fas fa-leaf"></i> Herbs Included:
+              </div>
+              <div className="herbs-tags">
+                {batch.herbs.map((herb, index) => (
+                  <span key={index} className="herb-tag">
+                    {herb.name} ({herb.quantity} {herb.unit})
+                  </span>
+                ))}
+              </div>
+            </div>
+
             <div className="batch-details">
               <div className="detail-row">
                 <span className="detail-label">Herb Type:</span>
                 <span className="detail-value">{batch.herbType}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Quantity:</span>
-                <span className="detail-value">{batch.quantity} kg</span>
+                <span className="detail-label">Total Quantity:</span>
+                <span className="detail-value">{batch.totalQuantity} kg</span>
               </div>
               <div className="detail-row">
                 <span className="detail-label">Test Score:</span>
@@ -323,7 +605,7 @@ const Manufacturer = () => {
                 {Object.entries(batch.testDetails).map(([test, result]) => (
                   <div key={test} className="test-item">
                     <span className="test-name">{test.replace(/([A-Z])/g, ' $1')}:</span>
-                    <span className={`test-result ${result.toLowerCase()}`}>{result}</span>
+                    <span className={`test-result ${result.toLowerCase().replace(' ', '-')}`}>{result}</span>
                   </div>
                 ))}
               </div>
@@ -381,8 +663,12 @@ const Manufacturer = () => {
                 <span className="info-value">{selectedBatch.name}</span>
               </div>
               <div className="info-item">
-                <span className="info-label">Quantity Available:</span>
-                <span className="info-value">{selectedBatch.quantity} kg</span>
+                <span className="info-label">Herb Type:</span>
+                <span className="info-value">{selectedBatch.herbType}</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Total Quantity:</span>
+                <span className="info-value">{selectedBatch.totalQuantity} kg</span>
               </div>
               <div className="info-item">
                 <span className="info-label">Test Score:</span>
@@ -417,6 +703,9 @@ const Manufacturer = () => {
             />
           </div>
 
+          {/* Herb Fields - Added to Quote Phase */}
+          {renderHerbFields()}
+
           <div className="form-group">
             <label>Quote Amount (INR/kg) *</label>
             <input
@@ -425,6 +714,8 @@ const Manufacturer = () => {
               onChange={(e) => setQuoteForm(prev => ({ ...prev, quoteAmount: e.target.value }))}
               placeholder="Enter amount per kg"
               required
+              min="0"
+              step="0.01"
             />
           </div>
 
@@ -495,6 +786,8 @@ const Manufacturer = () => {
                 onChange={(e) => handleManufacturingChange('receivedQuantity', e.target.value)}
                 placeholder="Enter actual received quantity"
                 required
+                step="0.01"
+                min="0"
               />
             </div>
             <div className="form-group">
@@ -507,6 +800,14 @@ const Manufacturer = () => {
               />
             </div>
           </div>
+        </div>
+
+        {/* Herb Processing Section - Added */}
+        <div className="form-section">
+          <h4 className="section-title">
+            <i className="fas fa-leaf"></i> Herb Processing Details
+          </h4>
+          {renderHerbFields()}
         </div>
 
         {/* Processing Steps */}
@@ -546,6 +847,8 @@ const Manufacturer = () => {
                 onChange={(e) => handleManufacturingChange('dryingTemp', e.target.value)}
                 placeholder="Temperature (°C)"
                 className="temp-input"
+                min="0"
+                max="100"
               />
             </div>
 
@@ -576,11 +879,12 @@ const Manufacturer = () => {
                 <option value="hot">Hot Extraction</option>
                 <option value="supercritical">Supercritical CO2</option>
                 <option value="solvent">Solvent Extraction</option>
+                <option value="steam">Steam Distillation</option>
               </select>
               <textarea
                 value={manufacturingForm.extractionDetails}
                 onChange={(e) => handleManufacturingChange('extractionDetails', e.target.value)}
-                placeholder="Extraction details..."
+                placeholder="Extraction details, solvents used, duration..."
                 rows="2"
               />
             </div>
@@ -595,7 +899,7 @@ const Manufacturer = () => {
               <textarea
                 value={manufacturingForm.storageConditions}
                 onChange={(e) => handleManufacturingChange('storageConditions', e.target.value)}
-                placeholder="Temperature, humidity, packaging..."
+                placeholder="Temperature, humidity, packaging materials..."
                 rows="3"
               />
             </div>
@@ -607,6 +911,8 @@ const Manufacturer = () => {
                 onChange={(e) => handleManufacturingChange('finalQuantity', e.target.value)}
                 placeholder="Enter final quantity"
                 required
+                step="0.01"
+                min="0"
               />
             </div>
           </div>
@@ -614,7 +920,7 @@ const Manufacturer = () => {
           <div className="form-group">
             <label>Product Form *</label>
             <div className="product-form-options">
-              {['powder', 'extract', 'capsules', 'tablets', 'syrup', 'oil'].map(form => (
+              {['powder', 'extract', 'capsules', 'tablets', 'syrup', 'oil', 'cream', 'paste'].map(form => (
                 <label key={form} className="form-option">
                   <input
                     type="radio"
@@ -645,7 +951,7 @@ const Manufacturer = () => {
               <div className="file-upload">
                 <input
                   type="file"
-                  accept=".pdf,.jpg,.png"
+                  accept=".pdf,.jpg,.png,.doc,.docx"
                   onChange={(e) => handleFileUpload('manufacturingCertificate', e.target.files)}
                   hidden
                   id="certificate-upload"
@@ -682,6 +988,9 @@ const Manufacturer = () => {
                 {manufacturingForm.manufacturingPhotos.length > 0 && (
                   <div className="photos-preview">
                     <span>{manufacturingForm.manufacturingPhotos.length} photos selected</span>
+                    <div className="photo-count">
+                      <i className="fas fa-images"></i> {manufacturingForm.manufacturingPhotos.length}
+                    </div>
                   </div>
                 )}
               </div>
@@ -702,7 +1011,6 @@ const Manufacturer = () => {
                 type="button"
                 className="gps-btn" 
                 onClick={() => {
-                  // Mock GPS capture
                   const mockGPS = `${(Math.random() * 90).toFixed(6)}, ${(Math.random() * 180).toFixed(6)}`;
                   handleManufacturingChange('geoTag', mockGPS);
                   alert(`GPS captured: ${mockGPS}`);
@@ -744,6 +1052,11 @@ const Manufacturer = () => {
           <div className="info-card">
             <h4>Manufacturing Complete</h4>
             <p>Proceed with final packaging using the assigned labels</p>
+            <div className="herbs-summary-small">
+              <span className="herbs-count">
+                <i className="fas fa-leaf"></i> {herbs.filter(h => h.name).length} herbs used
+              </span>
+            </div>
           </div>
         </div>
 
@@ -780,15 +1093,27 @@ const Manufacturer = () => {
             <div className="barcode-placeholder">
               <i className="fas fa-barcode"></i>
               <span>PROD-{selectedBatch?.id?.replace('BTH-', '') || 'XXXX'}-PKG</span>
+              <div className="barcode-actions">
+                <button
+                  className="btn-secondary small"
+                  onClick={() => setShowQRModal(true)}
+                >
+                  <i className="fas fa-qrcode"></i> Generate QR
+                </button>
+              </div>
             </div>
             <div className="barcode-info">
               <p>Scan this barcode to verify product authenticity</p>
-              <button
-                className="btn-secondary"
-                onClick={() => window.open("https://res.cloudinary.com/domogztsv/image/upload/v1765720436/WhatsApp_Image_2025-12-14_at_6.07.45_PM_ehfirz.jpg", "_blank")}
-              >
-                <i className="fas fa-print"></i> Print Barcode
-              </button>
+              <div className="product-details">
+                <div className="product-detail">
+                  <span>Herbs: </span>
+                  <span className="herbs-list-small">
+                    {herbs.filter(h => h.name).map((h, i) => (
+                      <span key={i} className="herb-name">{h.name}</span>
+                    ))}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -807,12 +1132,15 @@ const Manufacturer = () => {
 
   return (
     <div className="manufacturer-portal">
+      {/* QR Code Modal */}
+      {renderQRModal()}
+
       {/* Navigation */}
       <nav className="vhc-navbar">
         {/* LEFT SIDE */}
         <div className="vhc-navbar-left">
           <img
-            src="https://res.cloudinary.com/domogztsv/image/upload/v1765220874/WhatsApp_Image_2025-12-09_at_12.36.40_AM_bp8jxt.jpg"
+            src="https://res.cloudinary.com/dmolvlt7e/image/upload/v1766070051/Gemini_Generated_Image_ysxwkbysxwkbysxw-removebg-preview_jezctz.png"
             alt="AyuSethu Logo"
             className="vhc-nav-LogoImage"
           />
@@ -846,13 +1174,6 @@ const Manufacturer = () => {
                   >
                     Mark all read
                   </button>
-                </div>
-
-                <div className="vhc-notification-tabs">
-                  <button className="vhc-notification-tab active">All</button>
-                  <button className="vhc-notification-tab">Bidding</button>
-                  <button className="vhc-notification-tab">Collector</button>
-                  <button className="vhc-notification-tab">Material</button>
                 </div>
 
                 <div className="vhc-notification-list">
@@ -901,12 +1222,6 @@ const Manufacturer = () => {
                     </div>
                   ))}
                 </div>
-
-                <div className="vhc-notification-footer">
-                  <button className="vhc-view-all-btn">
-                    View All Notifications
-                  </button>
-                </div>
               </div>
             )}
           </div>
@@ -954,7 +1269,7 @@ const Manufacturer = () => {
                       <div className="stat-value">MID-2024-001</div>
                     </div>
                     <div className="stat-item">
-                      <div className="stat-label">Active Batches </div>
+                      <div className="stat-label">Active Batches</div>
                       <div className="stat-value">16</div>
                   </div>
                 </div>
@@ -1015,8 +1330,8 @@ const Manufacturer = () => {
               <span className="status-value">3</span>
             </div>
             <div className="status-item">
-              <span className="status-label">Quotes Submitted:</span>
-              <span className="status-value">2</span>
+              <span className="status-label">Herbs in Use:</span>
+              <span className="status-value">{herbs.filter(h => h.name).length}</span>
             </div>
             <div className="status-item">
               <span className="status-label">In Production:</span>

@@ -58,7 +58,7 @@ function Header({
               <Leaf className="w-5 h-5" />
             </div> */}
             <div className="Logo">
-              <img src="https://res.cloudinary.com/domogztsv/image/upload/v1765220874/WhatsApp_Image_2025-12-09_at_12.36.40_AM_bp8jxt.jpg"
+              <img src="https://res.cloudinary.com/dmolvlt7e/image/upload/v1766070051/Gemini_Generated_Image_ysxwkbysxwkbysxw-removebg-preview_jezctz.png"
                 alt="AyuSethu Logo"></img>
             </div>
             <div>
